@@ -8,12 +8,23 @@
     "start": "next start"
   },
   "dependencies": {
+    "@edgestore/react": "^0.5.4",
+    "@edgestore/server": "^0.5.4",
+    "bcryptjs": "^3.0.2",
+    "cookie": "^1.0.2",
+    "form-data": "^4.0.4",
+    "jose": "^6.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.1",
+    "next": "15.5.4",
+    "postcss": "^8.5.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "@tailwindcss/postcss": "^4.1.14",
+    "tailwindcss": "^4.1.14"
   }
 }
