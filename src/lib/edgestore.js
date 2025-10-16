@@ -1,6 +1,7 @@
-import { EdgeStoreClient } from "@edgestore/server";
+'use client';
 
-export const edgeStore = new EdgeStoreClient({
-  accessKey: process.env.EDGE_STORE_ACCESS_KEY,
-  secretKey: process.env.EDGE_STORE_SECRET_KEY,
-});
+import { createEdgeStoreProvider } from '@edgestore/react';
+
+const { EdgeStoreProvider, useEdgeStore } = createEdgeStoreProvider();
+
+export { EdgeStoreProvider, useEdgeStore };

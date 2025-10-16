@@ -6,25 +6,23 @@ import { useAuth } from "../../context/AuthContext";
 import Navbar from "../components/adminNavbar";
 
 export default function AdminDashboard() {
-  const { role } = useAuth();
+  const { role, loading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (role !== "seller") {
+    if (!loading && role !== "seller") {
       alert("You are not a seller. Access denied.");
       router.push("/");
     }
-  }, [role, router]);
+  }, [role, loading, router]);
 
-  if (role !== "seller") {
-    return null;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (role !== "seller") return null;
 
   const handleLogout = () => {
+    logout();
     router.push("/");
   };
-
-
 
   const products = [
     { id: 1, name: "Product 1", price: "$19.99" },
@@ -73,5 +71,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-

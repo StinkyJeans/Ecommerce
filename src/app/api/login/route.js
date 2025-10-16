@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
+import Seller from "@/models/Seller";  // 👈 import Seller model
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 
@@ -9,22 +10,42 @@ const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 export async function POST(req) {
   try {
     const { username, password } = await req.json();
+    if (!username || !password) {
+      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+    }
+
     await connectDB();
 
-    const user = await User.findOne({ username });
-    if (!user) return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+    // 🧭 Check User collection first
+    let account = await User.findOne({ username });
+    let role = "user";
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+    // 🧭 If not found in User, check Seller
+    if (!account) {
+      account = await Seller.findOne({ username });
+      role = "seller";
+    }
 
-    const token = await new SignJWT({ id: user._id, role: user.role })
+    // ❌ No account found
+    if (!account) {
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+    }
+
+    // 🔐 Check password
+    const isMatch = await bcrypt.compare(password, account.password);
+    if (!isMatch) {
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+    }
+
+    // 🪙 Create JWT
+    const token = await new SignJWT({ id: account._id, role })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("1h")
       .sign(SECRET);
 
     const response = NextResponse.json({
       message: "Login successful",
-      role: user.role,
+      role,
     });
 
     response.cookies.set("token", token, {
