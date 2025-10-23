@@ -1,52 +1,36 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { SignJWT } from "jose";
 import { connectDB } from "@/lib/mongodb";
 import Seller from "@/models/Seller";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
 export async function POST(req) {
   try {
-    const { username, password } = await req.json();
+    const { username, password, email, contact, idUrl } = await req.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+    if (!username || !password || !email || !contact || !idUrl) {
+      return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
     await connectDB();
 
-    const seller = await Seller.findOne({ username });
-    if (!seller) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+    const existing = await Seller.findOne({ username });
+    if (existing) {
+      return NextResponse.json({ message: "Username already taken" }, { status: 400 });
     }
 
-    const isMatch = await bcrypt.compare(password, seller.password);
-    if (!isMatch) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
-    }
-
-    const token = await new SignJWT({ id: seller._id, role: "seller" })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("1h")
-      .sign(SECRET);
-
-    const response = NextResponse.json({
-      message: "Login successful",
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await Seller.create({
+      username,
+      password: hashedPassword,
+      email,
+      contact,
+      idUrl,
       role: "seller",
     });
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 3600,
-      path: "/",
-    });
-
-    return response;
-  } catch (error) {
-    console.error("Seller login error:", error);
+    return NextResponse.json({ message: "Seller registered successfully!" }, { status: 201 });
+  } catch (err) {
+    console.error("Seller register error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

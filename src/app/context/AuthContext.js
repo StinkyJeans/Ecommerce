@@ -1,40 +1,21 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          setRole(data.role);
-        } else {
-          setRole(null);
-        }
-      } catch (err) {
-        setRole(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const logout = () => {
-    fetch("/api/logout", { method: "POST" }); // optional if you have logout route
+  const logout = async () => {
+    await fetch("/api/logout", { method: "POST" });
     setRole(null);
+    setUsername(null);
   };
 
   return (
-    <AuthContext.Provider value={{ role, setRole, loading, logout }}>
+    <AuthContext.Provider value={{ role, setRole, username, setUsername, logout }}>
       {children}
     </AuthContext.Provider>
   );

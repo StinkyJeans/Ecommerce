@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { setRole } = useAuth();
+  const { setRole, setUsername: setAuthUsername } = useAuth();   // ✅ Add setUsername here
   const router = useRouter();
 
   const register = () => router.push("/register");
@@ -22,12 +22,21 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-        credentials: "include",
       });
 
       const data = await res.json();
       console.log("Login response:", data);
 
+      if (!res.ok) {
+        alert(data.message || "Invalid Username or Password");
+        return;
+      }
+
+      // ✅ Set role and username in context
+      setRole(data.role);
+      setAuthUsername(data.username);
+
+      // ✅ Redirect based on role
       if (data.role === "admin") {
         router.push("/admin/dashboard");
       } else if (data.role === "seller") {

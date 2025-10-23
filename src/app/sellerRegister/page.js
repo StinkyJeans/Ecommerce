@@ -156,8 +156,8 @@ export default function SellerRegisterPage() {
             />
 
             <input
-              type="text"
-              placeholder="Contact Number"
+              type="number"
+              placeholder="Phone Number"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className="border w-full p-2 mb-4 rounded focus:ring-2 focus:ring-red-500 outline-none"
@@ -166,7 +166,7 @@ export default function SellerRegisterPage() {
 
             <button
               type="submit"
-              className={`bg-red-600 text-white w-full py-2 rounded hover:bg-red-700 transition ${
+              className={`bg-red-600 text-white w-full py-2 rounded hover:bg-red-700 transition cursor-pointer ${
                 loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
               disabled={loading}
