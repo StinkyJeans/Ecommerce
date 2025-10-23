@@ -8,8 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../components/sellerNavbar";
 
-
-
 export default function SellerDashboard() {
   const { role, username, loading, logout } = useAuth();
   const [products, setProducts] = useState([]);
@@ -17,6 +15,7 @@ export default function SellerDashboard() {
   const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,7 +45,30 @@ export default function SellerDashboard() {
       </div>
     );
   }
+  const handleAddToCart = async () => {
+    if (!selectedProduct) return;
 
+    try {
+      const res = await fetch("/api/addToCart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selectedProduct),
+      });
+      if (res.ok) {
+        setCartMessage("✅ Product added to cart!");
+        setTimeout(() => setCartMessage(""), 2000);
+      } else {
+        setCartMessage("⚠️ Product is already in cart.");
+        setTimeout(() => setCartMessage(""), 2000);
+      }
+    } catch (err) {
+      console.error("Add to cart failed:", err);
+    }
+  };
+  const closePopup = () => {
+    setPopupVisible(false);
+    setSelectedProduct(null);
+  };
   const handleView = (product) => {
     setSelectedProduct(product);
     setPopupVisible(true);
@@ -64,7 +86,7 @@ export default function SellerDashboard() {
     <div className="flex h-screen">
       <Navbar />
 
-<main className="flex-1 p-6 overflow-auto bg-gray-100 relative">
+      <main className="flex-1 p-6 overflow-auto bg-gray-100 relative">
         <div className="flex justify-between items-center mb-5">
           <h1 className="text-3xl font-bold text-red-600">Featured Products</h1>
           <div className="flex items-center gap-5">
@@ -167,7 +189,6 @@ export default function SellerDashboard() {
           </div>
         )}
       </main>
-      
     </div>
   );
 }
