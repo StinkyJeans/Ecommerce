@@ -15,75 +15,81 @@ export default function ViewCart() {
 
   useEffect(() => {
     if (!username) return;
-
     const fetchCart = async () => {
       try {
         const res = await fetch(`/api/getCart?username=${username}`);
         const data = await res.json();
         setCartItems(data.cart || []);
-      } catch (err) {
-        console.error("Failed to fetch cart:", err);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCart();
   }, [username]);
 
+  const handleRemove = async (itemId) => {
+    // Add your remove logic here
+    console.log("Remove item:", itemId);
+  };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       <Navbar />
-      <main className="flex-1 bg-gray-100 p-6 overflow-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-red-600">🛒 My Cart</h1>
+
+      <main className="flex-1 bg-gray-100 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
+            My Cart
+          </h1>
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
+            className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm sm:text-base"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
             Back
           </button>
         </div>
 
+        {/* Content */}
         {loading ? (
-          <p className="text-gray-600 text-center mt-20">Loading your cart...</p>
+          <p className="text-center text-gray-600 mt-20">Loading your cart...</p>
         ) : cartItems.length === 0 ? (
-          <div className="text-center text-gray-600 mt-20">
-            <p className="text-lg">Your cart is empty.</p>
-          </div>
+          <p className="text-center text-gray-600 mt-20">Your cart is empty.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
             {cartItems.map((item) => (
               <div
                 key={item._id}
-                className="bg-white shadow-lg rounded-xl p-5 hover:shadow-xl transition relative"
+                className="bg-white rounded-xl shadow-lg p-4 sm:p-5 hover:shadow-xl transition relative"
               >
                 <img
                   src={item.idUrl}
                   alt={item.productName}
-                  className="h-48 w-full object-cover rounded-lg mb-4"
+                  className="h-40 sm:h-48 w-full object-cover rounded-lg mb-4"
                 />
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 pr-6">
                   {item.productName}
                 </h2>
-                <p className="text-gray-600 mb-2 line-clamp-2">
+                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2">
                   {item.description}
                 </p>
-                <p className="text-red-600 font-bold text-lg mb-4">
+                <p className="text-red-600 font-bold text-base sm:text-lg mb-4">
                   ₱{item.price}
                 </p>
 
-                <button className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition cursor-pointer">
+                <button className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
                   Checkout
                 </button>
 
                 <button
-                  className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition"
-                  title="Remove item"
+                  onClick={() => handleRemove(item._id)}
+                  className="absolute top-3 right-3 text-gray-400 hover:text-red-600 transition"
+                  title="Remove"
                 >
-                  <FontAwesomeIcon icon={faTrash} />
+                  <FontAwesomeIcon icon={faTrash} className="text-sm sm:text-base" />
                 </button>
               </div>
             ))}

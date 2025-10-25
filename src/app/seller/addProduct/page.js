@@ -58,7 +58,6 @@ export default function AddProduct() {
       setShowPopup(true);
 
       if (response.ok) {
-        // ✅ Clear fields after success
         setProductName("");
         setDescription("");
         setPrice("");
@@ -79,34 +78,44 @@ export default function AddProduct() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 relative">
+    <div className="flex min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="flex-1 p-10">
-        <h1 className="text-4xl font-bold mb-8 text-center text-red-600">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 mt-16 md:mt-0 overflow-auto">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 text-center text-red-600">
           Add Product
         </h1>
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white p-8 rounded-md shadow-lg border-1"
+          className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 bg-white p-4 sm:p-6 lg:p-8 rounded-md shadow-lg"
         >
-          <div className="flex-1 flex flex-col items-center">
-            <label className="mb-2 text-gray-700 font-medium">
+          {/* Image Upload Section */}
+          <div className="flex flex-col">
+            <label className="mb-2 text-gray-700 font-medium text-sm sm:text-base">
               Upload Product Image
             </label>
             <div
-              className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+              className="w-full min-h-[16rem] sm:min-h-[20rem] lg:min-h-[24rem] max-h-[32rem] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition overflow-hidden"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (
-                <img
-                  src={idPreview}
-                  alt="ID Preview"
-                  className="w-[50%] h-[100%] object-cover rounded-lg"
-                />
+                <div className="w-full h-full flex items-center justify-center p-4">
+                  <img
+                    src={idPreview}
+                    alt="Product Preview"
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                </div>
               ) : (
-                <p className="text-gray-400">Click here to upload image</p>
+                <div className="text-center p-4">
+                  <p className="text-gray-400 text-sm sm:text-base">
+                    Click here to upload image
+                  </p>
+                  <p className="text-gray-300 text-xs mt-2">
+                    Supports: JPG, PNG, GIF
+                  </p>
+                </div>
               )}
             </div>
             <input
@@ -119,13 +128,14 @@ export default function AddProduct() {
             />
           </div>
 
-          <div className="space-y-4">
+          {/* Form Fields Section */}
+          <div className="space-y-3 sm:space-y-4 flex flex-col">
             <input
               type="text"
               placeholder="Product Name"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition text-sm sm:text-base"
               required
             />
 
@@ -133,7 +143,7 @@ export default function AddProduct() {
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-28 resize-none"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition h-24 sm:h-28 lg:h-32 resize-none text-sm sm:text-base flex-grow"
               required
             />
 
@@ -142,14 +152,14 @@ export default function AddProduct() {
               placeholder="Price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition text-sm sm:text-base"
               required
             />
 
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none transition bg-white cursor-pointer"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 transition bg-white cursor-pointer text-sm sm:text-base"
               required
             >
               <option value="">Select Category</option>
@@ -161,7 +171,7 @@ export default function AddProduct() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-lg transition cursor-pointer disabled:opacity-50"
+              className="w-full py-2.5 sm:py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-base sm:text-lg font-medium transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Adding..." : "Add Product"}
             </button>
@@ -169,8 +179,9 @@ export default function AddProduct() {
         </form>
       </div>
 
+      {/* Success/Error Popup */}
       {showPopup && (
-        <div className="absolute top-5 right-5 bg-gray-800 text-white px-4 py-2 rounded shadow-lg animate-fade-in">
+        <div className="fixed top-5 right-5 bg-gray-800 text-white px-4 py-3 rounded shadow-lg animate-fade-in z-50 max-w-xs text-sm sm:text-base">
           {popupMessage}
         </div>
       )}
