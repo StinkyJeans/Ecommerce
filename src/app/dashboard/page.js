@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import Header from "../components/header";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
-  const { logout, username } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +22,7 @@ export default function Home() {
         const res = await fetch("/api/getProduct");
         const data = await res.json();
         setProducts(data.products || []);
+        setFilteredProducts(data.products || []);
       } catch (err) {
         console.error("Failed to fetch products:", err);
       } finally {
@@ -31,11 +32,19 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    logout();
-    router.replace("/");
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+      return;
+    }
+
+    const filtered = products.filter((product) =>
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(filtered);
   };
+
 
   const handleView = (product) => {
     setSelectedProduct(product);
@@ -73,35 +82,25 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto bg-gray-100 relative mt-16 md:mt-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
-            Featured Products
-          </h1>
-          <div className="flex items-center gap-3 sm:gap-5">
-            <FontAwesomeIcon
-              icon={faShoppingCart}
-              className="text-red-600 text-xl sm:text-2xl cursor-pointer hover:text-red-700 transition"
-              onClick={() => router.push("/cart/viewCart")}
-            />
-            <span className="font-semibold text-gray-700 text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">
-              👤 {username || "Loading..."}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="px-3 sm:px-5 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition cursor-pointer text-sm sm:text-base whitespace-nowrap"
-            >
-              Logout
-            </button>
-          </div>
+        <Header/>
+
+        <div className="mb-6 flex justify-center">
+          <SearchBar 
+            placeholder="Search products by name or description..." 
+            onSearch={handleSearch}
+            className="w-full max-w-2xl"
+          />
         </div>
 
         {loading ? (
           <p className="text-center text-gray-600 mt-20">Loading products...</p>
-        ) : products.length === 0 ? (
-          <p className="text-center text-gray-600 mt-20">No products available.</p>
+        ) : filteredProducts.length === 0 ? (
+          <p className="text-center text-gray-600 mt-20">
+            {products.length === 0 ? "No products available." : "No products found matching your search."}
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <div
                 key={product._id}
                 className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition"

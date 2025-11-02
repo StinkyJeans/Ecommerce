@@ -3,17 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../components/sellerNavbar";
+import Header from "@/app/components/header";
+import SearchBar from "@/app/components/searchbar";
 
 export default function SellerDashboard() {
-  const { role, username, loading, logout } = useAuth();
+  const { role, loading, logout } = useAuth();
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -71,45 +72,45 @@ export default function SellerDashboard() {
     setPopupVisible(true);
   };
 
-  const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST" });
-    logout();
-    router.replace("/");
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+      return;
+    }
+
+    const filtered = products.filter(
+      (product) =>
+        product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(filtered);
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Navbar />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
-            Featured Products
-          </h1>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <FontAwesomeIcon
-              icon={faShoppingCart}
-              className="text-red-600 text-xl sm:text-2xl cursor-pointer hover:text-red-700 transition"
-              onClick={() => router.push("/seller/sellerCart")}
-            />
-            <span className="font-semibold text-gray-700 truncate max-w-[100px] sm:max-w-[150px] text-sm sm:text-base">
-              👤 {username || "Loading..."}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="px-3 sm:px-4 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition cursor-pointer text-sm sm:text-base whitespace-nowrap"
-            >
-              Logout
-            </button>
-          </div>
+        <Header />
+
+        <div className="mb-6 flex justify-center">
+          <SearchBar
+            placeholder="Search products by name or description..."
+            onSearch={handleSearch}
+            className="w-full max-w-2xl"
+          />
         </div>
 
         {pageLoading ? (
           <p className="text-center text-gray-600 mt-20">Loading products...</p>
-        ) : products.length === 0 ? (
-          <p className="text-center text-gray-600 mt-20">No products available.</p>
+        ) : filteredProducts.length === 0 ? (
+          <p className="text-center text-gray-600 mt-20">
+            {products.length === 0
+              ? "No products available."
+              : "No products found matching your search."}
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <div
                 key={product._id}
                 className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition"
@@ -124,7 +125,9 @@ export default function SellerDashboard() {
                 <h2 className="text-base sm:text-lg font-semibold truncate">
                   {product.productName}
                 </h2>
-                <p className="text-gray-600 text-sm sm:text-base">₱{product.price}</p>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  ₱{product.price}
+                </p>
                 <button
                   onClick={() => handleView(product)}
                   className="mt-3 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition cursor-pointer text-sm sm:text-base"

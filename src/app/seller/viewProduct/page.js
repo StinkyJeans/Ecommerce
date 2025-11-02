@@ -3,9 +3,10 @@ import Navbar from "../components/sellerNavbar";
 export default function AddProduct() {
   return (
       <>
+      <div className="flex">
         <Navbar />
-        <div>
-          <h1>Add Product Page</h1>
+        
+          <h1>My Product Page</h1>
         </div>
       </>
     );

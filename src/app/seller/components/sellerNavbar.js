@@ -85,7 +85,7 @@ export default function Navbar() {
                     : "hover:text-red-400"
                 }`}
               >
-                View Products
+                My Products
               </span>
             </li>
           </ul>
