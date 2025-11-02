@@ -16,6 +16,7 @@ export default function Home() {
   const [cartMessage, setCartMessage] = useState("");
   const [viewMode, setViewMode] = useState("grid");
   const router = useRouter();
+  const { username } = useAuth(); // Get username from auth context
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -55,11 +56,21 @@ export default function Home() {
   const handleAddToCart = async () => {
     if (!selectedProduct) return;
 
+    // Check if user is logged in
+    if (!username) {
+      setCartMessage("login");
+      setTimeout(() => setCartMessage(""), 3000);
+      return;
+    }
+
     try {
       const res = await fetch("/api/addToCart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedProduct),
+        body: JSON.stringify({
+          username, // Include username
+          ...selectedProduct
+        }),
       });
       if (res.ok) {
         setCartMessage("success");
@@ -350,6 +361,8 @@ export default function Home() {
                           ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
                           : cartMessage === "exists"
                           ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                          : cartMessage === "login"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                           : "bg-gradient-to-r from-red-500 to-red-600 text-white"
                       }`}
                     >
@@ -359,6 +372,8 @@ export default function Home() {
                             ? "fa-check-circle"
                             : cartMessage === "exists"
                             ? "fa-info-circle"
+                            : cartMessage === "login"
+                            ? "fa-user-lock"
                             : "fa-exclamation-circle"
                         } text-2xl`}
                       ></i>
@@ -367,6 +382,8 @@ export default function Home() {
                           "Product added to cart successfully!"}
                         {cartMessage === "exists" &&
                           "This product is already in your cart."}
+                        {cartMessage === "login" &&
+                          "Please log in to add items to your cart."}
                         {cartMessage === "error" &&
                           "Failed to add product. Please try again."}
                       </span>

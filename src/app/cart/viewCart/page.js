@@ -11,34 +11,79 @@ export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const { username } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!username) return;
+    if (!username) {
+      router.push("/");
+      return;
+    }
     const fetchCart = async () => {
       try {
         const res = await fetch(`/api/getCart?username=${username}`);
         const data = await res.json();
         setCartItems(data.cart || []);
       } catch (e) {
-        console.error(e);
+        console.error("Fetch cart error:", e);
+        setErrorMessage("Failed to load cart");
       } finally {
         setLoading(false);
       }
     };
     fetchCart();
-  }, [username]);
+  }, [username, router]);
 
   const handleRemove = async (itemId) => {
+    console.log("=== REMOVE ITEM ===");
+    console.log("Item ID:", itemId);
+    console.log("Username:", username);
+    
     setRemovingId(itemId);
-    // Add your remove logic here
-    console.log("Remove item:", itemId);
-    // Simulate removal
-    setTimeout(() => {
-      setCartItems(cartItems.filter(item => item._id !== itemId));
+    setErrorMessage("");
+    
+    try {
+      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(username)}`;
+      console.log("Requesting:", url);
+      
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      console.log("Response status:", res.status);
+      console.log("Response headers:", res.headers.get("content-type"));
+      
+      // Check if response is JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Response is not JSON!");
+        const text = await res.text();
+        console.error("Response text:", text.substring(0, 200));
+        setErrorMessage("Server error - API route may not exist");
+        return;
+      }
+      
+      const data = await res.json();
+      console.log("Response data:", data);
+      
+      if (res.ok && data.success) {
+        // Remove item from state
+        setCartItems(prevItems => prevItems.filter(item => item._id !== itemId));
+        console.log("✅ Item removed successfully");
+      } else {
+        console.error("❌ Failed to remove item:", data.message);
+        setErrorMessage(data.message || "Failed to remove item");
+      }
+    } catch (error) {
+      console.error("❌ Remove failed:", error);
+      setErrorMessage(`Error: ${error.message}`);
+    } finally {
       setRemovingId(null);
-    }, 500);
+    }
   };
 
   const calculateTotal = () => {
@@ -52,10 +97,25 @@ export default function ViewCart() {
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
       </div>
-
-      <Navbar />
-
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="max-w-7xl mx-auto mb-4">
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-3">
+              <i className="fas fa-exclamation-circle text-red-600 text-xl"></i>
+              <div className="flex-1">
+                <p className="text-red-800 font-semibold">{errorMessage}</p>
+              </div>
+              <button 
+                onClick={() => setErrorMessage("")}
+                className="text-red-600 hover:text-red-800"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -74,7 +134,7 @@ export default function ViewCart() {
             </div>
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 px-5 py-3 rounded-xl hover:border-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow-md font-semibold"
+              className="cursor-pointer flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 px-5 py-3 rounded-xl hover:border-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow-md font-semibold"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Continue Shopping
@@ -107,7 +167,7 @@ export default function ViewCart() {
                 </p>
                 <button
                   onClick={() => router.back()}
-                  className="px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
+                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
                 >
                   <i className="fas fa-shopping-bag mr-2"></i>
                   Start Shopping
@@ -157,10 +217,14 @@ export default function ViewCart() {
                           <button
                             onClick={() => handleRemove(item._id)}
                             disabled={removingId === item._id}
-                            className="p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-600 disabled:opacity-50"
+                            className="cursor-pointer p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Remove from cart"
                           >
-                            <FontAwesomeIcon icon={faTrash} className="text-lg" />
+                            {removingId === item._id ? (
+                              <i className="fas fa-spinner fa-spin text-lg"></i>
+                            ) : (
+                              <FontAwesomeIcon icon={faTrash} className="text-lg" />
+                            )}
                           </button>
                         </div>
                       </div>
@@ -168,11 +232,11 @@ export default function ViewCart() {
 
                     {/* Actions */}
                     <div className="px-5 pb-5 flex gap-3">
-                      <button className="flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                      <button className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                         <i className="fas fa-credit-card"></i>
                         Checkout
                       </button>
-                      <button className="px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-red-500 hover:text-red-600 transition-all font-semibold">
+                      <button className="cursor-pointer px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-red-500 hover:text-red-600 transition-all font-semibold">
                         <i className="fas fa-heart"></i>
                       </button>
                     </div>
@@ -212,12 +276,12 @@ export default function ViewCart() {
                     </div>
                   </div>
 
-                  <button className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4">
+                  <button className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4">
                     <i className="fas fa-lock"></i>
                     Proceed to Checkout
                   </button>
 
-                  <button className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-red-500 hover:text-red-600 transition-all">
+                  <button className="cursor-pointer w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-red-500 hover:text-red-600 transition-all">
                     Apply Coupon Code
                   </button>
 

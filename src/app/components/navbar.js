@@ -88,7 +88,7 @@ export default function Navbar() {
               <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 TotallyNormal
               </h1>
-              <p className="text-sm text-gray-500 -mt-0.5">Seller Portal</p>
+              <p className="text-sm text-gray-500 -mt-0.5">User Portal</p>
             </div>
           </div>
 

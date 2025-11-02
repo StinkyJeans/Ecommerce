@@ -8,14 +8,14 @@ import Header from "@/app/components/header";
 import SearchBar from "@/app/components/searchbar";
 
 export default function SellerDashboard() {
-  const { role, loading, logout } = useAuth();
+  const { role, username, loading, logout } = useAuth(); // Added username here
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [viewMode, setViewMode] = useState("grid");
   const router = useRouter();
 
   useEffect(() => {
@@ -73,11 +73,22 @@ export default function SellerDashboard() {
 
   const handleAddToCart = async () => {
     if (!selectedProduct) return;
+
+    // Check if user is logged in
+    if (!username) {
+      setCartMessage("login");
+      setTimeout(() => setCartMessage(""), 3000);
+      return;
+    }
+
     try {
       const res = await fetch("/api/addToCart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedProduct),
+        body: JSON.stringify({
+          username, // Include username
+          ...selectedProduct
+        }),
       });
       if (res.ok) {
         setCartMessage("success");
@@ -175,7 +186,7 @@ export default function SellerDashboard() {
                 </div>
 
                 {/* View Toggle */}
-                <div className=" flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+                <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
@@ -201,7 +212,7 @@ export default function SellerDashboard() {
 
               {/* Products Grid/List */}
               {viewMode === "grid" ? (
-                <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                   {filteredProducts.map((product) => (
                     <div
                       key={product._id}
@@ -308,7 +319,7 @@ export default function SellerDashboard() {
                 />
                 <button
                   onClick={closePopup}
-                  className="absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
+                  className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
                 >
                   <i className="fas fa-times text-xl"></i>
                 </button>
@@ -348,7 +359,7 @@ export default function SellerDashboard() {
                 <button
                   onClick={handleAddToCart}
                   disabled={cartMessage !== ""}
-                  className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   <i className="fas fa-cart-plus text-xl"></i>
                   Add to Cart
@@ -361,15 +372,20 @@ export default function SellerDashboard() {
                         ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
                         : cartMessage === 'exists'
                         ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white'
+                        : cartMessage === 'login'
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                         : 'bg-gradient-to-r from-red-500 to-red-600 text-white'
                     }`}>
                       <i className={`fas ${
                         cartMessage === 'success' ? 'fa-check-circle' :
-                        cartMessage === 'exists' ? 'fa-info-circle' : 'fa-exclamation-circle'
+                        cartMessage === 'exists' ? 'fa-info-circle' :
+                        cartMessage === 'login' ? 'fa-user-lock' :
+                        'fa-exclamation-circle'
                       } text-2xl`}></i>
                       <span>
                         {cartMessage === 'success' && 'Product added to cart successfully!'}
                         {cartMessage === 'exists' && 'This product is already in your cart.'}
+                        {cartMessage === 'login' && 'Please log in to add items to your cart.'}
                         {cartMessage === 'error' && 'Failed to add product. Please try again.'}
                       </span>
                     </div>
