@@ -2,12 +2,12 @@ import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
+import SearchBar from "./searchbar";
 
 export default function Header() {
   const router = useRouter();
   const { logout, username } = useAuth();
 
-  
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
     logout();
@@ -15,7 +15,7 @@ export default function Header() {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div className="sticky top-0 pb-4 pt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
         Featured Products
       </h1>

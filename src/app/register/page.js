@@ -9,26 +9,32 @@ export default function RegisterPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password}),
-    });
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setPopupMessage(data.message || data.error);
-    setShowPopup(true);
+      setPopupMessage(data.message || data.error);
+      setShowPopup(true);
 
-    setTimeout(() => {
-      setShowPopup(false);
-      if (res.ok) router.push("/");
-    }, 2000);
+      setTimeout(() => {
+        setShowPopup(false);
+        if (res.ok) router.push("/");
+      }, 2000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const Login = () => {
@@ -37,73 +43,147 @@ export default function RegisterPage() {
 
   const sellerRegister = () => {
     router.push("/sellerRegister");
-  }
+  };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100 relative">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
+      </div>
+
+      {/* Success/Error Popup */}
       {showPopup && (
-        <div className="absolute top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-md animate-fade-in">
-          {popupMessage}
+        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
+          <i className="fas fa-check-circle text-xl"></i>
+          <span className="font-medium">{popupMessage}</span>
         </div>
       )}
 
       <form
         onSubmit={handleRegister}
-        className="bg-white p-6 rounded shadow-md w-80 relative"
+        className="relative bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              <p className="text-gray-600 font-medium">Creating account...</p>
+            </div>
+          </div>
+        )}
 
-        <input
-          type="text"
-          placeholder="Username"
-          className="border w-full p-2 mb-3 rounded"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-
-        <div className="relative mb-3">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="border w-full p-2 pr-10 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-          >
-            {showPassword ? "🙈" : "👁️"}
-          </button>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
+            <i className="fas fa-user-plus text-white text-2xl"></i>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Join TotallyNormal Store today
+          </p>
         </div>
 
+        {/* Username Input */}
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Username
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i className="fas fa-user text-gray-400"></i>
+            </div>
+            <input
+              type="text"
+              placeholder="Choose a username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+              required
+            />
+          </div>
+        </div>
 
+        {/* Password Input */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i className="fas fa-lock text-gray-400"></i>
+            </div>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
-          className="bg-red-600 text-white w-full py-2 rounded hover:bg-red-700 cursor-pointer"
+          disabled={loading}
+          className="w-full py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          Register
-        </button>
-        <div className="flex gap-2 mt-2 justify-center text-sm">
-          <p>Want to register as a Seller?</p>
-          <span
-            onClick={sellerRegister}
-            className="text-red-600 hover:text-red-400 cursor-pointer underline"
-          >
+          <span className="flex items-center justify-center gap-2">
+            <i className="fas fa-user-plus"></i>
             Register
           </span>
+        </button>
+
+        {/* Seller Register Link */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-100">
+          <div className="flex items-start gap-3">
+            <i className="fas fa-store text-red-600 text-lg mt-0.5"></i>
+            <div>
+              <p className="text-sm font-medium text-gray-800 mb-1">
+                Want to sell on our platform?
+              </p>
+              <button
+                type="button"
+                onClick={sellerRegister}
+                className="cursor-pointer text-red-600 hover:text-red-700 font-semibold text-sm underline underline-offset-2 transition-colors"
+              >
+                Register as a Seller →
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2 mt-2 justify-center text-sm">
-          <p>Already Have an Account?</p>
-          <span
-            onClick={Login}
-            className="text-red-600 hover:text-red-400 cursor-pointer underline"
-          >
-            Login
-          </span>
+
+        {/* Login Link */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            Already have an account?{" "}
+            <span
+              onClick={Login}
+              className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
+            >
+              Login here
+            </span>
+          </p>
+        </div>
+
+        {/* Security Note */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className="text-center text-xs text-gray-500">
+            By registering, you agree to our Terms & Privacy Policy
+          </p>
         </div>
       </form>
     </div>

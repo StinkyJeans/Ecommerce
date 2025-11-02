@@ -10,11 +10,12 @@ import SearchBar from "@/app/components/searchbar";
 export default function SellerDashboard() {
   const { role, loading, logout } = useAuth();
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [viewMode, setViewMode] = useState("grid"); // grid or list
   const router = useRouter();
 
   useEffect(() => {
@@ -22,7 +23,9 @@ export default function SellerDashboard() {
       try {
         const res = await fetch("/api/getProduct");
         const data = await res.json();
-        setProducts(data.products || []);
+        const productList = data.products || [];
+        setProducts(productList);
+        setFilteredProducts(productList);
       } catch (err) {
         console.error("Failed to fetch products:", err);
       } finally {
@@ -38,39 +41,16 @@ export default function SellerDashboard() {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-screen text-lg">
-        Loading...
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
+        <div className="text-center">
+          <div className="relative">
+            <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
+            <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
+          </div>
+          <p className="text-gray-700 font-semibold mt-6 text-lg">Loading Dashboard...</p>
+        </div>
       </div>
     );
-
-  const handleAddToCart = async () => {
-    if (!selectedProduct) return;
-    try {
-      const res = await fetch("/api/addToCart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedProduct),
-      });
-      if (res.ok) {
-        setCartMessage("✅ Product added to cart!");
-      } else {
-        setCartMessage("⚠️ Product already in cart.");
-      }
-      setTimeout(() => setCartMessage(""), 2000);
-    } catch (err) {
-      console.error("Add to cart failed:", err);
-    }
-  };
-
-  const closePopup = () => {
-    setPopupVisible(false);
-    setSelectedProduct(null);
-  };
-
-  const handleView = (product) => {
-    setSelectedProduct(product);
-    setPopupVisible(true);
-  };
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -86,98 +66,316 @@ export default function SellerDashboard() {
     setFilteredProducts(filtered);
   };
 
-  return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Navbar />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0">
-        <Header />
+  const handleView = (product) => {
+    setSelectedProduct(product);
+    setPopupVisible(true);
+  };
 
-        <div className="mb-6 flex justify-center">
-          <SearchBar
-            placeholder="Search products by name or description..."
-            onSearch={handleSearch}
-            className="w-full max-w-2xl"
-          />
+  const handleAddToCart = async () => {
+    if (!selectedProduct) return;
+    try {
+      const res = await fetch("/api/addToCart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selectedProduct),
+      });
+      if (res.ok) {
+        setCartMessage("success");
+      } else {
+        setCartMessage("exists");
+      }
+      setTimeout(() => setCartMessage(""), 3000);
+    } catch (err) {
+      console.error("Add to cart failed:", err);
+      setCartMessage("error");
+      setTimeout(() => setCartMessage(""), 3000);
+    }
+  };
+
+  const closePopup = () => {
+    setPopupVisible(false);
+    setSelectedProduct(null);
+    setCartMessage("");
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
+      </div>
+
+      <Navbar />
+      
+      <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+          <div className="px-4 sm:px-6 lg:px-8 pt-4">
+            <Header />
+            <div className="pb-4 pt-3">
+              <div className="max-w-3xl mx-auto">
+                <SearchBar 
+                  placeholder="🔍 Search products by name or description..." 
+                  onSearch={handleSearch}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {pageLoading ? (
-          <p className="text-center text-gray-600 mt-20">Loading products...</p>
-        ) : filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-600 mt-20">
-            {products.length === 0
-              ? "No products available."
-              : "No products found matching your search."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product._id}
-                className="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition"
-              >
-                <div className="h-40 sm:h-48 bg-gray-200 rounded mb-4 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={product.idUrl}
-                    alt={product.productName}
-                    className="object-cover h-full w-full"
-                  />
+        <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
+          {pageLoading ? (
+            <div className="flex justify-center items-center h-96">
+              <div className="text-center">
+                <div className="relative mb-6">
+                  <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
+                  <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
                 </div>
-                <h2 className="text-base sm:text-lg font-semibold truncate">
-                  {product.productName}
-                </h2>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  ₱{product.price}
-                </p>
-                <button
-                  onClick={() => handleView(product)}
-                  className="mt-3 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition cursor-pointer text-sm sm:text-base"
-                >
-                  View Details
-                </button>
+                <p className="text-gray-700 font-semibold text-lg">Loading Products...</p>
+                <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+              <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
+                <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="fas fa-box-open text-5xl text-red-500"></i>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                  {products.length === 0 ? "No Products Yet" : "No Results Found"}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {products.length === 0
+                    ? "Start building your inventory by adding your first product."
+                    : "We couldn't find any products matching your search. Try different keywords."}
+                </p>
+                {products.length === 0 && (
+                  <button className="mt-6 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl">
+                    <i className="fas fa-plus mr-2"></i>
+                    Add Product
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Toolbar */}
+              <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-bold text-red-600 text-lg">{filteredProducts.length}</span>
+                      <span className="ml-2 text-gray-500">
+                        {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
+                      </span>
+                    </p>
+                  </div>
+                </div>
 
+                {/* View Toggle */}
+                <div className=" flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                      viewMode === "grid"
+                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <i className="fas fa-th mr-2"></i>Grid
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                      viewMode === "list"
+                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    <i className="fas fa-list mr-2"></i>List
+                  </button>
+                </div>
+              </div>
+
+              {/* Products Grid/List */}
+              {viewMode === "grid" ? (
+                <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product._id}
+                      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
+                    >
+                      <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                        <img
+                          src={product.idUrl}
+                          alt={product.productName}
+                          className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Quick Action Badge */}
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
+                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                            <i className="fas fa-eye text-red-600"></i>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-5">
+                        <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+                          {product.productName}
+                        </h2>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Price</p>
+                            <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                              ₱{product.price}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleView(product)}
+                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                        >
+                          <i className="fas fa-eye"></i>
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product._id}
+                      className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
+                    >
+                      <div className="relative w-full sm:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex-shrink-0">
+                        <img
+                          src={product.idUrl}
+                          alt={product.productName}
+                          className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 p-6 flex flex-col justify-between">
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                            {product.productName}
+                          </h2>
+                          <p className="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
+                            {product.description}
+                          </p>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">Price</p>
+                            <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                              ₱{product.price}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleView(product)}
+                            className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+                          >
+                            <i className="fas fa-eye"></i>
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Product Detail Modal */}
         {popupVisible && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center backdrop-blur-md z-50 p-4">
-            <div className="bg-white p-4 sm:p-6 rounded-3xl shadow-2xl w-full max-w-md transform transition-all duration-300 ease-out">
+          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
                   alt={selectedProduct.productName}
-                  className="w-full h-48 sm:h-56 object-cover rounded-2xl mb-4"
+                  className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
                 />
                 <button
                   onClick={closePopup}
-                  className="absolute top-2 right-2 bg-white/70 hover:bg-white text-gray-700 rounded-full p-2 shadow-md transition cursor-pointer"
+                  className="absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
                 >
-                  ✕
+                  <i className="fas fa-times text-xl"></i>
                 </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
+                  <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
+                    {selectedProduct.productName}
+                  </h2>
+                </div>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 text-center">
-                {selectedProduct.productName}
-              </h2>
-              <p className="text-gray-600 mb-3 text-center leading-relaxed text-sm sm:text-base">
-                {selectedProduct.description}
-              </p>
-              <p className="text-red-600 font-bold text-lg sm:text-xl mb-5 text-center">
-                ₱{selectedProduct.price}
-              </p>
-
-              <button
-                onClick={handleAddToCart}
-                className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:scale-[1.02] active:scale-95 transition cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base"
-              >
-                🛒 Add to Cart
-              </button>
-
-              {cartMessage && (
-                <div className="mt-4 text-center text-green-600 font-medium text-xs sm:text-sm">
-                  {cartMessage}
+              <div className="p-6 sm:p-8">
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    <i className="fas fa-align-left mr-2"></i>Description
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed text-base">
+                    {selectedProduct.description || "No description available"}
+                  </p>
                 </div>
-              )}
+
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1 font-medium">
+                        <i className="fas fa-tag mr-2"></i>Price
+                      </p>
+                      <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                        ₱{selectedProduct.price}
+                      </p>
+                    </div>
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <i className="fas fa-shopping-bag text-white text-2xl"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={cartMessage !== ""}
+                  className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <i className="fas fa-cart-plus text-xl"></i>
+                  Add to Cart
+                </button>
+
+                {cartMessage && (
+                  <div className="mt-4 animate-in slide-in-from-bottom-2 fade-in duration-300">
+                    <div className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all shadow-lg ${
+                      cartMessage === 'success'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
+                        : cartMessage === 'exists'
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white'
+                        : 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+                    }`}>
+                      <i className={`fas ${
+                        cartMessage === 'success' ? 'fa-check-circle' :
+                        cartMessage === 'exists' ? 'fa-info-circle' : 'fa-exclamation-circle'
+                      } text-2xl`}></i>
+                      <span>
+                        {cartMessage === 'success' && 'Product added to cart successfully!'}
+                        {cartMessage === 'exists' && 'This product is already in your cart.'}
+                        {cartMessage === 'error' && 'Failed to add product. Please try again.'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

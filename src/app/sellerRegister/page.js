@@ -38,7 +38,6 @@ export default function SellerRegisterPage() {
 
     try {
       if (idFile) {
-        // ✅ Upload image to EdgeStore properly
         const res = await edgestore.publicFiles.upload({ file: idFile });
         idUrl = res.url;
       }
@@ -72,39 +71,83 @@ export default function SellerRegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 relative">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 p-4 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
+      </div>
+
+      {/* Success/Error Popup */}
       {showPopup && (
-        <div className="absolute top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-md animate-fade-in">
-          {popupMessage}
+        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
+          <i className="fas fa-check-circle text-xl"></i>
+          <span className="font-medium">{popupMessage}</span>
         </div>
       )}
 
       <form
         onSubmit={handleRegister}
-        className="bg-white p-8 rounded-lg shadow-md max-w-4xl w-full flex flex-col gap-6"
+        className="relative bg-white p-8 rounded-2xl shadow-2xl max-w-5xl w-full"
       >
-        <h1 className="text-3xl font-bold text-center mb-4 text-gray-800">
-          Seller Registration
-        </h1>
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              <p className="text-gray-600 font-medium">Registering seller account...</p>
+            </div>
+          </div>
+        )}
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* LEFT - UPLOAD BOX */}
-          <div className="flex-1 flex flex-col items-center">
-            <label className="mb-2 text-gray-700 font-medium">
-              Upload ID Image
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-4 shadow-lg">
+            <i className="fas fa-store text-white text-2xl"></i>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Become a Seller
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Start selling on Stupidshits Store today
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* LEFT - UPLOAD SECTION */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              <i className="fas fa-id-card mr-2 text-red-600"></i>
+              Upload Valid ID
             </label>
             <div
-              className="w-full h-56 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+              className="w-full h-64 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (
-                <img
-                  src={idPreview}
-                  alt="ID Preview"
-                  className="w-full h-full object-cover rounded-lg"
-                />
+                <>
+                  <img
+                    src={idPreview}
+                    alt="ID Preview"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i className="fas fa-sync-alt text-white text-3xl"></i>
+                      <p className="text-white font-medium mt-2">Change Image</p>
+                    </div>
+                  </div>
+                </>
               ) : (
-                <p className="text-gray-400">Click here to upload</p>
+                <div className="text-center p-6">
+                  <i className="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                  <p className="text-gray-600 font-medium mb-2">
+                    Click to upload your ID
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    PNG, JPG up to 10MB
+                  </p>
+                </div>
               )}
             </div>
             <input
@@ -115,77 +158,143 @@ export default function SellerRegisterPage() {
               className="hidden"
               required
             />
+            <p className="mt-3 text-xs text-gray-500 flex items-center gap-2">
+              <i className="fas fa-shield-alt text-green-600"></i>
+              Your ID is securely encrypted and used for verification only
+            </p>
           </div>
 
           {/* RIGHT - FORM INPUTS */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="border w-full p-2 mb-4 rounded focus:ring-2 focus:ring-red-500 outline-none"
-              required
-            />
-
-            <div className="relative mb-4">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="border w-full p-2 pr-10 rounded focus:ring-2 focus:ring-red-500 outline-none"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </button>
+          <div className="flex-1 space-y-5">
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i className="fas fa-user text-gray-400"></i>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+              </div>
             </div>
 
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="border w-full p-2 mb-4 rounded focus:ring-2 focus:ring-red-500 outline-none"
-              required
-            />
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i className="fas fa-lock text-gray-400"></i>
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                </button>
+              </div>
+            </div>
 
-            <input
-              type="number"
-              placeholder="Phone Number"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              className="border w-full p-2 mb-4 rounded focus:ring-2 focus:ring-red-500 outline-none"
-              required
-            />
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i className="fas fa-envelope text-gray-400"></i>
+                </div>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+              </div>
+            </div>
 
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i className="fas fa-phone text-gray-400"></i>
+                </div>
+                <input
+                  type="number"
+                  placeholder="09123456789"
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
-              className={`bg-red-600 text-white w-full py-2 rounded hover:bg-red-700 transition cursor-pointer ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
               disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
             >
-              {loading ? "Registering..." : "Register"}
+              <span className="cursor-pointer flex items-center justify-center gap-2">
+                <i className="fas fa-check-circle"></i>
+                Register as Seller
+              </span>
             </button>
 
-            <div className="flex gap-2 mt-2 justify-center text-sm">
-              <p>Already have an Account?</p>
-              <span
-                onClick={() => router.push("/")}
-                className="text-red-600 hover:text-red-400 cursor-pointer underline"
-              >
-                Login
-              </span>
+            {/* Login Link */}
+            <div className="text-center pt-4">
+              <p className="text-gray-600 text-sm">
+                Already have an account?{" "}
+                <span
+                  onClick={() => router.push("/")}
+                  className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
+                >
+                  Login here
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Banner */}
+        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <i className="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
+            <div>
+              <p className="text-sm font-medium text-gray-800 mb-1">
+                Seller Verification Process
+              </p>
+              <p className="text-xs text-gray-600">
+                Your account will be reviewed within 24-48 hours. You'll receive an email once approved to start selling.
+              </p>
             </div>
           </div>
         </div>
       </form>
     </div>
   );
-}
+};
