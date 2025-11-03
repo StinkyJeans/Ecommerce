@@ -111,7 +111,6 @@ export default function SellerDashboard() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
@@ -120,7 +119,6 @@ export default function SellerDashboard() {
       <Navbar />
       
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        {/* Sticky Header */}
         <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
             <Header />
@@ -172,7 +170,6 @@ export default function SellerDashboard() {
             </div>
           ) : (
             <>
-              {/* Toolbar */}
               <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
@@ -185,7 +182,6 @@ export default function SellerDashboard() {
                   </div>
                 </div>
 
-                {/* View Toggle */}
                 <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
                   <button
                     onClick={() => setViewMode("grid")}
@@ -210,7 +206,6 @@ export default function SellerDashboard() {
                 </div>
               </div>
 
-              {/* Products Grid/List */}
               {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                   {filteredProducts.map((product) => (
@@ -225,8 +220,7 @@ export default function SellerDashboard() {
                           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        
-                        {/* Quick Action Badge */}
+
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
                           <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
                             <i className="fas fa-eye text-red-600"></i>
@@ -307,7 +301,6 @@ export default function SellerDashboard() {
           )}
         </div>
 
-        {/* Product Detail Modal */}
         {popupVisible && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">

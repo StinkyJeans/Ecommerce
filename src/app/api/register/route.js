@@ -9,20 +9,16 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Check if username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return NextResponse.json({ error: "Username already exists" }, { status: 400 });
     }
-
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user or seller depending on the role
     const newUser = new User({
       username,
       password: hashedPassword,
-      role: role || "user",   // 👈 defaults to user if no role passed
+      role: role || "user", 
       email: email || null,
       contact: contact || null,
       idUrl: idUrl || null,

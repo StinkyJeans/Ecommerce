@@ -52,17 +52,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
       </div>
-
+      
       <form
         onSubmit={handleLogin}
         className="relative bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
       >
-        {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-3">
@@ -72,7 +70,6 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
             <i className="fas fa-store text-white text-2xl"></i>
@@ -85,7 +82,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Username Input */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Username
@@ -105,7 +101,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Password Input */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Password
@@ -132,7 +127,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
@@ -144,7 +138,6 @@ export default function LoginPage() {
           </span>
         </button>
 
-        {/* Register Link */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
             Don't have an account?{" "}

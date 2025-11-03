@@ -20,8 +20,7 @@ export async function DELETE(req) {
     }
 
     await connectDB();
-    
-    // Try to find and delete the item
+
     const deletedItem = await AddToCart.findByIdAndDelete(id);
 
     console.log("Deleted item:", deletedItem);
@@ -33,9 +32,7 @@ export async function DELETE(req) {
       }, { status: 404 });
     }
 
-    // If item has username field, verify it matches
     if (deletedItem.username && deletedItem.username !== username) {
-      // Oops, deleted wrong user's item - restore it
       await AddToCart.create(deletedItem);
       return NextResponse.json({ 
         success: false,

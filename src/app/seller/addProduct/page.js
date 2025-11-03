@@ -88,7 +88,6 @@ export default function AddProduct() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      {/* Background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
@@ -97,7 +96,6 @@ export default function AddProduct() {
       <Navbar />
 
       <div className="flex-1 p-4 sm:p-6 lg:p-8 mt-16 md:mt-0 overflow-auto relative">
-        {/* Header Section */}
         <div className="max-w-6xl mx-auto mb-8">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -118,7 +116,6 @@ export default function AddProduct() {
           onSubmit={handleSubmit}
           className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"
         >
-          {/* Left Column - Image Upload */}
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
               <i className="fas fa-image text-red-600"></i>
@@ -126,7 +123,7 @@ export default function AddProduct() {
                 Product Image
               </label>
             </div>
-            
+
             <div
               className="relative w-full h-80 sm:h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all overflow-hidden group"
               onClick={() => document.getElementById("idFileInput").click()}
@@ -163,7 +160,7 @@ export default function AddProduct() {
                 </div>
               )}
             </div>
-            
+
             <input
               id="idFileInput"
               type="file"
@@ -179,7 +176,6 @@ export default function AddProduct() {
             </p>
           </div>
 
-          {/* Right Column - Product Details */}
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-6">
               <i className="fas fa-edit text-red-600"></i>
@@ -189,7 +185,6 @@ export default function AddProduct() {
             </div>
 
             <div className="space-y-5">
-              {/* Product Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <i className="fas fa-tag mr-2 text-gray-400"></i>
@@ -205,7 +200,6 @@ export default function AddProduct() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <i className="fas fa-align-left mr-2 text-gray-400"></i>
@@ -223,7 +217,6 @@ export default function AddProduct() {
                 </p>
               </div>
 
-              {/* Price */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <i className="fas fa-dollar-sign mr-2 text-gray-400"></i>
@@ -246,7 +239,6 @@ export default function AddProduct() {
                 </div>
               </div>
 
-              {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <i className="fas fa-folder mr-2 text-gray-400"></i>
@@ -274,7 +266,6 @@ export default function AddProduct() {
                 </select>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -296,37 +287,42 @@ export default function AddProduct() {
           </div>
         </form>
 
-        {/* Info Cards */}
         <div className="max-w-6xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <i className="fas fa-lightbulb text-blue-600 text-xl mt-1"></i>
               <div>
-                <p className="font-semibold text-gray-800 text-sm mb-1">Pro Tip</p>
+                <p className="font-semibold text-gray-800 text-sm mb-1">
+                  Pro Tip
+                </p>
                 <p className="text-xs text-gray-600">
                   Use high-quality images to increase buyer interest
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-green-50 border border-green-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <i className="fas fa-check-circle text-green-600 text-xl mt-1"></i>
               <div>
-                <p className="font-semibold text-gray-800 text-sm mb-1">Best Practice</p>
+                <p className="font-semibold text-gray-800 text-sm mb-1">
+                  Best Practice
+                </p>
                 <p className="text-xs text-gray-600">
                   Write detailed descriptions to improve sales
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <i className="fas fa-star text-purple-600 text-xl mt-1"></i>
               <div>
-                <p className="font-semibold text-gray-800 text-sm mb-1">Pricing Tip</p>
+                <p className="font-semibold text-gray-800 text-sm mb-1">
+                  Pricing Tip
+                </p>
                 <p className="text-xs text-gray-600">
                   Competitive pricing helps attract more customers
                 </p>
@@ -336,18 +332,18 @@ export default function AddProduct() {
         </div>
       </div>
 
-      {/* Success/Error Popup */}
       {showPopup && (
         <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3">
           <i className="fas fa-check-circle text-2xl"></i>
           <div>
             <p className="font-semibold">{popupMessage}</p>
-            <p className="text-xs text-green-100 mt-1">Your product has been added successfully</p>
+            <p className="text-xs text-green-100 mt-1">
+              Your product has been added successfully
+            </p>
           </div>
         </div>
       )}
 
-      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 shadow-2xl text-center">
@@ -355,7 +351,9 @@ export default function AddProduct() {
               <div className="h-16 w-16 border-4 border-red-200 rounded-full mx-auto"></div>
               <div className="h-16 w-16 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
             </div>
-            <p className="text-gray-700 font-semibold text-lg">Adding Product</p>
+            <p className="text-gray-700 font-semibold text-lg">
+              Adding Product
+            </p>
             <p className="text-gray-500 text-sm mt-1">Please wait...</p>
           </div>
         </div>

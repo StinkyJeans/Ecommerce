@@ -47,13 +47,11 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4 relative">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
       </div>
 
-      {/* Success/Error Popup */}
       {showPopup && (
         <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
           <i className="fas fa-check-circle text-xl"></i>
@@ -65,7 +63,6 @@ export default function RegisterPage() {
         onSubmit={handleRegister}
         className="relative bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
       >
-        {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-3">
@@ -75,7 +72,6 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
             <i className="fas fa-user-plus text-white text-2xl"></i>
@@ -88,7 +84,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Username Input */}
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Username
@@ -108,7 +103,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Password Input */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Password
@@ -135,7 +129,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
@@ -147,7 +140,6 @@ export default function RegisterPage() {
           </span>
         </button>
 
-        {/* Seller Register Link */}
         <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-100">
           <div className="flex items-start gap-3">
             <i className="fas fa-store text-red-600 text-lg mt-0.5"></i>
@@ -166,7 +158,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Login Link */}
         <div className="mt-6 text-center">
           <p className="text-gray-600 text-sm">
             Already have an account?{" "}
@@ -179,7 +170,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Security Note */}
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-center text-xs text-gray-500">
             By registering, you agree to our Terms & Privacy Policy

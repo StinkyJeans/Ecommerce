@@ -40,7 +40,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm z-30">
         <div className="flex justify-between items-center px-4 py-3">
           <div
@@ -69,13 +68,11 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Sidebar */}
       <aside
         className={`fixed md:sticky top-0 right-0 md:right-auto h-screen bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out z-50 shadow-xl md:shadow-none
         ${open ? "translate-x-0" : "translate-x-full"} md:translate-x-0 w-72 md:w-72`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo - Desktop */}
           <div
             onClick={dashboard}
             className="hidden md:flex items-center gap-3 p-6 border-b border-gray-200 cursor-pointer group"
@@ -91,7 +88,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Menu Section */}
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
               <div className="flex items-center gap-2 px-3 mb-3">
@@ -145,7 +141,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Bottom User Section */}
           <div className="p-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center gap-3 px-2 py-3">
               <div className="w-11 h-11 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -163,7 +158,6 @@ export default function Navbar() {
         </div>
       </aside>
 
-      {/* Overlay (Mobile) */}
       {open && (
         <div
           onClick={() => setOpen(false)}

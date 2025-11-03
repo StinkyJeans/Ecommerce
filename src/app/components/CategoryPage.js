@@ -1,13 +1,18 @@
+// src/app/components/CategoryPage.js
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../components/navbar";
-import SearchBar from "../components/searchbar";
+import Navbar from "./navbar";
+import SearchBar from "./searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import Header from "../components/header";
+import Header from "./header";
 
-export default function Home() {
+export default function CategoryPage({
+  categoryName,
+  categoryIcon,
+  categoryValue,
+}) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +26,9 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/getProduct");
+        const res = await fetch(
+          `/api/getProductByCategory?category=${categoryValue}`
+        );
         const data = await res.json();
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
@@ -32,7 +39,7 @@ export default function Home() {
       }
     };
     fetchProducts();
-  }, []);
+  }, [categoryValue]);
 
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -73,10 +80,10 @@ export default function Home() {
       });
       if (res.ok) {
         setCartMessage("success");
-        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         setCartMessage("exists");
       }
+      setTimeout(() => setCartMessage(""), 3000);
     } catch (err) {
       console.error("Add to cart failed:", err);
       setCartMessage("error");
@@ -102,11 +109,26 @@ export default function Home() {
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
         <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
-            <Header />
-            <div className="pb-4 pt-3">
+            <div className="py-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <i className={`fas ${categoryIcon} text-white text-3xl`}></i>
+                </div>
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                    {categoryName}
+                  </h1>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Browse our collection of {categoryName.toLowerCase()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pb-4">
               <div className="max-w-3xl mx-auto">
                 <SearchBar
-                  placeholder="🔍 Search products..."
+                  placeholder={`🔍 Search ${categoryName.toLowerCase()}...`}
                   onSearch={handleSearch}
                   className="w-full"
                 />
@@ -124,7 +146,7 @@ export default function Home() {
                   <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
                 </div>
                 <p className="text-gray-700 font-semibold text-lg">
-                  Loading Products...
+                  Loading {categoryName}...
                 </p>
                 <p className="text-gray-500 text-sm mt-2">
                   Please wait a moment
@@ -135,16 +157,18 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="fas fa-search text-5xl text-red-500"></i>
+                  <i
+                    className={`fas ${categoryIcon} text-5xl text-red-500`}
+                  ></i>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   {products.length === 0
-                    ? "No Products Available"
+                    ? `No ${categoryName} Available`
                     : "No Results Found"}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {products.length === 0
-                    ? "Check back later for new products."
+                    ? `Check back later for new ${categoryName.toLowerCase()}.`
                     : "We couldn't find any products matching your search. Try different keywords."}
                 </p>
               </div>

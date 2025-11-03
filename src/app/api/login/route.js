@@ -30,7 +30,6 @@ export async function POST(req) {
       return NextResponse.json({ message: "Invalid Username or Password" }, { status: 401 });
     }
 
-    // ✅ No JWT, just return data
     return NextResponse.json({
       message: "Login successful",
       role,
