@@ -6,10 +6,10 @@ export async function POST(req) {
   try {
     const { username, productName, description, price, idUrl } = await req.json();
 
-    console.log("=== ADD TO CART REQUEST ===");
-    console.log("Username:", username);
-    console.log("Product:", productName);
-    console.log("Price:", price, "Type:", typeof price);
+    // console.log("=== ADD TO CART REQUEST ===");
+    // console.log("Username:", username);
+    // console.log("Product:", productName);
+    // console.log("Price:", price, "Type:", typeof price);
 
     if (!username || !productName || !description || !price || !idUrl) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(req) {
       idUrl 
     });
 
-    console.log("Cart item created:", cartItem);
+    // console.log("Cart item created:", cartItem);
 
     return NextResponse.json({ message: "Product added to cart successfully!" }, { status: 201 });
   } catch (err) {

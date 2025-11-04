@@ -8,7 +8,7 @@ import Header from "@/app/components/header";
 import SearchBar from "@/app/components/searchbar";
 
 export default function SellerDashboard() {
-  const { role, username, loading, logout } = useAuth(); // Added username here
+  const { role, username, loading, logout } = useAuth(); 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -47,7 +47,9 @@ export default function SellerDashboard() {
             <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
             <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
           </div>
-          <p className="text-gray-700 font-semibold mt-6 text-lg">Loading Dashboard...</p>
+          <p className="text-gray-700 font-semibold mt-6 text-lg">
+            Loading Dashboard...
+          </p>
         </div>
       </div>
     );
@@ -74,7 +76,6 @@ export default function SellerDashboard() {
   const handleAddToCart = async () => {
     if (!selectedProduct) return;
 
-    // Check if user is logged in
     if (!username) {
       setCartMessage("login");
       setTimeout(() => setCartMessage(""), 3000);
@@ -82,20 +83,40 @@ export default function SellerDashboard() {
     }
 
     try {
+      // console.log("Adding to cart:", {
+      //   username,
+      //   productName: selectedProduct.productName,
+      //   price: selectedProduct.price,
+      //   priceType: typeof selectedProduct.price,
+      // });
+
       const res = await fetch("/api/addToCart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username, // Include username
-          ...selectedProduct
+          username,
+          productName: selectedProduct.productName,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          idUrl: selectedProduct.idUrl,
         }),
       });
+
+      const data = await res.json();
+      console.log("Response:", res.status, data);
+
       if (res.ok) {
         setCartMessage("success");
-      } else {
+        window.dispatchEvent(new Event("cartUpdated"));
+        setTimeout(() => setCartMessage(""), 3000);
+      } else if (res.status === 409) {
         setCartMessage("exists");
+        setTimeout(() => setCartMessage(""), 3000);
+      } else {
+        console.error("Error response:", data);
+        setCartMessage("error");
+        setTimeout(() => setCartMessage(""), 3000);
       }
-      setTimeout(() => setCartMessage(""), 3000);
     } catch (err) {
       console.error("Add to cart failed:", err);
       setCartMessage("error");
@@ -117,15 +138,15 @@ export default function SellerDashboard() {
       </div>
 
       <Navbar />
-      
+
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
         <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
             <Header />
             <div className="pb-4 pt-3">
               <div className="max-w-3xl mx-auto">
-                <SearchBar 
-                  placeholder="🔍 Search products by name or description..." 
+                <SearchBar
+                  placeholder="🔍 Search products by name or description..."
                   onSearch={handleSearch}
                   className="w-full"
                 />
@@ -142,8 +163,12 @@ export default function SellerDashboard() {
                   <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
                   <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
                 </div>
-                <p className="text-gray-700 font-semibold text-lg">Loading Products...</p>
-                <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
+                <p className="text-gray-700 font-semibold text-lg">
+                  Loading Products...
+                </p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Please wait a moment
+                </p>
               </div>
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -153,7 +178,9 @@ export default function SellerDashboard() {
                   <i className="fas fa-box-open text-5xl text-red-500"></i>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  {products.length === 0 ? "No Products Yet" : "No Results Found"}
+                  {products.length === 0
+                    ? "No Products Yet"
+                    : "No Results Found"}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {products.length === 0
@@ -174,9 +201,12 @@ export default function SellerDashboard() {
                 <div className="flex items-center gap-3">
                   <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
                     <p className="text-sm text-gray-600">
-                      <span className="font-bold text-red-600 text-lg">{filteredProducts.length}</span>
+                      <span className="font-bold text-red-600 text-lg">
+                        {filteredProducts.length}
+                      </span>
                       <span className="ml-2 text-gray-500">
-                        {filteredProducts.length === 1 ? 'Product' : 'Products'} Found
+                        {filteredProducts.length === 1 ? "Product" : "Products"}{" "}
+                        Found
                       </span>
                     </p>
                   </div>
@@ -227,12 +257,12 @@ export default function SellerDashboard() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="p-5">
                         <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
                           {product.productName}
                         </h2>
-                        
+
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Price</p>
@@ -266,7 +296,7 @@ export default function SellerDashboard() {
                           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
                         />
                       </div>
-                      
+
                       <div className="flex-1 p-6 flex flex-col justify-between">
                         <div>
                           <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
@@ -276,7 +306,7 @@ export default function SellerDashboard() {
                             {product.description}
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Price</p>
@@ -360,26 +390,37 @@ export default function SellerDashboard() {
 
                 {cartMessage && (
                   <div className="mt-4 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all shadow-lg ${
-                      cartMessage === 'success'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-                        : cartMessage === 'exists'
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white'
-                        : cartMessage === 'login'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                        : 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                    }`}>
-                      <i className={`fas ${
-                        cartMessage === 'success' ? 'fa-check-circle' :
-                        cartMessage === 'exists' ? 'fa-info-circle' :
-                        cartMessage === 'login' ? 'fa-user-lock' :
-                        'fa-exclamation-circle'
-                      } text-2xl`}></i>
+                    <div
+                      className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all shadow-lg ${
+                        cartMessage === "success"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                          : cartMessage === "exists"
+                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                          : cartMessage === "login"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          : "bg-gradient-to-r from-red-500 to-red-600 text-white"
+                      }`}
+                    >
+                      <i
+                        className={`fas ${
+                          cartMessage === "success"
+                            ? "fa-check-circle"
+                            : cartMessage === "exists"
+                            ? "fa-info-circle"
+                            : cartMessage === "login"
+                            ? "fa-user-lock"
+                            : "fa-exclamation-circle"
+                        } text-2xl`}
+                      ></i>
                       <span>
-                        {cartMessage === 'success' && 'Product added to cart successfully!'}
-                        {cartMessage === 'exists' && 'This product is already in your cart.'}
-                        {cartMessage === 'login' && 'Please log in to add items to your cart.'}
-                        {cartMessage === 'error' && 'Failed to add product. Please try again.'}
+                        {cartMessage === "success" &&
+                          "Product added to cart successfully!"}
+                        {cartMessage === "exists" &&
+                          "This product is already in your cart."}
+                        {cartMessage === "login" &&
+                          "Please log in to add items to your cart."}
+                        {cartMessage === "error" &&
+                          "Failed to add product. Please try again."}
                       </span>
                     </div>
                   </div>
