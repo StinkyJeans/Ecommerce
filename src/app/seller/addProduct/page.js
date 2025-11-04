@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function AddProduct() {
   const [image, setImage] = useState(null);
@@ -17,6 +18,7 @@ export default function AddProduct() {
   const [showPopup, setShowPopup] = useState(false);
   const { edgestore } = useEdgeStore();
   const router = useRouter();
+  const {username} = useAuth()
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -50,6 +52,7 @@ export default function AddProduct() {
           price,
           category,
           idUrl,
+          username,
         }),
       });
 

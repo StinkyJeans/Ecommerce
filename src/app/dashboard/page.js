@@ -63,19 +63,39 @@ export default function Home() {
     }
 
     try {
+      console.log("Adding to cart:", {
+        username,
+        productName: selectedProduct.productName,
+        price: selectedProduct.price,
+        priceType: typeof selectedProduct.price,
+      });
+
       const res = await fetch("/api/addToCart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
-          ...selectedProduct,
+          productName: selectedProduct.productName,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          idUrl: selectedProduct.idUrl,
         }),
       });
+
+      const data = await res.json();
+      console.log("Response:", res.status, data);
+
       if (res.ok) {
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
-      } else {
+        setTimeout(() => setCartMessage(""), 3000);
+      } else if (res.status === 409) {
         setCartMessage("exists");
+        setTimeout(() => setCartMessage(""), 3000);
+      } else {
+        console.error("Error response:", data);
+        setCartMessage("error");
+        setTimeout(() => setCartMessage(""), 3000);
       }
     } catch (err) {
       console.error("Add to cart failed:", err);

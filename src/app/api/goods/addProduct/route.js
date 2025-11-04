@@ -4,15 +4,16 @@ import AddProduct from "@/models/AddProduct";
 
 export async function POST(req) {
   try {
-    const { productName, description, price, category, idUrl } = await req.json();
+    const { productName, description, price, category, idUrl, username } = await req.json();
 
-    if (!productName || !description || !price || !category || !idUrl) {
+    if (!productName || !description || !price || !category || !idUrl || !username) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
     await connectDB();
 
     await AddProduct.create({
+      username,     
       productName,
       description,
       price,

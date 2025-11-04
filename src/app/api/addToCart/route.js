@@ -6,25 +6,40 @@ export async function POST(req) {
   try {
     const { username, productName, description, price, idUrl } = await req.json();
 
-    // Validate all required fields including username
+    console.log("=== ADD TO CART REQUEST ===");
+    console.log("Username:", username);
+    console.log("Product:", productName);
+    console.log("Price:", price, "Type:", typeof price);
+
     if (!username || !productName || !description || !price || !idUrl) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
     await connectDB();
 
-    // Check if this user already has this product in their cart
     const existing = await AddToCart.findOne({ username, productName });
     if (existing) {
       return NextResponse.json({ message: "Product already in cart." }, { status: 409 });
     }
 
-    // Create cart item with username
-    await AddToCart.create({ username, productName, description, price, idUrl });
+    const priceString = typeof price === 'number' ? price.toString() : price;
+
+    const cartItem = await AddToCart.create({ 
+      username, 
+      productName, 
+      description, 
+      price: priceString, 
+      idUrl 
+    });
+
+    console.log("Cart item created:", cartItem);
 
     return NextResponse.json({ message: "Product added to cart successfully!" }, { status: 201 });
   } catch (err) {
     console.error("Add to cart error:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json({ 
+      message: "Server error", 
+      error: err.message 
+    }, { status: 500 });
   }
 }
