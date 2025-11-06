@@ -91,7 +91,7 @@ export default function Dashboard() {
           description: selectedProduct.description,
           price: selectedProduct.price,
           idUrl: selectedProduct.idUrl,
-          quantity: quantity, // Send quantity
+          quantity: quantity,
         }),
       });
 
@@ -102,7 +102,7 @@ export default function Dashboard() {
         window.dispatchEvent(new Event("cartUpdated"));
         setTimeout(() => {
           setCartMessage("");
-          closePopup(); // Close modal after success
+          closePopup();
         }, 2000);
       } else if (res.status === 409) {
         setCartMessage("exists");
@@ -417,7 +417,7 @@ export default function Dashboard() {
                   ) : (
                     <>
                       <i className="fas fa-cart-plus text-xl"></i>
-                      Add {quantity} {quantity === 1 ? "Item" : "Items"} to Cart
+                      Add Item to Cart
                     </>
                   )}
                 </button>
