@@ -14,7 +14,6 @@ export async function POST(req) {
 
     const existing = await AddToCart.findOne({ username, productName });
     if (existing) {
-      // If product exists, increase quantity
       existing.quantity += (quantity || 1);
       await existing.save();
       return NextResponse.json({ 

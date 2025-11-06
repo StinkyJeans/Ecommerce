@@ -7,7 +7,7 @@ const AddToCartSchema = new Schema(
     description: { type: String, required: true },
     price: { type: String, required: true },
     idUrl: { type: String, required: true },
-    quantity: { type: Number, required: true, default: 1, min: 1 }, // Add quantity field
+    quantity: { type: Number, required: true, default: 1, min: 1 },
   },
   { timestamps: true }
 );

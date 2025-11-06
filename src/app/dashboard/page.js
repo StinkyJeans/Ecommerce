@@ -1,11 +1,7 @@
-// This code works for BOTH dashboards
-// src/app/dashboard/page.js
-// src/app/seller/dashboard/page.js
-
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../components/navbar"; // or "../components/navbar" for user dashboard
+import Navbar from "../components/navbar"; 
 import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
@@ -21,8 +17,8 @@ export default function Dashboard() {
   const [popupVisible, setPopupVisible] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
   const [viewMode, setViewMode] = useState("grid");
-  const [quantity, setQuantity] = useState(1); // Add quantity state
-  const [addingToCart, setAddingToCart] = useState(false); // Add loading state
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
   const { username } = useAuth();
 
@@ -59,7 +55,7 @@ export default function Dashboard() {
   const handleView = (product) => {
     setSelectedProduct(product);
     setPopupVisible(true);
-    setQuantity(1); // Reset quantity when opening modal
+    setQuantity(1);
   };
 
   const increaseQuantity = () => {
@@ -313,7 +309,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Product Details Modal with Quantity Selection */}
         {popupVisible && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
@@ -346,7 +341,6 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                {/* Quantity Selector */}
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
                     <i className="fas fa-shopping-cart mr-2"></i>Quantity
@@ -378,7 +372,6 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Price Summary */}
                 <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
                   <div className="flex items-center justify-between mb-3">
                     <div>

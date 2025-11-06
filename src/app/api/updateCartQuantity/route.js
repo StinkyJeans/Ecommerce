@@ -6,7 +6,7 @@ export async function PATCH(req) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    const action = searchParams.get("action"); // 'increase' or 'decrease'
+    const action = searchParams.get("action");
     const username = searchParams.get("username");
 
     if (!id || !action || !username) {
@@ -33,7 +33,6 @@ export async function PATCH(req) {
       if (cartItem.quantity > 1) {
         cartItem.quantity -= 1;
       } else {
-        // If quantity is 1 and user decreases, remove the item
         await AddToCart.findByIdAndDelete(id);
         return NextResponse.json({
           message: "Item removed from cart",
