@@ -316,7 +316,7 @@ export default function Dashboard() {
         {/* Product Details Modal with Quantity Selection */}
         {popupVisible && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
