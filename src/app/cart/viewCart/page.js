@@ -121,10 +121,7 @@ export default function ViewCart() {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
-      </div>
-      
-      <Navbar />
-      
+      </div> 
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4">
