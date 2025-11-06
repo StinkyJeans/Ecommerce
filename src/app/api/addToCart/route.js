@@ -4,12 +4,7 @@ import AddToCart from "@/models/AddToCart";
 
 export async function POST(req) {
   try {
-    const { username, productName, description, price, idUrl } = await req.json();
-
-    // console.log("=== ADD TO CART REQUEST ===");
-    // console.log("Username:", username);
-    // console.log("Product:", productName);
-    // console.log("Price:", price, "Type:", typeof price);
+    const { username, productName, description, price, idUrl, quantity } = await req.json();
 
     if (!username || !productName || !description || !price || !idUrl) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
@@ -19,7 +14,13 @@ export async function POST(req) {
 
     const existing = await AddToCart.findOne({ username, productName });
     if (existing) {
-      return NextResponse.json({ message: "Product already in cart." }, { status: 409 });
+      // If product exists, increase quantity
+      existing.quantity += (quantity || 1);
+      await existing.save();
+      return NextResponse.json({ 
+        message: "Product quantity updated in cart!", 
+        updated: true 
+      }, { status: 200 });
     }
 
     const priceString = typeof price === 'number' ? price.toString() : price;
@@ -29,10 +30,9 @@ export async function POST(req) {
       productName, 
       description, 
       price: priceString, 
-      idUrl 
+      idUrl,
+      quantity: quantity || 1
     });
-
-    // console.log("Cart item created:", cartItem);
 
     return NextResponse.json({ message: "Product added to cart successfully!" }, { status: 201 });
   } catch (err) {

@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faTrash, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/components/navbar";
 
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const { username } = useAuth();
   const router = useRouter();
@@ -20,34 +21,68 @@ export default function ViewCart() {
       router.push("/");
       return;
     }
-    const fetchCart = async () => {
-      try {
-        const res = await fetch(`/api/getCart?username=${username}`);
-        const data = await res.json();
-        setCartItems(data.cart || []);
-      } catch (e) {
-        console.error("Fetch cart error:", e);
-        setErrorMessage("Failed to load cart");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCart();
   }, [username, router]);
 
-  const handleRemove = async (itemId) => {
-    console.log("=== REMOVE ITEM ===");
-    console.log("Item ID:", itemId);
-    console.log("Username:", username);
+  const fetchCart = async () => {
+    try {
+      const res = await fetch(`/api/getCart?username=${username}`);
+      const data = await res.json();
+      setCartItems(data.cart || []);
+    } catch (e) {
+      console.error("Fetch cart error:", e);
+      setErrorMessage("Failed to load cart");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleQuantityChange = async (itemId, action) => {
+    setUpdatingId(itemId);
+    setErrorMessage("");
+
+    try {
+      const res = await fetch(
+        `/api/updateCartQuantity?id=${itemId}&action=${action}&username=${encodeURIComponent(username)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.removed) {
+          // Item was removed because quantity reached 0
+          setCartItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+        } else {
+          // Update the quantity in the UI
+          setCartItems((prevItems) =>
+            prevItems.map((item) =>
+              item._id === itemId ? { ...item, quantity: data.cartItem.quantity } : item
+            )
+          );
+        }
+      } else {
+        setErrorMessage(data.message || "Failed to update quantity");
+      }
+    } catch (error) {
+      console.error("Update quantity failed:", error);
+      setErrorMessage(`Error: ${error.message}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleRemove = async (itemId) => {
     setRemovingId(itemId);
     setErrorMessage("");
 
     try {
-      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(
-        username
-      )}`;
-      console.log("Requesting:", url);
+      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(username)}`;
 
       const res = await fetch(url, {
         method: "DELETE",
@@ -56,41 +91,28 @@ export default function ViewCart() {
         },
       });
 
-      console.log("Response status:", res.status);
-      console.log("Response headers:", res.headers.get("content-type"));
-
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error("Response is not JSON!");
-        const text = await res.text();
-        console.error("Response text:", text.substring(0, 200));
-        setErrorMessage("Server error - API route may not exist");
-        return;
-      }
-
       const data = await res.json();
-      console.log("Response data:", data);
 
       if (res.ok && data.success) {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item._id !== itemId)
-        );
-        console.log("✅ Item removed successfully");
+        setCartItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
       } else {
-        console.error("❌ Failed to remove item:", data.message);
         setErrorMessage(data.message || "Failed to remove item");
       }
     } catch (error) {
-      console.error("❌ Remove failed:", error);
+      console.error("Remove failed:", error);
       setErrorMessage(`Error: ${error.message}`);
     } finally {
       setRemovingId(null);
     }
   };
 
+  const calculateSubtotal = (price, quantity) => {
+    return (parseFloat(price) * quantity).toFixed(2);
+  };
+
   const calculateTotal = () => {
     return cartItems
-      .reduce((total, item) => total + parseFloat(item.price || 0), 0)
+      .reduce((total, item) => total + parseFloat(item.price || 0) * (item.quantity || 1), 0)
       .toFixed(2);
   };
 
@@ -100,6 +122,9 @@ export default function ViewCart() {
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
       </div>
+      
+      <Navbar />
+      
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4">
@@ -129,8 +154,7 @@ export default function ViewCart() {
                   Shopping Cart
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">
-                  {cartItems.length} {cartItems.length === 1 ? "item" : "items"}{" "}
-                  in your cart
+                  {cartItems.reduce((total, item) => total + (item.quantity || 1), 0)} items in your cart
                 </p>
               </div>
             </div>
@@ -143,6 +167,7 @@ export default function ViewCart() {
             </button>
           </div>
         </div>
+
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96">
@@ -150,9 +175,7 @@ export default function ViewCart() {
                 <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
                 <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
               </div>
-              <p className="text-gray-700 font-semibold text-lg">
-                Loading your cart...
-              </p>
+              <p className="text-gray-700 font-semibold text-lg">Loading your cart...</p>
               <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
             </div>
           ) : cartItems.length === 0 ? (
@@ -161,12 +184,9 @@ export default function ViewCart() {
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <i className="fas fa-shopping-cart text-5xl text-red-500"></i>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  Your cart is empty
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Your cart is empty</h3>
                 <p className="text-gray-600 leading-relaxed mb-6">
-                  Looks like you haven't added any items to your cart yet. Start
-                  shopping to fill it up!
+                  Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
                 </p>
                 <button
                   onClick={() => router.back()}
@@ -197,7 +217,7 @@ export default function ViewCart() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1">
                             <h2 className="text-lg font-bold text-gray-900 mb-2">
                               {item.productName}
@@ -205,14 +225,6 @@ export default function ViewCart() {
                             <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                               {item.description}
                             </p>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-500">
-                                Price:
-                              </span>
-                              <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                                ₱{item.price}
-                              </span>
-                            </div>
                           </div>
 
                           <button
@@ -224,24 +236,47 @@ export default function ViewCart() {
                             {removingId === item._id ? (
                               <i className="fas fa-spinner fa-spin text-lg"></i>
                             ) : (
-                              <FontAwesomeIcon
-                                icon={faTrash}
-                                className="text-lg"
-                              />
+                              <FontAwesomeIcon icon={faTrash} className="text-lg" />
                             )}
                           </button>
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="px-5 pb-5 flex gap-3">
-                      <button className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                        <i className="fas fa-credit-card"></i>
-                        Checkout
-                      </button>
-                      <button className="cursor-pointer px-4 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-red-500 hover:text-red-600 transition-all font-semibold">
-                        <i className="fas fa-heart"></i>
-                      </button>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-500">Quantity:</span>
+                            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                              <button
+                                onClick={() => handleQuantityChange(item._id, 'decrease')}
+                                disabled={updatingId === item._id}
+                                className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                              >
+                                <FontAwesomeIcon icon={faMinus} className="text-sm" />
+                              </button>
+                              <span className="w-12 text-center font-bold text-gray-800">
+                                {updatingId === item._id ? (
+                                  <i className="fas fa-spinner fa-spin text-sm"></i>
+                                ) : (
+                                  item.quantity || 1
+                                )}
+                              </span>
+                              <button
+                                onClick={() => handleQuantityChange(item._id, 'increase')}
+                                disabled={updatingId === item._id}
+                                className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-green-50 hover:text-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                              >
+                                <FontAwesomeIcon icon={faPlus} className="text-sm" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 mb-1">Subtotal</p>
+                            <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                              ₱{calculateSubtotal(item.price, item.quantity || 1)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -257,9 +292,7 @@ export default function ViewCart() {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-semibold text-gray-800">
-                        ₱{calculateTotal()}
-                      </span>
+                      <span className="font-semibold text-gray-800">₱{calculateTotal()}</span>
                     </div>
 
                     <div className="flex justify-between items-center pb-4 border-b border-gray-200">
@@ -273,9 +306,7 @@ export default function ViewCart() {
                     </div>
 
                     <div className="flex justify-between items-center pt-2">
-                      <span className="text-lg font-bold text-gray-800">
-                        Total
-                      </span>
+                      <span className="text-lg font-bold text-gray-800">Total</span>
                       <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                         ₱{calculateTotal()}
                       </span>
@@ -312,20 +343,6 @@ export default function ViewCart() {
             </div>
           )}
         </div>
-
-        {cartItems.length > 0 && (
-          <div className="max-w-7xl mx-auto mt-12">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <i className="fas fa-star text-yellow-500"></i>
-              You might also like
-            </h3>
-            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-              <p className="text-gray-600 text-center">
-                Recommended products will appear here
-              </p>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );
