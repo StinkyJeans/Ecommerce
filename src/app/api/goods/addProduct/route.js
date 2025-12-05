@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import AddProduct from "@/models/AddProduct";
 
+// Function to generate unique product ID
+function generateProductId() {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+  return `PROD-${timestamp}-${random}`;
+}
+
 export async function POST(req) {
   try {
     const { productName, description, price, category, idUrl, username } = await req.json();
@@ -12,7 +19,11 @@ export async function POST(req) {
 
     await connectDB();
 
-    await AddProduct.create({
+    // Generate the product ID
+    const productId = generateProductId();
+
+    const newProduct = await AddProduct.create({
+      productId,      // Add the generated productId
       username,     
       productName,
       description,
@@ -21,7 +32,10 @@ export async function POST(req) {
       idUrl,
     });
 
-    return NextResponse.json({ message: "Product added successfully!" }, { status: 201 });
+    return NextResponse.json({ 
+      message: "Product added successfully!", 
+      productId: newProduct.productId 
+    }, { status: 201 });
   } catch (err) {
     console.error("product adding error:", err);
 

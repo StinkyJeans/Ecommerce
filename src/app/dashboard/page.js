@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "../components/navbar"; 
+import Navbar from "../components/navbar";
 import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
@@ -83,6 +83,7 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
+          productId: selectedProduct.productId, // ✅ ADD THIS LINE
           productName: selectedProduct.productName,
           description: selectedProduct.description,
           price: selectedProduct.price,
@@ -161,8 +162,12 @@ export default function Dashboard() {
                   <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
                   <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
                 </div>
-                <p className="text-gray-700 font-semibold text-lg">Loading Products...</p>
-                <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
+                <p className="text-gray-700 font-semibold text-lg">
+                  Loading Products...
+                </p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Please wait a moment
+                </p>
               </div>
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -172,7 +177,9 @@ export default function Dashboard() {
                   <i className="fas fa-search text-5xl text-red-500"></i>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  {products.length === 0 ? "No Products Available" : "No Results Found"}
+                  {products.length === 0
+                    ? "No Products Available"
+                    : "No Results Found"}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {products.length === 0
@@ -187,9 +194,12 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3">
                   <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
                     <p className="text-sm text-gray-600">
-                      <span className="font-bold text-red-600 text-lg">{filteredProducts.length}</span>
+                      <span className="font-bold text-red-600 text-lg">
+                        {filteredProducts.length}
+                      </span>
                       <span className="ml-2 text-gray-500">
-                        {filteredProducts.length === 1 ? "Product" : "Products"} Available
+                        {filteredProducts.length === 1 ? "Product" : "Products"}{" "}
+                        Available
                       </span>
                     </p>
                   </div>
@@ -364,9 +374,12 @@ export default function Dashboard() {
                       </button>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500">Available in stock</p>
+                      <p className="text-xs text-gray-500">
+                        Available in stock
+                      </p>
                       <p className="text-sm text-green-600 font-semibold">
-                        <i className="fas fa-check-circle mr-1"></i>Ready to ship
+                        <i className="fas fa-check-circle mr-1"></i>Ready to
+                        ship
                       </p>
                     </div>
                   </div>
@@ -383,8 +396,12 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="text-center px-4">
-                      <p className="text-sm text-gray-600 mb-1 font-medium">×</p>
-                      <p className="text-2xl font-bold text-gray-800">{quantity}</p>
+                      <p className="text-sm text-gray-600 mb-1 font-medium">
+                        ×
+                      </p>
+                      <p className="text-2xl font-bold text-gray-800">
+                        {quantity}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-600 mb-1 font-medium">
@@ -441,7 +458,9 @@ export default function Dashboard() {
                       ></i>
                       <span>
                         {cartMessage === "success" &&
-                          `${quantity} ${quantity === 1 ? "item" : "items"} added to cart successfully!`}
+                          `${quantity} ${
+                            quantity === 1 ? "item" : "items"
+                          } added to cart successfully!`}
                         {cartMessage === "exists" &&
                           "Product quantity updated in your cart!"}
                         {cartMessage === "login" &&

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faTrash, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import Navbar from "@/app/components/navbar";
+
 
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
@@ -148,7 +148,7 @@ export default function ViewCart() {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                  Shopping Cart
+                  My Shopping Cart
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">
                   {cartItems.reduce((total, item) => total + (item.quantity || 1), 0)} items in your cart

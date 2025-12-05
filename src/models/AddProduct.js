@@ -1,7 +1,12 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const AddProductSchema = new Schema(
   {
+    productId: { 
+      type: String, 
+      required: true, 
+      unique: true
+    },
     username: { type: String, required: true }, 
     productName: { type: String, required: true },
     description: { type: String, required: true },
@@ -13,5 +18,11 @@ const AddProductSchema = new Schema(
 );
 
 AddProductSchema.index({ username: 1, productName: 1 }, { unique: true });
+AddProductSchema.index({ productId: 1 }, { unique: true });
+
+// Force delete cached model in development
+if (process.env.NODE_ENV === 'development') {
+  delete mongoose.models.AddProduct;
+}
 
 export default mongoose.models.AddProduct || mongoose.model("AddProduct", AddProductSchema);

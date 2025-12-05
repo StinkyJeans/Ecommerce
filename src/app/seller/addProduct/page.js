@@ -18,7 +18,7 @@ export default function AddProduct() {
   const [showPopup, setShowPopup] = useState(false);
   const { edgestore } = useEdgeStore();
   const router = useRouter();
-  const {username} = useAuth()
+  const { username } = useAuth();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -57,10 +57,16 @@ export default function AddProduct() {
       });
 
       const data = await response.json();
-      setPopupMessage(data.message);
-      setShowPopup(true);
 
       if (response.ok) {
+        setPopupMessage(
+          data.productId
+            ? `${data.message}`
+            : data.message
+        );
+        setShowPopup(true);
+
+        // Reset form fields...
         setProductName("");
         setDescription("");
         setPrice("");
@@ -71,6 +77,9 @@ export default function AddProduct() {
         setTimeout(() => {
           setShowPopup(false);
         }, 3000);
+      } else {
+        setPopupMessage(data.message);
+        setShowPopup(true);
       }
     } catch (err) {
       setPopupMessage("Adding of product failed. " + err.message);
