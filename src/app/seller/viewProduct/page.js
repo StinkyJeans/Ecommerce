@@ -151,17 +151,17 @@ export default function ViewProduct() {
             </div>
           </div>
         )}
-        <div className="max-w-7xl mx-auto mb-8">
+        <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i className="fas fa-boxes text-white text-2xl"></i>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i className="fas fa-boxes text-white text-xl sm:text-2xl"></i>
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                   My Products
                 </h1>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-gray-600 text-xs sm:text-sm mt-1">
                   {products.length}{" "}
                   {products.length === 1 ? "product" : "products"} in your
                   inventory
@@ -171,10 +171,11 @@ export default function ViewProduct() {
 
             <button
               onClick={() => router.push("/seller/addProduct")}
-              className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+              className="cursor-pointer px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base touch-manipulation w-full sm:w-auto"
             >
               <i className="fas fa-plus-circle"></i>
-              Add New Product
+              <span className="hidden sm:inline">Add New Product</span>
+              <span className="sm:hidden">Add Product</span>
             </button>
           </div>
         </div>
@@ -214,7 +215,7 @@ export default function ViewProduct() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {products.map((product) => (
                 <div
                   key={product._id}
@@ -286,7 +287,7 @@ export default function ViewProduct() {
 
                     <button
                       onClick={() => handleViewDetails(product)}
-                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
                     >
                       <i className="fas fa-eye"></i>
                       View Details
@@ -299,8 +300,8 @@ export default function ViewProduct() {
         </div>
 
         {viewModalOpen && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
@@ -309,9 +310,9 @@ export default function ViewProduct() {
                 />
                 <button
                   onClick={closeModal}
-                  className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
+                  className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"
                 >
-                  <i className="fas fa-times text-xl"></i>
+                  <i className="fas fa-times text-lg sm:text-xl"></i>
                 </button>
 
                 <div className="absolute top-4 left-4">
@@ -376,7 +377,7 @@ export default function ViewProduct() {
                   <button
                     onClick={() => handleDelete(selectedProduct._id)}
                     disabled={removingId === selectedProduct._id}
-                    className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {removingId === selectedProduct._id ? (
                       <>

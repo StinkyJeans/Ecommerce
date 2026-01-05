@@ -185,17 +185,17 @@ export default function ViewCart() {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto mb-8">
+        <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <FontAwesomeIcon icon={faShoppingCart} className="text-white text-2xl" />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <FontAwesomeIcon icon={faShoppingCart} className="text-white text-xl sm:text-2xl" />
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                   My Shopping Cart
                 </h1>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-gray-600 text-xs sm:text-sm mt-1">
                   {cartItems.reduce(
                     (total, item) => total + (item.quantity || 1),
                     0
@@ -206,10 +206,11 @@ export default function ViewCart() {
             </div>
             <button
               onClick={() => router.back()}
-              className="cursor-pointer flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 px-5 py-3 rounded-xl hover:border-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow-md font-semibold"
+              className="cursor-pointer flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:border-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow-md font-semibold text-sm sm:text-base touch-manipulation w-full sm:w-auto"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
-              Continue Shopping
+              <span className="hidden sm:inline">Continue Shopping</span>
+              <span className="sm:hidden">Continue</span>
             </button>
           </div>
         </div>
@@ -258,8 +259,8 @@ export default function ViewCart() {
                       removingId === item._id ? "opacity-50 scale-95" : ""
                     }`}
                   >
-                    <div className="flex flex-col sm:flex-row gap-4 p-5">
-                      <div className="relative w-full sm:w-32 h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group">
+                    <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
+                      <div className="relative w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group">
                         <img
                           src={item.idUrl}
                           alt={item.productName}
@@ -295,9 +296,9 @@ export default function ViewCart() {
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 hidden sm:inline">
                               Quantity:
                             </span>
                             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
@@ -306,14 +307,14 @@ export default function ViewCart() {
                                   handleQuantityChange(item._id, "decrease")
                                 }
                                 disabled={updatingId === item._id}
-                                className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                className="cursor-pointer w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-md hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation"
                               >
                                 <FontAwesomeIcon
                                   icon={faMinus}
                                   className="text-sm"
                                 />
                               </button>
-                              <span className="w-12 text-center font-bold text-gray-800">
+                              <span className="w-16 sm:w-12 text-center font-bold text-gray-800">
                                 {updatingId === item._id ? (
                                   <FontAwesomeIcon icon={faSpinner} className="text-sm animate-spin" />
                                 ) : (
@@ -325,7 +326,7 @@ export default function ViewCart() {
                                   handleQuantityChange(item._id, "increase")
                                 }
                                 disabled={updatingId === item._id}
-                                className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-green-50 hover:text-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                className="cursor-pointer w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-md hover:bg-green-50 hover:text-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation"
                               >
                                 <FontAwesomeIcon
                                   icon={faPlus}
@@ -335,11 +336,11 @@ export default function ViewCart() {
                             </div>
                           </div>
 
-                          <div className="text-right">
+                          <div className="text-left sm:text-right w-full sm:w-auto">
                             <p className="text-xs text-gray-500 mb-1">
                               Subtotal
                             </p>
-                            <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                               ₱
                               {calculateSubtotal(
                                 item.price,
@@ -355,7 +356,7 @@ export default function ViewCart() {
               </div>
 
               <div className="lg:col-span-1">
-                <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-6">
+                <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100 lg:sticky lg:top-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <FontAwesomeIcon icon={faReceipt} className="text-red-600" />
                     Order Summary
@@ -391,13 +392,13 @@ export default function ViewCart() {
 
                   <button
                     onClick={handleCheckout}
-                    className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4"
+                    className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4 touch-manipulation"
                   >
                     <FontAwesomeIcon icon={faLock} />
-                    Proceed to Checkout
+                    <span className="text-sm sm:text-base">Proceed to Checkout</span>
                   </button>
 
-                  <button className="cursor-pointer w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-red-500 hover:text-red-600 transition-all">
+                  <button className="cursor-pointer w-full border-2 border-gray-200 text-gray-700 py-2.5 sm:py-3 rounded-xl font-semibold hover:border-red-500 hover:text-red-600 transition-all text-sm sm:text-base touch-manipulation">
                     Apply Coupon Code
                   </button>
 

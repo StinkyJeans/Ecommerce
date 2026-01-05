@@ -108,16 +108,16 @@ export default function AddProduct() {
       <Navbar />
 
       <div className="flex-1 p-4 sm:p-6 lg:p-8 mt-16 md:mt-0 overflow-auto relative">
-        <div className="max-w-6xl mx-auto mb-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <i className="fas fa-plus text-white text-xl"></i>
+        <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4 mb-2">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <i className="fas fa-plus text-white text-lg sm:text-xl"></i>
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Add New Product
               </h1>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-gray-600 text-xs sm:text-sm mt-1">
                 Fill in the details to add a product to your inventory
               </p>
             </div>
@@ -126,7 +126,7 @@ export default function AddProduct() {
 
         <form
           onSubmit={handleSubmit}
-          className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8"
+          className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
         >
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -137,7 +137,7 @@ export default function AddProduct() {
             </div>
 
             <div
-              className="relative w-full h-80 sm:h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all overflow-hidden group"
+              className="relative w-full h-64 sm:h-80 md:h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all overflow-hidden group touch-manipulation"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (
@@ -281,7 +281,7 @@ export default function AddProduct() {
               <button
                 type="submit"
                 disabled={loading}
-                className="cursor-pointer w-full py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-lg font-semibold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mt-8"
+                className="cursor-pointer w-full py-3 sm:py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-base sm:text-lg font-semibold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 mt-6 sm:mt-8 touch-manipulation"
               >
                 {loading ? (
                   <>

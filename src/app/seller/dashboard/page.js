@@ -235,29 +235,31 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "grid"
                         ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <i className="fas fa-th mr-2"></i>Grid
+                    <i className="fas fa-th mr-1 sm:mr-2"></i>
+                    <span className="hidden xs:inline">Grid</span>
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
-                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "list"
                         ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <i className="fas fa-list mr-2"></i>List
+                    <i className="fas fa-list mr-1 sm:mr-2"></i>
+                    <span className="hidden xs:inline">List</span>
                   </button>
                 </div>
               </div>
 
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
                   {filteredProducts.map((product) => (
                     <div
                       key={product._id}

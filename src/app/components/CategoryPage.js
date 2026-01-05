@@ -207,31 +207,31 @@ export default function CategoryPage({
                 <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "grid"
                         ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faTh} className="mr-2" />
-                    Grid
+                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">Grid</span>
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
-                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all ${
+                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "list"
                         ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faList} className="mr-2" />
-                    List
+                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">List</span>
                   </button>
                 </div>
               </div>
 
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
                   {filteredProducts.map((product) => (
                     <div
                       key={product._id}
@@ -270,7 +270,7 @@ export default function CategoryPage({
                         </div>
                         <button
                           onClick={() => handleView(product)}
-                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
                         >
                           <FontAwesomeIcon icon={faEye} />
                           View Details
@@ -313,10 +313,11 @@ export default function CategoryPage({
                           </div>
                           <button
                             onClick={() => handleView(product)}
-                            className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+                            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation text-sm sm:text-base whitespace-nowrap"
                           >
                             <FontAwesomeIcon icon={faEye} />
-                            View Details
+                            <span className="hidden sm:inline">View Details</span>
+                            <span className="sm:hidden">View</span>
                           </button>
                         </div>
                       </div>
@@ -329,8 +330,8 @@ export default function CategoryPage({
         </div>
 
         {popupVisible && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
@@ -339,9 +340,9 @@ export default function CategoryPage({
                 />
                 <button
                   onClick={closePopup}
-                  className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
+                  className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                  <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
                 </button>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
@@ -381,9 +382,9 @@ export default function CategoryPage({
                 <button
                   onClick={handleAddToCart}
                   disabled={cartMessage !== ""}
-                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
                 >
-                  <FontAwesomeIcon icon={faCartPlus} className="text-xl" />
+                  <FontAwesomeIcon icon={faCartPlus} className="text-lg sm:text-xl" />
                   Add to Cart
                 </button>
 

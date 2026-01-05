@@ -74,9 +74,9 @@ export default function Header() {
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
           Featured Products
         </h1>
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-5 flex-wrap">
           <div
-            className="relative cursor-pointer group"
+            className="relative cursor-pointer group touch-manipulation"
             onClick={() => router.push("/cart/viewCart")}
           >
             <FontAwesomeIcon
@@ -90,21 +90,21 @@ export default function Header() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+          <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-gray-100 rounded-lg">
             <FontAwesomeIcon
               icon={faUser}
               className="text-gray-600 text-sm"
             />
-            <span className="font-semibold text-gray-700 text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">
+            <span className="font-semibold text-gray-700 text-xs sm:text-sm md:text-base truncate max-w-[80px] sm:max-w-[120px] md:max-w-none">
               {username || "Loading..."}
             </span>
           </div>
           <button
             onClick={handleLogout}
-            className="px-3 sm:px-5 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition cursor-pointer text-sm sm:text-base whitespace-nowrap flex items-center gap-2"
+            className="px-2 sm:px-3 md:px-5 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition cursor-pointer text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 sm:gap-2 touch-manipulation"
           >
-            <FontAwesomeIcon icon={faSignOutAlt} className="text-sm" />
-            <span>Logout</span>
+            <FontAwesomeIcon icon={faSignOutAlt} className="text-xs sm:text-sm" />
+            <span className="hidden xs:inline">Logout</span>
           </button>
         </div>
       </div>
