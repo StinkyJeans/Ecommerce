@@ -23,7 +23,7 @@ export default function Navbar() {
 
   const addProduct = () => router.push("/seller/addProduct");
   const viewProduct = () => router.push("/seller/viewProduct");
-  const orders = () => router.push("/seller/orders");
+  // const orders = () => router.push("/seller/orders");
   const dashboard = () => router.push("/seller/dashboard");
 
   const menuItems = [
@@ -48,13 +48,13 @@ export default function Navbar() {
       path: "/seller/viewProduct",
       action: viewProduct,
     },
-    {
-      id: "orders",
-      label: "User Orders",
-      icon: faShoppingBag,
-      path: "/seller/orders",
-      action: orders,
-    },
+    // {
+    //   id: "orders",
+    //   label: "User Orders",
+    //   icon: faShoppingBag,
+    //   path: "/seller/orders",
+    //   action: orders,
+    // },
   ];
 
   return (
