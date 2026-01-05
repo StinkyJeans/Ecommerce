@@ -5,22 +5,22 @@ import Seller from "@/models/Seller";
 
 export async function POST(req) {
   try {
-    const { username, password, email, contact, idUrl } = await req.json();
+    const { sellerUsername, password, email, contact, idUrl } = await req.json();
 
-    if (!username || !password || !email || !contact || !idUrl) {
+    if (!sellerUsername || !password || !email || !contact || !idUrl) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
     await connectDB();
 
-    const existing = await Seller.findOne({ username });
+    const existing = await Seller.findOne({ sellerUsername });
     if (existing) {
       return NextResponse.json({ message: "Username already taken" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await Seller.create({
-      username,
+      sellerUsername,
       password: hashedPassword,
       email,
       contact,

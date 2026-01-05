@@ -7,33 +7,42 @@ import bcrypt from "bcryptjs";
 export async function POST(req) {
   try {
     const { username, password } = await req.json();
+
     if (!username || !password) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
     }
 
     await connectDB();
 
+    // Try normal user login
     let account = await User.findOne({ username });
     let role = "user";
 
+    // If not found, try seller login using sellerUsername
     if (!account) {
-      account = await Seller.findOne({ username });
+      account = await Seller.findOne({ sellerUsername: username });
       role = "seller";
     }
 
     if (!account) {
-      return NextResponse.json({ message: "Invalid Username or Password" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid Username or Password" },
+        { status: 401 }
+      );
     }
 
     const isMatch = await bcrypt.compare(password, account.password);
     if (!isMatch) {
-      return NextResponse.json({ message: "Invalid Username or Password" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid Username or Password" },
+        { status: 401 }
+      );
     }
 
     return NextResponse.json({
       message: "Login successful",
       role,
-      username: account.username,
+      username: role === "seller" ? account.sellerUsername : account.username
     });
 
   } catch (error) {

@@ -32,7 +32,7 @@ export async function DELETE(req) {
       }, { status: 404 });
     }
 
-    if (deletedItem.username && deletedItem.username !== username) {
+    if (deletedItem.sellerUsername && deletedItem.sellerUsername !== username) {
       await AddProduct.create(deletedItem);
       return NextResponse.json({ 
         success: false,

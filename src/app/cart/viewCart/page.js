@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faTrash, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-
+import {
+  faArrowLeft,
+  faTrash,
+  faPlus,
+  faMinus,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
@@ -43,7 +47,9 @@ export default function ViewCart() {
 
     try {
       const res = await fetch(
-        `/api/updateCartQuantity?id=${itemId}&action=${action}&username=${encodeURIComponent(username)}`,
+        `/api/updateCartQuantity?id=${itemId}&action=${action}&username=${encodeURIComponent(
+          username
+        )}`,
         {
           method: "PATCH",
           headers: {
@@ -57,12 +63,16 @@ export default function ViewCart() {
       if (res.ok && data.success) {
         if (data.removed) {
           // Item was removed because quantity reached 0
-          setCartItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+          setCartItems((prevItems) =>
+            prevItems.filter((item) => item._id !== itemId)
+          );
         } else {
           // Update the quantity in the UI
           setCartItems((prevItems) =>
             prevItems.map((item) =>
-              item._id === itemId ? { ...item, quantity: data.cartItem.quantity } : item
+              item._id === itemId
+                ? { ...item, quantity: data.cartItem.quantity }
+                : item
             )
           );
         }
@@ -82,7 +92,9 @@ export default function ViewCart() {
     setErrorMessage("");
 
     try {
-      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(username)}`;
+      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(
+        username
+      )}`;
 
       const res = await fetch(url, {
         method: "DELETE",
@@ -94,7 +106,9 @@ export default function ViewCart() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        setCartItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item._id !== itemId)
+        );
       } else {
         setErrorMessage(data.message || "Failed to remove item");
       }
@@ -112,8 +126,29 @@ export default function ViewCart() {
 
   const calculateTotal = () => {
     return cartItems
-      .reduce((total, item) => total + parseFloat(item.price || 0) * (item.quantity || 1), 0)
+      .reduce(
+        (total, item) =>
+          total + parseFloat(item.price || 0) * (item.quantity || 1),
+        0
+      )
       .toFixed(2);
+  };
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) return;
+
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Your order is confirmed and now ready to ship");
+      router.push("/shippedItems");
+    }
   };
 
   return (
@@ -121,7 +156,7 @@ export default function ViewCart() {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
         <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
-      </div> 
+      </div>
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4">
@@ -151,7 +186,11 @@ export default function ViewCart() {
                   My Shopping Cart
                 </h1>
                 <p className="text-gray-600 text-sm mt-1">
-                  {cartItems.reduce((total, item) => total + (item.quantity || 1), 0)} items in your cart
+                  {cartItems.reduce(
+                    (total, item) => total + (item.quantity || 1),
+                    0
+                  )}{" "}
+                  items in your cart
                 </p>
               </div>
             </div>
@@ -172,7 +211,9 @@ export default function ViewCart() {
                 <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
                 <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
               </div>
-              <p className="text-gray-700 font-semibold text-lg">Loading your cart...</p>
+              <p className="text-gray-700 font-semibold text-lg">
+                Loading your cart...
+              </p>
               <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
             </div>
           ) : cartItems.length === 0 ? (
@@ -181,9 +222,12 @@ export default function ViewCart() {
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <i className="fas fa-shopping-cart text-5xl text-red-500"></i>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">Your cart is empty</h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                  Your cart is empty
+                </h3>
                 <p className="text-gray-600 leading-relaxed mb-6">
-                  Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
+                  Looks like you haven't added any items to your cart yet. Start
+                  shopping to fill it up!
                 </p>
                 <button
                   onClick={() => router.back()}
@@ -233,21 +277,31 @@ export default function ViewCart() {
                             {removingId === item._id ? (
                               <i className="fas fa-spinner fa-spin text-lg"></i>
                             ) : (
-                              <FontAwesomeIcon icon={faTrash} className="text-lg" />
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                className="text-lg"
+                              />
                             )}
                           </button>
                         </div>
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500">Quantity:</span>
+                            <span className="text-sm text-gray-500">
+                              Quantity:
+                            </span>
                             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                               <button
-                                onClick={() => handleQuantityChange(item._id, 'decrease')}
+                                onClick={() =>
+                                  handleQuantityChange(item._id, "decrease")
+                                }
                                 disabled={updatingId === item._id}
                                 className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                               >
-                                <FontAwesomeIcon icon={faMinus} className="text-sm" />
+                                <FontAwesomeIcon
+                                  icon={faMinus}
+                                  className="text-sm"
+                                />
                               </button>
                               <span className="w-12 text-center font-bold text-gray-800">
                                 {updatingId === item._id ? (
@@ -257,19 +311,30 @@ export default function ViewCart() {
                                 )}
                               </span>
                               <button
-                                onClick={() => handleQuantityChange(item._id, 'increase')}
+                                onClick={() =>
+                                  handleQuantityChange(item._id, "increase")
+                                }
                                 disabled={updatingId === item._id}
                                 className="cursor-pointer w-8 h-8 flex items-center justify-center bg-white rounded-md hover:bg-green-50 hover:text-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                               >
-                                <FontAwesomeIcon icon={faPlus} className="text-sm" />
+                                <FontAwesomeIcon
+                                  icon={faPlus}
+                                  className="text-sm"
+                                />
                               </button>
                             </div>
                           </div>
 
                           <div className="text-right">
-                            <p className="text-xs text-gray-500 mb-1">Subtotal</p>
+                            <p className="text-xs text-gray-500 mb-1">
+                              Subtotal
+                            </p>
                             <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                              ₱{calculateSubtotal(item.price, item.quantity || 1)}
+                              ₱
+                              {calculateSubtotal(
+                                item.price,
+                                item.quantity || 1
+                              )}
                             </p>
                           </div>
                         </div>
@@ -289,7 +354,9 @@ export default function ViewCart() {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-semibold text-gray-800">₱{calculateTotal()}</span>
+                      <span className="font-semibold text-gray-800">
+                        ₱{calculateTotal()}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center pb-4 border-b border-gray-200">
@@ -303,14 +370,19 @@ export default function ViewCart() {
                     </div>
 
                     <div className="flex justify-between items-center pt-2">
-                      <span className="text-lg font-bold text-gray-800">Total</span>
+                      <span className="text-lg font-bold text-gray-800">
+                        Total
+                      </span>
                       <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                         ₱{calculateTotal()}
                       </span>
                     </div>
                   </div>
 
-                  <button className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4">
+                  <button
+                    onClick={handleCheckout}
+                    className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4"
+                  >
                     <i className="fas fa-lock"></i>
                     Proceed to Checkout
                   </button>

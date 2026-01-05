@@ -24,7 +24,7 @@ export async function POST(req) {
 
     const newProduct = await AddProduct.create({
       productId,      // Add the generated productId
-      username,     
+      sellerUsername: username,     
       productName,
       description,
       price,

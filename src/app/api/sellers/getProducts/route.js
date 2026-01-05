@@ -16,7 +16,7 @@ export async function GET(request) {
       );
     }
     
-    const products = await AddProduct.find({ username }).sort({ createdAt: -1 }); 
+    const products = await AddProduct.find({ sellerUsername: username }).sort({ createdAt: -1 }); 
     
     return NextResponse.json({ products, count: products.length });
   } catch (err) {

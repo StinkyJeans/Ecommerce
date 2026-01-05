@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
 
 export default function LoginPage() {
+  const [sellerUsername, setSellerUsername] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +34,7 @@ export default function LoginPage() {
       }
 
       setRole(data.role);
-      setAuthUsername(data.username);
+      setAuthUsername(data.username, data.sellerUsername);
 
       if (data.role === "admin") {
         router.push("/admin/dashboard");
@@ -56,7 +57,7 @@ export default function LoginPage() {
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
       </div>
-      
+
       <form
         onSubmit={handleLogin}
         className="relative bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
@@ -122,7 +123,9 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              <i
+                className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+              ></i>
             </button>
           </div>
         </div>
@@ -149,8 +152,6 @@ export default function LoginPage() {
             </span>
           </p>
         </div>
-
-
       </form>
     </div>
   );

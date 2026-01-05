@@ -8,7 +8,7 @@ export default function SellerRegisterPage() {
   const router = useRouter();
   const { edgestore } = useEdgeStore();
 
-  const [username, setUsername] = useState("");
+  const [sellerUsername, setSellerUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
@@ -46,7 +46,7 @@ export default function SellerRegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username,
+          sellerUsername,
           password,
           email,
           contact,
@@ -166,7 +166,7 @@ export default function SellerRegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Username
+                Seller Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -175,8 +175,8 @@ export default function SellerRegisterPage() {
                 <input
                   type="text"
                   placeholder="Choose a username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={sellerUsername}
+                  onChange={(e) => setSellerUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none"
                   required
                 />

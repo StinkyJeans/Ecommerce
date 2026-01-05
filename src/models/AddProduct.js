@@ -7,7 +7,7 @@ const AddProductSchema = new Schema(
       required: true, 
       unique: true
     },
-    username: { type: String, required: true }, 
+    sellerUsername: { type: String, required: true }, 
     productName: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: String, required: true },
@@ -17,7 +17,7 @@ const AddProductSchema = new Schema(
   { timestamps: true }
 );
 
-AddProductSchema.index({ username: 1, productName: 1 }, { unique: true });
+AddProductSchema.index({ sellerUsername: 1, productName: 1 }, { unique: true });
 AddProductSchema.index({ productId: 1 }, { unique: true });
 
 // Force delete cached model in development
