@@ -9,6 +9,16 @@ import {
   faTrash,
   faPlus,
   faMinus,
+  faShoppingCart,
+  faShoppingBag,
+  faExclamationCircle,
+  faTimes,
+  faSpinner,
+  faReceipt,
+  faLock,
+  faShieldAlt,
+  faTruck,
+  faUndo,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function ViewCart() {
@@ -161,7 +171,7 @@ export default function ViewCart() {
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4">
             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-3">
-              <i className="fas fa-exclamation-circle text-red-600 text-xl"></i>
+              <FontAwesomeIcon icon={faExclamationCircle} className="text-red-600 text-xl" />
               <div className="flex-1">
                 <p className="text-red-800 font-semibold">{errorMessage}</p>
               </div>
@@ -169,7 +179,7 @@ export default function ViewCart() {
                 onClick={() => setErrorMessage("")}
                 className="text-red-600 hover:text-red-800"
               >
-                <i className="fas fa-times"></i>
+                <FontAwesomeIcon icon={faTimes} />
               </button>
             </div>
           </div>
@@ -179,7 +189,7 @@ export default function ViewCart() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i className="fas fa-shopping-cart text-white text-2xl"></i>
+                <FontAwesomeIcon icon={faShoppingCart} className="text-white text-2xl" />
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -220,7 +230,7 @@ export default function ViewCart() {
             <div className="flex flex-col items-center justify-center h-96">
               <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="fas fa-shopping-cart text-5xl text-red-500"></i>
+                  <FontAwesomeIcon icon={faShoppingCart} className="text-5xl text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   Your cart is empty
@@ -233,7 +243,7 @@ export default function ViewCart() {
                   onClick={() => router.back()}
                   className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
                 >
-                  <i className="fas fa-shopping-bag mr-2"></i>
+                  <FontAwesomeIcon icon={faShoppingBag} className="mr-2" />
                   Start Shopping
                 </button>
               </div>
@@ -275,7 +285,7 @@ export default function ViewCart() {
                             title="Remove from cart"
                           >
                             {removingId === item._id ? (
-                              <i className="fas fa-spinner fa-spin text-lg"></i>
+                              <FontAwesomeIcon icon={faSpinner} className="text-lg animate-spin" />
                             ) : (
                               <FontAwesomeIcon
                                 icon={faTrash}
@@ -305,7 +315,7 @@ export default function ViewCart() {
                               </button>
                               <span className="w-12 text-center font-bold text-gray-800">
                                 {updatingId === item._id ? (
-                                  <i className="fas fa-spinner fa-spin text-sm"></i>
+                                  <FontAwesomeIcon icon={faSpinner} className="text-sm animate-spin" />
                                 ) : (
                                   item.quantity || 1
                                 )}
@@ -347,7 +357,7 @@ export default function ViewCart() {
               <div className="lg:col-span-1">
                 <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <i className="fas fa-receipt text-red-600"></i>
+                    <FontAwesomeIcon icon={faReceipt} className="text-red-600" />
                     Order Summary
                   </h3>
 
@@ -383,7 +393,7 @@ export default function ViewCart() {
                     onClick={handleCheckout}
                     className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mb-4"
                   >
-                    <i className="fas fa-lock"></i>
+                    <FontAwesomeIcon icon={faLock} />
                     Proceed to Checkout
                   </button>
 
@@ -394,15 +404,15 @@ export default function ViewCart() {
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <i className="fas fa-shield-alt text-green-600"></i>
+                        <FontAwesomeIcon icon={faShieldAlt} className="text-green-600" />
                         <span>Secure checkout</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <i className="fas fa-truck text-blue-600"></i>
+                        <FontAwesomeIcon icon={faTruck} className="text-blue-600" />
                         <span>Free delivery on orders over ₱500</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <i className="fas fa-undo text-purple-600"></i>
+                        <FontAwesomeIcon icon={faUndo} className="text-purple-600" />
                         <span>30-day return policy</span>
                       </div>
                     </div>

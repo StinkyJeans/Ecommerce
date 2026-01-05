@@ -7,6 +7,22 @@ import SearchBar from "./searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Header from "./header";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEye,
+  faHeart,
+  faTimes,
+  faAlignLeft,
+  faTag,
+  faShoppingBag,
+  faCartPlus,
+  faCheckCircle,
+  faInfoCircle,
+  faUserLock,
+  faExclamationCircle,
+  faTh,
+  faList,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function CategoryPage({
   categoryName,
@@ -112,7 +128,7 @@ export default function CategoryPage({
             <div className="py-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <i className={`fas ${categoryIcon} text-white text-3xl`}></i>
+                  <FontAwesomeIcon icon={categoryIcon} className="text-white text-3xl" />
                 </div>
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -157,9 +173,7 @@ export default function CategoryPage({
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i
-                    className={`fas ${categoryIcon} text-5xl text-red-500`}
-                  ></i>
+                  <FontAwesomeIcon icon={categoryIcon} className="text-5xl text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   {products.length === 0
@@ -199,7 +213,8 @@ export default function CategoryPage({
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <i className="fas fa-th mr-2"></i>Grid
+                    <FontAwesomeIcon icon={faTh} className="mr-2" />
+                    Grid
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
@@ -209,7 +224,8 @@ export default function CategoryPage({
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <i className="fas fa-list mr-2"></i>List
+                    <FontAwesomeIcon icon={faList} className="mr-2" />
+                    List
                   </button>
                 </div>
               </div>
@@ -231,12 +247,12 @@ export default function CategoryPage({
 
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
                           <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <i className="fas fa-eye text-red-600"></i>
+                            <FontAwesomeIcon icon={faEye} className="text-red-600" />
                           </div>
                         </div>
 
                         <button className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white">
-                          <i className="far fa-heart text-red-600 hover:fas"></i>
+                          <FontAwesomeIcon icon={faHeart} className="text-red-600" />
                         </button>
                       </div>
 
@@ -256,7 +272,7 @@ export default function CategoryPage({
                           onClick={() => handleView(product)}
                           className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                         >
-                          <i className="fas fa-eye"></i>
+                          <FontAwesomeIcon icon={faEye} />
                           View Details
                         </button>
                       </div>
@@ -299,7 +315,7 @@ export default function CategoryPage({
                             onClick={() => handleView(product)}
                             className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                           >
-                            <i className="fas fa-eye"></i>
+                            <FontAwesomeIcon icon={faEye} />
                             View Details
                           </button>
                         </div>
@@ -325,7 +341,7 @@ export default function CategoryPage({
                   onClick={closePopup}
                   className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
                 >
-                  <i className="fas fa-times text-xl"></i>
+                  <FontAwesomeIcon icon={faTimes} className="text-xl" />
                 </button>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
@@ -337,7 +353,8 @@ export default function CategoryPage({
               <div className="p-6 sm:p-8">
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <i className="fas fa-align-left mr-2"></i>Description
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+                    Description
                   </h3>
                   <p className="text-gray-700 leading-relaxed text-base">
                     {selectedProduct.description || "No description available"}
@@ -348,14 +365,15 @@ export default function CategoryPage({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 mb-1 font-medium">
-                        <i className="fas fa-tag mr-2"></i>Price
+                        <FontAwesomeIcon icon={faTag} className="mr-2" />
+                        Price
                       </p>
                       <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
                     <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <i className="fas fa-shopping-bag text-white text-2xl"></i>
+                      <FontAwesomeIcon icon={faShoppingBag} className="text-white text-2xl" />
                     </div>
                   </div>
                 </div>
@@ -365,7 +383,7 @@ export default function CategoryPage({
                   disabled={cartMessage !== ""}
                   className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <i className="fas fa-cart-plus text-xl"></i>
+                  <FontAwesomeIcon icon={faCartPlus} className="text-xl" />
                   Add to Cart
                 </button>
 
@@ -382,17 +400,18 @@ export default function CategoryPage({
                           : "bg-gradient-to-r from-red-500 to-red-600 text-white"
                       }`}
                     >
-                      <i
-                        className={`fas ${
+                      <FontAwesomeIcon
+                        icon={
                           cartMessage === "success"
-                            ? "fa-check-circle"
+                            ? faCheckCircle
                             : cartMessage === "exists"
-                            ? "fa-info-circle"
+                            ? faInfoCircle
                             : cartMessage === "login"
-                            ? "fa-user-lock"
-                            : "fa-exclamation-circle"
-                        } text-2xl`}
-                      ></i>
+                            ? faUserLock
+                            : faExclamationCircle
+                        }
+                        className="text-2xl"
+                      />
                       <span>
                         {cartMessage === "success" &&
                           "Product added to cart successfully!"}

@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
   const { username } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,6 +37,24 @@ export default function Dashboard() {
       }
     };
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+          setIsScrolled(scrollPosition > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleSearch = (searchTerm) => {
@@ -139,10 +158,25 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
             <Header />
-            <div className="pb-4 pt-3">
+            {!isScrolled && (
+              <div className="pb-4 pt-3">
+                <div className="max-w-3xl mx-auto">
+                  <SearchBar
+                    placeholder="🔍 Search products..."
+                    onSearch={handleSearch}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {isScrolled && (
+          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
+            <div className="px-4 sm:px-6 lg:px-8 py-3">
               <div className="max-w-3xl mx-auto">
                 <SearchBar
                   placeholder="🔍 Search products..."
@@ -152,7 +186,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
           {loading ? (

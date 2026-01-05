@@ -3,7 +3,18 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faBars, 
+  faTimes, 
+  faChartLine, 
+  faPlusCircle, 
+  faBoxes, 
+  faShoppingBag, 
+  faStore, 
+  faGripHorizontal, 
+  faChevronRight, 
+  faEllipsisV 
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
   const router = useRouter();
@@ -19,28 +30,28 @@ export default function Navbar() {
     {
       id: "dashboard",
       label: "Dashboard",
-      icon: "fa-chart-line",
+      icon: faChartLine,
       path: "/seller/dashboard",
       action: dashboard,
     },
     {
       id: "add",
       label: "Add Product",
-      icon: "fa-plus-circle",
+      icon: faPlusCircle,
       path: "/seller/addProduct",
       action: addProduct,
     },
     {
       id: "products",
       label: "My Products",
-      icon: "fa-box-open",
+      icon: faBoxes,
       path: "/seller/viewProduct",
       action: viewProduct,
     },
     {
       id: "orders",
       label: "User Orders",
-      icon: "fa-box-open",
+      icon: faShoppingBag,
       path: "/seller/orders",
       action: orders,
     },
@@ -55,7 +66,7 @@ export default function Navbar() {
             className="flex items-center gap-2 cursor-pointer group"
           >
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <i className="fas fa-store text-white text-lg"></i>
+              <FontAwesomeIcon icon={faStore} className="text-white text-lg" />
             </div>
             <div>
               <h1 className="text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -86,7 +97,7 @@ export default function Navbar() {
             className="hidden md:flex items-center gap-3 p-6 border-b border-gray-200 cursor-pointer group"
           >
             <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <i className="fas fa-store text-white text-xl"></i>
+              <FontAwesomeIcon icon={faStore} className="text-white text-xl" />
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -99,7 +110,7 @@ export default function Navbar() {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
               <div className="flex items-center gap-2 px-3 mb-3">
-                <i className="fas fa-grip-horizontal text-gray-400 text-sm"></i>
+                <FontAwesomeIcon icon={faGripHorizontal} className="text-gray-400 text-sm" />
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Navigation
                 </p>
@@ -128,19 +139,20 @@ export default function Navbar() {
                             : "bg-gray-100 group-hover:bg-red-50"
                         }`}
                       >
-                        <i
-                          className={`fas ${item.icon} text-lg ${
+                        <FontAwesomeIcon
+                          icon={item.icon}
+                          className={`text-lg ${
                             isActive
                               ? "text-white"
                               : "text-gray-600 group-hover:text-red-600"
                           }`}
-                        ></i>
+                        />
                       </div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold">{item.label}</span>
                       </div>
                       {isActive && (
-                        <i className="fas fa-chevron-right text-sm"></i>
+                        <FontAwesomeIcon icon={faChevronRight} className="text-sm" />
                       )}
                     </button>
                   );
@@ -151,15 +163,15 @@ export default function Navbar() {
 
           <div className="p-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center gap-3 px-2 py-3">
-              <div className="w-11 h-11 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
-                S
+              <div className="w-11 h-11 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                <FontAwesomeIcon icon={faStore} className="text-lg" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-gray-800 text-sm">Seller Account</p>
                 <p className="text-xs text-gray-500">Active Status</p>
               </div>
               <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                <i className="fas fa-ellipsis-v text-gray-600"></i>
+                <FontAwesomeIcon icon={faEllipsisV} className="text-gray-600" />
               </button>
             </div>
           </div>

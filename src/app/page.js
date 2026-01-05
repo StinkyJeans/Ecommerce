@@ -3,6 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faStore,
+  faUser,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faSignInAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function LoginPage() {
   const [sellerUsername, setSellerUsername] = useState("");
@@ -73,7 +82,7 @@ export default function LoginPage() {
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <i className="fas fa-store text-white text-2xl"></i>
+            <FontAwesomeIcon icon={faStore} className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Welcome Back
@@ -89,7 +98,7 @@ export default function LoginPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="fas fa-user text-gray-400"></i>
+              <FontAwesomeIcon icon={faUser} className="text-gray-400" />
             </div>
             <input
               type="text"
@@ -108,7 +117,7 @@ export default function LoginPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="fas fa-lock text-gray-400"></i>
+              <FontAwesomeIcon icon={faLock} className="text-gray-400" />
             </div>
             <input
               type={showPassword ? "text" : "password"}
@@ -123,9 +132,9 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <i
-                className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
-              ></i>
+              <FontAwesomeIcon
+                icon={showPassword ? faEyeSlash : faEye}
+              />
             </button>
           </div>
         </div>
@@ -136,7 +145,7 @@ export default function LoginPage() {
           className="w-full py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           <span className="cursor-pointer flex items-center justify-center gap-2">
-            <i className="fas fa-sign-in-alt"></i>
+            <FontAwesomeIcon icon={faSignInAlt} />
             Login
           </span>
         </button>

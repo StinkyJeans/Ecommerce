@@ -1,10 +1,11 @@
 import CategoryPage from "@/app/components/CategoryPage";
+import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
 
 export default function MobilePhonesPage() {
   return (
     <CategoryPage 
       categoryName="Mobile Devices" 
-      categoryIcon="fa-mobile-alt" 
+      categoryIcon={faMobileAlt} 
       categoryValue="Mobile" 
     />
   );

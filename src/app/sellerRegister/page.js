@@ -3,6 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEdgeStore } from "@/lib/edgestore";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faStore,
+  faIdCard,
+  faSyncAlt,
+  faCloudUploadAlt,
+  faShieldAlt,
+  faUser,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faEnvelope,
+  faPhone,
+  faCheckCircle,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function SellerRegisterPage() {
   const router = useRouter();
@@ -80,7 +96,7 @@ export default function SellerRegisterPage() {
 
       {showPopup && (
         <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
-          <i className="fas fa-check-circle text-xl"></i>
+          <FontAwesomeIcon icon={faCheckCircle} className="text-xl" />
           <span className="font-medium">{popupMessage}</span>
         </div>
       )}
@@ -101,7 +117,7 @@ export default function SellerRegisterPage() {
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <i className="fas fa-store text-white text-2xl"></i>
+            <FontAwesomeIcon icon={faStore} className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Become a Seller
@@ -115,7 +131,7 @@ export default function SellerRegisterPage() {
 
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              <i className="fas fa-id-card mr-2 text-red-600"></i>
+              <FontAwesomeIcon icon={faIdCard} className="mr-2 text-red-600" />
               Upload Valid ID
             </label>
             <div
@@ -131,14 +147,14 @@ export default function SellerRegisterPage() {
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <i className="fas fa-sync-alt text-white text-3xl"></i>
+                      <FontAwesomeIcon icon={faSyncAlt} className="text-white text-3xl" />
                       <p className="text-white font-medium mt-2">Change Image</p>
                     </div>
                   </div>
                 </>
               ) : (
                 <div className="text-center p-6">
-                  <i className="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                  <FontAwesomeIcon icon={faCloudUploadAlt} className="text-5xl text-gray-400 mb-4" />
                   <p className="text-gray-600 font-medium mb-2">
                     Click to upload your ID
                   </p>
@@ -157,7 +173,7 @@ export default function SellerRegisterPage() {
               required
             />
             <p className="mt-3 text-xs text-gray-500 flex items-center gap-2">
-              <i className="fas fa-shield-alt text-green-600"></i>
+              <FontAwesomeIcon icon={faShieldAlt} className="text-green-600" />
               Your ID is securely encrypted and used for verification only
             </p>
           </div>
@@ -170,7 +186,7 @@ export default function SellerRegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-user text-gray-400"></i>
+                  <FontAwesomeIcon icon={faUser} className="text-gray-400" />
                 </div>
                 <input
                   type="text"
@@ -189,7 +205,7 @@ export default function SellerRegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-lock text-gray-400"></i>
+                  <FontAwesomeIcon icon={faLock} className="text-gray-400" />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -204,7 +220,7 @@ export default function SellerRegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                 </button>
               </div>
             </div>
@@ -215,7 +231,7 @@ export default function SellerRegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-envelope text-gray-400"></i>
+                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
                 </div>
                 <input
                   type="email"
@@ -234,7 +250,7 @@ export default function SellerRegisterPage() {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <i className="fas fa-phone text-gray-400"></i>
+                  <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
                 </div>
                 <input
                   type="number"
@@ -253,7 +269,7 @@ export default function SellerRegisterPage() {
               className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
             >
               <span className="cursor-pointer flex items-center justify-center gap-2">
-                <i className="fas fa-check-circle"></i>
+                <FontAwesomeIcon icon={faCheckCircle} />
                 Register as Seller
               </span>
             </button>
@@ -274,7 +290,7 @@ export default function SellerRegisterPage() {
 
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start gap-3">
-            <i className="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
+            <FontAwesomeIcon icon={faInfoCircle} className="text-blue-600 text-lg mt-0.5" />
             <div>
               <p className="text-sm font-medium text-gray-800 mb-1">
                 Seller Verification Process
