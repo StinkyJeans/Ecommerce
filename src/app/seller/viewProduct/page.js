@@ -121,32 +121,34 @@ export default function ViewProduct() {
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
         {successMessage && (
           <div className="max-w-7xl mx-auto mb-4 animate-in slide-in-from-top-2 fade-in">
-            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-center gap-3">
-              <i className="fas fa-check-circle text-green-600 text-xl"></i>
-              <div className="flex-1">
-                <p className="text-green-800 font-semibold">{successMessage}</p>
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+              <i className="fas fa-check-circle text-green-600 text-lg sm:text-xl flex-shrink-0"></i>
+              <div className="flex-1 min-w-0">
+                <p className="text-green-800 font-semibold text-sm sm:text-base break-words">{successMessage}</p>
               </div>
               <button
                 onClick={() => setSuccessMessage("")}
-                className="text-green-600 hover:text-green-800"
+                className="text-green-600 hover:text-green-800 flex-shrink-0 p-1 touch-manipulation"
+                aria-label="Close"
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-times text-sm sm:text-base"></i>
               </button>
             </div>
           </div>
         )}
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4 animate-in slide-in-from-top-2 fade-in">
-            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-3">
-              <i className="fas fa-exclamation-circle text-red-600 text-xl"></i>
-              <div className="flex-1">
-                <p className="text-red-800 font-semibold">{errorMessage}</p>
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+              <i className="fas fa-exclamation-circle text-red-600 text-lg sm:text-xl flex-shrink-0"></i>
+              <div className="flex-1 min-w-0">
+                <p className="text-red-800 font-semibold text-sm sm:text-base break-words">{errorMessage}</p>
               </div>
               <button
                 onClick={() => setErrorMessage("")}
-                className="text-red-600 hover:text-red-800"
+                className="text-red-600 hover:text-red-800 flex-shrink-0 p-1 touch-manipulation"
+                aria-label="Close"
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-times text-sm sm:text-base"></i>
               </button>
             </div>
           </div>

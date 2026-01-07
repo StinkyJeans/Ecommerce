@@ -95,15 +95,15 @@ export default function SellerRegisterPage() {
       </div>
 
       {showPopup && (
-        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-xl" />
-          <span className="font-medium">{popupMessage}</span>
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-2 sm:gap-3 max-w-sm sm:max-w-md mx-auto sm:mx-0">
+          <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0" />
+          <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
         </div>
       )}
 
       <form
         onSubmit={handleRegister}
-        className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl max-w-5xl w-full"
+        className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl max-w-5xl w-full overflow-y-auto max-h-[95vh] sm:max-h-auto"
       >
 
         {loading && (
@@ -127,7 +127,7 @@ export default function SellerRegisterPage() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
 
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -135,7 +135,7 @@ export default function SellerRegisterPage() {
               Upload Valid ID
             </label>
             <div
-              className="w-full h-64 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden"
+              className="w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden touch-manipulation"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (

@@ -65,9 +65,9 @@ export default function RegisterPage() {
       </div>
 
       {showPopup && (
-        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-3">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-xl" />
-          <span className="font-medium">{popupMessage}</span>
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-2 sm:gap-3 max-w-sm sm:max-w-md mx-auto sm:mx-0">
+          <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0" />
+          <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
         </div>
       )}
 

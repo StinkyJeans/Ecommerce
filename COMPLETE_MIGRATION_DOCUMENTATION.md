@@ -228,6 +228,42 @@ CREATE POLICY "Users can insert" ON users FOR INSERT WITH CHECK (true);
 - AuthContext handles null client gracefully
 - See `VERCEL_DEPLOYMENT.md` for setup
 
+### 6. Seller Add to Cart Issue (December 2024)
+
+**Issue**: Sellers getting "Please log in to add items to your cart" error when trying to add products to cart
+
+**Root Cause**: Seller dashboard was checking for `sellerUsername` instead of `username` for cart operations. The `username` field is set for all authenticated users (including sellers) in AuthContext, but the code was only checking `sellerUsername`.
+
+**Files Changed**:
+- `src/app/seller/dashboard/page.js` - Updated to use `username` for cart operations
+
+**Code Changes**:
+
+**Deleted/Changed:**
+```javascript
+// BEFORE: Checking sellerUsername (causes error)
+const { username } = useAuth();
+const { sellerUsername } = useAuth();
+if (!sellerUsername) {
+  setCartMessage("login");
+  return;
+}
+username: sellerUsername
+```
+
+**After:**
+```javascript
+// AFTER: Using username (works for all users including sellers)
+const { username, sellerUsername } = useAuth();
+if (!username) {
+  setCartMessage("login");
+  return;
+}
+username: username
+```
+
+**Result**: ✅ Sellers can now add items to cart successfully
+
 ---
 
 ## Setup & Deployment
@@ -272,12 +308,19 @@ See `VERCEL_DEPLOYMENT.md` for detailed instructions.
 | "Missing fields" (Add to Cart) | Check products have both snake_case and camelCase |
 | "Cart operations not working" | Use `item.id` instead of `item._id` |
 | "Missing env variables" (Vercel) | Set variables in Vercel Dashboard and redeploy |
+| "Please log in to add items" (Seller) | Use `username` instead of `sellerUsername` for cart operations |
 
 ---
 
 ## Changelog
 
 ### December 2024
+
+**Seller Add to Cart Fix**
+- Fixed "Please log in to add items to your cart" error for sellers
+- Changed from `sellerUsername` to `username` for cart operations
+- Removed duplicate `useAuth()` call
+- Files: `seller/dashboard/page.js`
 
 **Shopping Cart Fix**
 - Fixed cart operations (plus/minus/delete buttons)
@@ -312,6 +355,6 @@ See `VERCEL_DEPLOYMENT.md` for detailed instructions.
 
 ---
 
-**Version**: 1.2  
+**Version**: 1.3  
 **Last Updated**: December 2024  
 **Status**: ✅ Complete & Production Ready

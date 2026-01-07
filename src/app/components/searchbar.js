@@ -26,22 +26,22 @@ export default function SearchBar({
       <div className="relative flex items-center">
         <FontAwesomeIcon
           icon={faSearch}
-          className="absolute left-4 text-gray-400 pointer-events-none"
+          className="absolute left-3 sm:left-4 text-gray-400 pointer-events-none text-sm sm:text-base"
         />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-11 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
+          className="w-full pl-9 sm:pl-11 pr-9 sm:pr-10 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition touch-manipulation"
         />
         {searchTerm && (
           <button
             onClick={clearSearch}
-            className="absolute right-3 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+            className="absolute right-2 sm:right-3 text-gray-400 hover:text-gray-600 transition cursor-pointer p-1 touch-manipulation"
             aria-label="Clear search"
           >
-            <FontAwesomeIcon icon={faTimes} />
+            <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
           </button>
         )}
       </div>

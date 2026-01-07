@@ -37,8 +37,7 @@ export default function Dashboard() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
-  const { username } = useAuth();
-  const { sellerUsername } = useAuth();
+  const { username, sellerUsername } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -106,7 +105,7 @@ export default function Dashboard() {
   const handleAddToCart = async () => {
     if (!selectedProduct) return;
 
-    if (!sellerUsername) {
+    if (!username) {
       setCartMessage("login");
       setTimeout(() => setCartMessage(""), 3000);
       return;
@@ -119,7 +118,7 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: sellerUsername, // Use 'username' field name
+          username: username,
           productId: selectedProduct.product_id || selectedProduct.productId,
           productName: selectedProduct.product_name || selectedProduct.productName,
           description: selectedProduct.description,
