@@ -72,15 +72,13 @@ export default function ViewCart() {
 
       if (res.ok && data.success) {
         if (data.removed) {
-          // Item was removed because quantity reached 0
           setCartItems((prevItems) =>
-            prevItems.filter((item) => item._id !== itemId)
+            prevItems.filter((item) => item.id !== itemId)
           );
         } else {
-          // Update the quantity in the UI
           setCartItems((prevItems) =>
             prevItems.map((item) =>
-              item._id === itemId
+              item.id === itemId
                 ? { ...item, quantity: data.cartItem.quantity }
                 : item
             )
@@ -117,7 +115,7 @@ export default function ViewCart() {
 
       if (res.ok && data.success) {
         setCartItems((prevItems) =>
-          prevItems.filter((item) => item._id !== itemId)
+          prevItems.filter((item) => item.id !== itemId)
         );
       } else {
         setErrorMessage(data.message || "Failed to remove item");
@@ -254,16 +252,16 @@ export default function ViewCart() {
               <div className="lg:col-span-2 space-y-4">
                 {cartItems.map((item) => (
                   <div
-                    key={item._id}
+                    key={item.id}
                     className={`bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden ${
-                      removingId === item._id ? "opacity-50 scale-95" : ""
+                      removingId === item.id ? "opacity-50 scale-95" : ""
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
                       <div className="relative w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group">
                         <img
-                          src={item.idUrl}
-                          alt={item.productName}
+                          src={item.id_url || item.idUrl}
+                          alt={item.product_name || item.productName}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       </div>
@@ -272,7 +270,7 @@ export default function ViewCart() {
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex-1">
                             <h2 className="text-lg font-bold text-gray-900 mb-2">
-                              {item.productName}
+                              {item.product_name || item.productName}
                             </h2>
                             <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                               {item.description}
@@ -280,12 +278,12 @@ export default function ViewCart() {
                           </div>
 
                           <button
-                            onClick={() => handleRemove(item._id)}
-                            disabled={removingId === item._id}
+                            onClick={() => handleRemove(item.id)}
+                            disabled={removingId === item.id}
                             className="cursor-pointer p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Remove from cart"
                           >
-                            {removingId === item._id ? (
+                            {removingId === item.id ? (
                               <FontAwesomeIcon icon={faSpinner} className="text-lg animate-spin" />
                             ) : (
                               <FontAwesomeIcon
@@ -304,9 +302,9 @@ export default function ViewCart() {
                             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                               <button
                                 onClick={() =>
-                                  handleQuantityChange(item._id, "decrease")
+                                  handleQuantityChange(item.id, "decrease")
                                 }
-                                disabled={updatingId === item._id}
+                                disabled={updatingId === item.id}
                                 className="cursor-pointer w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-md hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation"
                               >
                                 <FontAwesomeIcon
@@ -315,7 +313,7 @@ export default function ViewCart() {
                                 />
                               </button>
                               <span className="w-16 sm:w-12 text-center font-bold text-gray-800">
-                                {updatingId === item._id ? (
+                                {updatingId === item.id ? (
                                   <FontAwesomeIcon icon={faSpinner} className="text-sm animate-spin" />
                                 ) : (
                                   item.quantity || 1
@@ -323,9 +321,9 @@ export default function ViewCart() {
                               </span>
                               <button
                                 onClick={() =>
-                                  handleQuantityChange(item._id, "increase")
+                                  handleQuantityChange(item.id, "increase")
                                 }
-                                disabled={updatingId === item._id}
+                                disabled={updatingId === item.id}
                                 className="cursor-pointer w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center bg-white rounded-md hover:bg-green-50 hover:text-green-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm touch-manipulation"
                               >
                                 <FontAwesomeIcon

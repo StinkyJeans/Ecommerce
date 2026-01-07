@@ -10,9 +10,15 @@ export function AuthProvider({ children }) {
   const [username, setUsername] = useState(null);
   const [sellerUsername, setSellerUsername] = useState(null);
   const [loading, setLoading] = useState(true);
+  
   const supabase = createClient();
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         fetchUserData(session.user.email || session.user.user_metadata?.username);
@@ -20,6 +26,10 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     });
+
+    if (!supabase) {
+      return;
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
@@ -32,10 +42,19 @@ export function AuthProvider({ children }) {
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, [supabase]);
 
   const fetchUserData = async (emailOrUsername) => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data: userData, error } = await supabase
         .from('users')
@@ -58,7 +77,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
     await fetch("/api/logout", { method: "POST" });
     setRole(null);
     setUsername(null);

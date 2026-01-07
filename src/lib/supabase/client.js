@@ -6,6 +6,9 @@ export function createClient() {
                       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
+    if (typeof window === 'undefined') {
+      return null;
+    }
     throw new Error('Missing Supabase environment variables');
   }
 

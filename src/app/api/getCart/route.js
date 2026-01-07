@@ -26,9 +26,15 @@ export async function GET(req) {
       }, { status: 500 });
     }
 
+    const transformedCart = (cart || []).map(item => ({
+      ...item,
+      idUrl: item.id_url,
+      productName: item.product_name,
+    }));
+
     return NextResponse.json({ 
-      cart: cart || [],
-      count: cart?.length || 0 
+      cart: transformedCart,
+      count: transformedCart.length 
     }, { status: 200 });
   } catch (err) {
     console.error("Get cart error:", err);
