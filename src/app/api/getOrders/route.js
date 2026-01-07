@@ -12,14 +12,14 @@ export async function GET(req) {
 
     const supabase = await createClient();
 
-    const { data: cart, error } = await supabase
-      .from('cart_items')
+    const { data: orders, error } = await supabase
+      .from('orders')
       .select('*')
       .eq('username', username)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Get cart error:", error);
+      console.error("Get orders error:", error);
       return NextResponse.json({ 
         message: "Server error", 
         error: error.message 
@@ -27,11 +27,11 @@ export async function GET(req) {
     }
 
     return NextResponse.json({ 
-      cart: cart || [],
-      count: cart?.length || 0 
+      orders: orders || [],
+      count: orders?.length || 0 
     }, { status: 200 });
   } catch (err) {
-    console.error("Get cart error:", err);
+    console.error("Get orders error:", err);
     return NextResponse.json({ 
       message: "Server error", 
       error: err.message 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import AddProduct from "@/models/AddProduct";
+import { createClient } from "@/lib/supabase/server";
 
 export async function DELETE(req) {
   try {
@@ -19,25 +18,41 @@ export async function DELETE(req) {
       }, { status: 400 });
     }
 
-    await connectDB();
+    const supabase = await createClient();
 
-    const deletedItem = await AddProduct.findByIdAndDelete(id);
+    const { data: product, error: fetchError } = await supabase
+      .from('products')
+      .select('id, seller_username')
+      .eq('id', id)
+      .single();
 
-    console.log("Deleted item:", deletedItem);
-
-    if (!deletedItem) {
+    if (fetchError || !product) {
       return NextResponse.json({ 
         success: false,
         message: "Item not found" 
       }, { status: 404 });
     }
 
-    if (deletedItem.sellerUsername && deletedItem.sellerUsername !== username) {
-      await AddProduct.create(deletedItem);
+    if (product.seller_username !== username) {
       return NextResponse.json({ 
         success: false,
         message: "Unauthorized" 
       }, { status: 403 });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error("=== DELETE ERROR ===");
+      console.error(deleteError);
+      return NextResponse.json({ 
+        success: false,
+        message: "Server error", 
+        error: deleteError.message 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

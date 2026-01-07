@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import AddProduct from "@/models/AddProduct";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request) {
   try {
-    await connectDB();
+    const supabase = await createClient();
     
     const { searchParams } = new URL(request.url);
     const username = searchParams.get('username');
@@ -16,9 +15,31 @@ export async function GET(request) {
       );
     }
     
-    const products = await AddProduct.find({ sellerUsername: username }).sort({ createdAt: -1 }); 
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('seller_username', username)
+      .order('created_at', { ascending: false });
     
-    return NextResponse.json({ products, count: products.length });
+    if (error) {
+      console.error("Failed to fetch products:", error);
+      return NextResponse.json(
+        { message: "Server error" },
+        { status: 500 }
+      );
+    }
+    
+    const transformedProducts = (products || []).map(product => ({
+      ...product,
+      productId: product.product_id,
+      productName: product.product_name,
+      idUrl: product.id_url,
+      sellerUsername: product.seller_username,
+      createdAt: product.created_at,
+      updatedAt: product.updated_at,
+    }));
+    
+    return NextResponse.json({ products: transformedProducts, count: transformedProducts.length });
   } catch (err) {
     console.error("Failed to fetch products:", err);
     return NextResponse.json(

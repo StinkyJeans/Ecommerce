@@ -4,7 +4,7 @@ import { faDesktop } from "@fortawesome/free-solid-svg-icons";
 export default function ComputersPage() {
   return (
     <CategoryPage 
-      categoryName="PC & Computers" 
+      categoryName="Computers & Laptops" 
       categoryIcon={faDesktop} 
       categoryValue="Pc" 
     />

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import AddProduct from "@/models/AddProduct";
+import { createClient } from "@/lib/supabase/server";
 
-// Function to generate unique product ID
 function generateProductId() {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -17,35 +15,43 @@ export async function POST(req) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
-    await connectDB();
+    const supabase = await createClient();
 
-    // Generate the product ID
     const productId = generateProductId();
 
-    const newProduct = await AddProduct.create({
-      productId,      // Add the generated productId
-      sellerUsername: username,     
-      productName,
-      description,
-      price,
-      category,
-      idUrl,
-    });
+    const { data: newProduct, error } = await supabase
+      .from('products')
+      .insert({
+        product_id: productId,
+        seller_username: username,
+        product_name: productName,
+        description: description,
+        price: price,
+        category: category,
+        id_url: idUrl,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("product adding error:", error);
+      
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { message: "Product name already taken." },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json({ message: "Server error" }, { status: 500 });
+    }
 
     return NextResponse.json({ 
       message: "Product added successfully!", 
-      productId: newProduct.productId 
+      productId: newProduct.product_id 
     }, { status: 201 });
   } catch (err) {
     console.error("product adding error:", err);
-
-    if (err.code === 11000) {
-      return NextResponse.json(
-        { message: "Product name already taken." },
-        { status: 409 }
-      );
-    }
-
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

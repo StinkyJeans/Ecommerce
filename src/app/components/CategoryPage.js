@@ -1,4 +1,3 @@
-// src/app/components/CategoryPage.js
 "use client";
 
 import { useEffect, useState } from "react";
@@ -91,7 +90,12 @@ export default function CategoryPage({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
-          ...selectedProduct,
+          productId: selectedProduct.product_id || selectedProduct.productId,
+          productName: selectedProduct.product_name || selectedProduct.productName,
+          description: selectedProduct.description,
+          price: selectedProduct.price,
+          idUrl: selectedProduct.id_url || selectedProduct.idUrl,
+          quantity: 1,
         }),
       });
       if (res.ok) {

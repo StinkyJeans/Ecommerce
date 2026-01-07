@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import AddToCart from "@/models/AddToCart";
+import { createClient } from "@/lib/supabase/server";
 
 export async function PATCH(req) {
   try {
@@ -16,11 +15,16 @@ export async function PATCH(req) {
       }, { status: 400 });
     }
 
-    await connectDB();
+    const supabase = await createClient();
 
-    const cartItem = await AddToCart.findOne({ _id: id, username });
+    const { data: cartItem, error: fetchError } = await supabase
+      .from('cart_items')
+      .select('*')
+      .eq('id', id)
+      .eq('username', username)
+      .single();
     
-    if (!cartItem) {
+    if (fetchError || !cartItem) {
       return NextResponse.json({ 
         message: "Cart item not found",
         success: false 
@@ -28,12 +32,50 @@ export async function PATCH(req) {
     }
 
     if (action === 'increase') {
-      cartItem.quantity += 1;
+      const { data: updated, error: updateError } = await supabase
+        .from('cart_items')
+        .update({ quantity: cartItem.quantity + 1 })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      return NextResponse.json({
+        message: "Quantity updated successfully",
+        success: true,
+        cartItem: updated
+      });
     } else if (action === 'decrease') {
       if (cartItem.quantity > 1) {
-        cartItem.quantity -= 1;
+        const { data: updated, error: updateError } = await supabase
+          .from('cart_items')
+          .update({ quantity: cartItem.quantity - 1 })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (updateError) {
+          throw updateError;
+        }
+
+        return NextResponse.json({
+          message: "Quantity updated successfully",
+          success: true,
+          cartItem: updated
+        });
       } else {
-        await AddToCart.findByIdAndDelete(id);
+        const { error: deleteError } = await supabase
+          .from('cart_items')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) {
+          throw deleteError;
+        }
+
         return NextResponse.json({
           message: "Item removed from cart",
           success: true,
@@ -42,13 +84,10 @@ export async function PATCH(req) {
       }
     }
 
-    await cartItem.save();
-
     return NextResponse.json({
-      message: "Quantity updated successfully",
-      success: true,
-      cartItem
-    });
+      message: "Invalid action",
+      success: false
+    }, { status: 400 });
   } catch (err) {
     console.error("Update quantity error:", err);
     return NextResponse.json({ 

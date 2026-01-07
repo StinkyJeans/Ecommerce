@@ -225,8 +225,8 @@ export default function ViewProduct() {
                 >
                   <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                     <img
-                      src={product.idUrl}
-                      alt={product.productName}
+                      src={product.id_url}
+                      alt={product.product_name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -263,7 +263,7 @@ export default function ViewProduct() {
 
                   <div className="p-5">
                     <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                      {product.productName}
+                      {product.product_name}
                     </h2>
 
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
@@ -304,8 +304,8 @@ export default function ViewProduct() {
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
-                  src={selectedProduct.idUrl}
-                  alt={selectedProduct.productName}
+                  src={selectedProduct.id_url}
+                  alt={selectedProduct.product_name}
                   className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
                 />
                 <button
@@ -330,7 +330,7 @@ export default function ViewProduct() {
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
-                    {selectedProduct.productName}
+                    {selectedProduct.product_name}
                   </h2>
                 </div>
               </div>

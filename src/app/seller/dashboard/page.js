@@ -119,11 +119,12 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sellerUsername,
-          productName: selectedProduct.productName,
+          username: sellerUsername, // Use 'username' field name
+          productId: selectedProduct.product_id || selectedProduct.productId,
+          productName: selectedProduct.product_name || selectedProduct.productName,
           description: selectedProduct.description,
           price: selectedProduct.price,
-          idUrl: selectedProduct.idUrl,
+          idUrl: selectedProduct.id_url || selectedProduct.idUrl,
           quantity: quantity,
         }),
       });
@@ -282,8 +283,8 @@ export default function Dashboard() {
                     >
                       <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                         <img
-                          src={product.idUrl}
-                          alt={product.productName}
+                          src={product.id_url}
+                          alt={product.product_name}
                           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -295,7 +296,7 @@ export default function Dashboard() {
                       </div>
                       <div className="p-5">
                         <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                          {product.productName}
+                          {product.product_name}
                         </h2>
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -325,15 +326,15 @@ export default function Dashboard() {
                     >
                       <div className="relative w-full sm:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex-shrink-0">
                         <img
-                          src={product.idUrl}
-                          alt={product.productName}
+                          src={product.id_url}
+                          alt={product.product_name}
                           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
                         />
                       </div>
                       <div className="flex-1 p-6 flex flex-col justify-between">
                         <div>
                           <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
-                            {product.productName}
+                            {product.product_name}
                           </h2>
                           <p className="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
                             {product.description}
@@ -368,8 +369,8 @@ export default function Dashboard() {
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
-                  src={selectedProduct.idUrl}
-                  alt={selectedProduct.productName}
+                  src={selectedProduct.id_url}
+                  alt={selectedProduct.product_name}
                   className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
                 />
                 <button
@@ -380,7 +381,7 @@ export default function Dashboard() {
                 </button>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
                   <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
-                    {selectedProduct.productName}
+                    {selectedProduct.product_name}
                   </h2>
                 </div>
               </div>

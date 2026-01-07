@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import AddToCart from "@/models/AddToCart";
+import { createClient } from "@/lib/supabase/server";
 
 export async function DELETE(req) {
   try {
@@ -19,25 +18,41 @@ export async function DELETE(req) {
       }, { status: 400 });
     }
 
-    await connectDB();
+    const supabase = await createClient();
 
-    const deletedItem = await AddToCart.findByIdAndDelete(id);
+    const { data: cartItem, error: fetchError } = await supabase
+      .from('cart_items')
+      .select('id, username')
+      .eq('id', id)
+      .single();
 
-    console.log("Deleted item:", deletedItem);
-
-    if (!deletedItem) {
+    if (fetchError || !cartItem) {
       return NextResponse.json({ 
         success: false,
         message: "Item not found" 
       }, { status: 404 });
     }
 
-    if (deletedItem.username && deletedItem.username !== username) {
-      await AddToCart.create(deletedItem);
+    if (cartItem.username !== username) {
       return NextResponse.json({ 
         success: false,
         message: "Unauthorized" 
       }, { status: 403 });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('cart_items')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error("=== DELETE ERROR ===");
+      console.error(deleteError);
+      return NextResponse.json({ 
+        success: false,
+        message: "Server error", 
+        error: deleteError.message 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

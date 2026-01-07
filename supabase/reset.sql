@@ -1,0 +1,155 @@
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_products_updated_at ON products;
+DROP TRIGGER IF EXISTS update_cart_items_updated_at ON cart_items;
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
+
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS cart_items CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+
+DROP INDEX IF EXISTS idx_users_username;
+DROP INDEX IF EXISTS idx_users_role;
+DROP INDEX IF EXISTS idx_products_product_id;
+DROP INDEX IF EXISTS idx_products_seller_username;
+DROP INDEX IF EXISTS idx_products_category;
+DROP INDEX IF EXISTS idx_cart_items_username;
+DROP INDEX IF EXISTS idx_cart_items_product_id;
+DROP INDEX IF EXISTS idx_orders_username;
+DROP INDEX IF EXISTS idx_orders_seller_username;
+DROP INDEX IF EXISTS idx_orders_status;
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT UNIQUE NOT NULL,
+  email TEXT,
+  contact TEXT,
+  id_url TEXT,
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'seller', 'admin')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_id TEXT UNIQUE NOT NULL,
+  seller_username TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price TEXT NOT NULL,
+  category TEXT NOT NULL,
+  id_url TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT unique_seller_product UNIQUE (seller_username, product_name)
+);
+
+CREATE TABLE cart_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price TEXT NOT NULL,
+  id_url TEXT NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity >= 1),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT unique_user_product_cart UNIQUE (username, product_id)
+);
+
+CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT NOT NULL,
+  seller_username TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  price NUMERIC NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  total_amount NUMERIC NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_products_product_id ON products(product_id);
+CREATE INDEX idx_products_seller_username ON products(seller_username);
+CREATE INDEX idx_products_category ON products(category);
+CREATE INDEX idx_cart_items_username ON cart_items(username);
+CREATE INDEX idx_cart_items_product_id ON cart_items(product_id);
+CREATE INDEX idx_orders_username ON orders(username);
+CREATE INDEX idx_orders_seller_username ON orders(seller_username);
+CREATE INDEX idx_orders_status ON orders(status);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own data" ON users
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert" ON users
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update own data" ON users
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Anyone can read products" ON products
+  FOR SELECT USING (true);
+
+CREATE POLICY "Sellers can insert own products" ON products
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Sellers can update own products" ON products
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Sellers can delete own products" ON products
+  FOR DELETE USING (true);
+
+CREATE POLICY "Users can read own cart items" ON cart_items
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert own cart items" ON cart_items
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update own cart items" ON cart_items
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Users can delete own cart items" ON cart_items
+  FOR DELETE USING (true);
+
+CREATE POLICY "Users can read own orders" ON orders
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert own orders" ON orders
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Sellers can read own orders" ON orders
+  FOR SELECT USING (true);

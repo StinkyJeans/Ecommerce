@@ -253,7 +253,7 @@ export default function SellerRegisterPage() {
               <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
             </div>
             <input
-              type="tel"
+              type="number"
               placeholder="09123456789"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
