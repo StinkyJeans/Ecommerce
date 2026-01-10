@@ -23,6 +23,8 @@ import {
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 
+export const dynamic = 'force-dynamic';
+
 export default function EditProduct() {
   const [image, setImage] = useState(null);
   const [idPreview, setIdPreview] = useState(null);
