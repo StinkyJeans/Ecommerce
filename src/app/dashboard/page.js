@@ -284,7 +284,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                   {filteredProducts.map((product) => (
                     <div
-                      key={product._id}
+                      key={product.id || product._id || product.product_id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
                     >
                       <div className="relative h-56 overflow-hidden">
@@ -328,7 +328,7 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   {filteredProducts.map((product) => (
                     <div
-                      key={product._id}
+                      key={product.id || product._id || product.product_id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
                       <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">

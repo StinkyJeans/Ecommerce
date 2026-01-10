@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter } from "next/navigation";
@@ -39,7 +39,16 @@ export default function AddProduct() {
   const [showPopup, setShowPopup] = useState(false);
   const { edgestore } = useEdgeStore();
   const router = useRouter();
-  const { username } = useAuth();
+  const { username, role, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

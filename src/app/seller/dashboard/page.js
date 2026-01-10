@@ -37,10 +37,22 @@ export default function Dashboard() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
-  const { username, sellerUsername } = useAuth();
+  const { username, sellerUsername, role, loading: authLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
+
+  useEffect(() => {
+    if (!username || (role !== "seller" && role !== "admin")) {
+      return;
+    }
     const fetchProducts = async () => {
       try {
         const res = await fetch("/api/getProduct");

@@ -11,11 +11,22 @@ import Navbar from "../components/sellerNavbar";
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { username } = useAuth();
+  const { username, role, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!username) return;
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
+
+  useEffect(() => {
+    if (!username || (role !== "seller" && role !== "admin")) {
+      return;
+    }
 
     const fetchCart = async () => {
       try {

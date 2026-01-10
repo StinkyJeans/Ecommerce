@@ -32,16 +32,24 @@ export default function ViewProduct() {
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const { username } = useAuth();
+  const { username, role, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!username) {
-      router.push("/");
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
+
+  useEffect(() => {
+    if (!username || (role !== "seller" && role !== "admin")) {
       return;
     }
     fetchProducts();
-  }, [username, router]);
+  }, [username, role, router]);
 
   const fetchProducts = async () => {
     try {
