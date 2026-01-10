@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import {
   faArrowLeft,
   faTrash,
@@ -29,6 +30,8 @@ export default function ViewCart() {
   const [errorMessage, setErrorMessage] = useState("");
   const { username } = useAuth();
   const router = useRouter();
+
+  useLoadingFavicon(loading, "Shopping Cart");
 
   useEffect(() => {
     if (!username) {

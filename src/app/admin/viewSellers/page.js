@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -29,6 +30,8 @@ export default function AdminViewSellers() {
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [showIdModal, setShowIdModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+
+  useLoadingFavicon(authLoading || loading, "View Sellers");
 
   useEffect(() => {
     if (!authLoading) {
@@ -115,18 +118,7 @@ export default function AdminViewSellers() {
     setShowIdModal(true);
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading sellers...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (role !== "admin") {
+  if (role !== "admin" && !authLoading) {
     return null;
   }
 
@@ -147,21 +139,30 @@ export default function AdminViewSellers() {
       <AdminNavbar />
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
-                  View Sellers
-                </h1>
-                <p className="text-gray-600">Manage and view all registered sellers</p>
-              </div>
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200">
-                <FontAwesomeIcon icon={faStore} className="text-red-600" />
-                <span className="font-semibold text-gray-800">{sellers.length}</span>
-                <span className="text-gray-600">Sellers</span>
-              </div>
+        {authLoading || loading ? (
+          <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              <p className="text-gray-600 font-medium">Loading sellers...</p>
             </div>
+          </div>
+        ) : (
+          <>
+            <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+              <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
+                      View Sellers
+                    </h1>
+                    <p className="text-gray-600">Manage and view all registered sellers</p>
+                  </div>
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200">
+                    <FontAwesomeIcon icon={faStore} className="text-red-600" />
+                    <span className="font-semibold text-gray-800">{sellers.length}</span>
+                    <span className="text-gray-600">Sellers</span>
+                  </div>
+                </div>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <div className="relative flex-1">
@@ -300,6 +301,8 @@ export default function AdminViewSellers() {
             </div>
           )}
         </div>
+          </>
+        )}
       </main>
 
       {showIdModal && selectedSeller && (

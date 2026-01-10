@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import {
   faTrash,
   faEdit,
@@ -34,6 +35,13 @@ export default function ViewProduct() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const { username, role, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  useLoadingFavicon(authLoading || loading, "My Products");
+
+  const handleEdit = (product) => {
+    const productId = product.product_id || product.productId || product.id || product._id;
+    router.push(`/seller/editProduct?id=${productId}`);
+  };
 
   useEffect(() => {
     if (!authLoading) {
@@ -327,13 +335,19 @@ export default function ViewProduct() {
         </div>
 
         {viewModalOpen && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200"
+            onClick={closeModal}
+          >
+            <div 
+              className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[90%] sm:max-w-md md:max-w-lg transform transition-all duration-300 animate-in zoom-in-95 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="relative">
                 <img
                   src={selectedProduct.id_url}
                   alt={selectedProduct.product_name}
-                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
+                  className="w-full h-40 sm:h-56 md:h-64 object-cover rounded-t-xl sm:rounded-t-2xl"
                   style={{ objectPosition: 'center', minHeight: '100%', minWidth: '100%' }}
                 />
                 <button
@@ -355,41 +369,41 @@ export default function ViewProduct() {
                   </div>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 md:p-8">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-2xl">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 sm:p-4 md:p-5">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white drop-shadow-2xl line-clamp-2">
                     {selectedProduct.product_name}
                   </h2>
                 </div>
               </div>
 
-              <div className="p-6 sm:p-8">
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+              <div className="p-4 sm:p-5 md:p-6">
+                <div className="mb-4 sm:mb-5">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                     Description
                   </h3>
-                  <p className="text-gray-700 leading-relaxed text-base">
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                     {selectedProduct.description || "No description available"}
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 border border-red-100">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-2" />
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                         Price
                       </p>
-                      <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                      <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faCalendar} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                         Added On
                       </p>
-                      <p className="text-lg font-bold text-gray-800">
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-gray-800">
                         {new Date(selectedProduct.createdAt).toLocaleDateString(
                           "en-US",
                           {
@@ -403,20 +417,27 @@ export default function ViewProduct() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
+                  <button
+                    onClick={() => handleEdit(selectedProduct)}
+                    className="cursor-pointer flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2.5 sm:py-3 rounded-xl font-bold text-sm sm:text-base active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 touch-manipulation"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="text-lg sm:text-xl" />
+                    Edit Product
+                  </button>
                   <button
                     onClick={() => handleDelete(selectedProduct._id)}
                     disabled={removingId === selectedProduct._id}
-                    className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
+                    className="cursor-pointer flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2.5 sm:py-3 rounded-xl font-bold text-sm sm:text-base active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
                   >
                     {removingId === selectedProduct._id ? (
                       <>
-                        <FontAwesomeIcon icon={faSpinner} className="text-xl animate-spin" />
+                        <FontAwesomeIcon icon={faSpinner} className="text-lg sm:text-xl animate-spin" />
                         Deleting...
                       </>
                     ) : (
                       <>
-                        <FontAwesomeIcon icon={faTrash} className="text-xl" />
+                        <FontAwesomeIcon icon={faTrash} className="text-lg sm:text-xl" />
                         Delete Product
                       </>
                     )}

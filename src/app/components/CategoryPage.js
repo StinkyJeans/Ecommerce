@@ -6,6 +6,7 @@ import SearchBar from "./searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Header from "./header";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
@@ -37,6 +38,8 @@ export default function CategoryPage({
   const [viewMode, setViewMode] = useState("grid");
   const router = useRouter();
   const { username } = useAuth();
+
+  useLoadingFavicon(loading, categoryName);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -131,8 +134,8 @@ export default function CategoryPage({
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
             <div className="py-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <FontAwesomeIcon icon={categoryIcon} className="text-white text-3xl" />
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg overflow-visible">
+                  <FontAwesomeIcon icon={categoryIcon} className="text-white" style={{ fontSize: '3.5rem', width: '3.5rem', height: '3.5rem' }} />
                 </div>
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -145,12 +148,12 @@ export default function CategoryPage({
               </div>
             </div>
 
-            <div className="pb-4">
-              <div className="max-w-3xl mx-auto">
+            <div className="pb-4 flex justify-center">
+              <div className="w-full max-w-2xl">
                 <SearchBar
                   placeholder={`🔍 Search ${categoryName.toLowerCase()}...`}
                   onSearch={handleSearch}
-                  className="w-full"
+                  className="w-full mx-auto"
                 />
               </div>
             </div>
@@ -176,8 +179,8 @@ export default function CategoryPage({
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
-                <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FontAwesomeIcon icon={categoryIcon} className="text-5xl text-red-500" />
+                <div className="w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 overflow-visible">
+                  <FontAwesomeIcon icon={categoryIcon} className="text-red-500" style={{ fontSize: '4rem', width: '4rem', height: '4rem' }} />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   {products.length === 0
@@ -238,7 +241,7 @@ export default function CategoryPage({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
                   {filteredProducts.map((product) => (
                     <div
-                      key={product._id}
+                      key={product.id || product._id || product.product_id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
                     >
                       <div className="relative h-56 overflow-hidden">
@@ -288,7 +291,7 @@ export default function CategoryPage({
                 <div className="space-y-4">
                   {filteredProducts.map((product) => (
                     <div
-                      key={product._id}
+                      key={product.id || product._id || product.product_id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
                       <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
@@ -336,8 +339,14 @@ export default function CategoryPage({
         </div>
 
         {popupVisible && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200"
+            onClick={closePopup}
+          >
+            <div 
+              className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
@@ -368,18 +377,18 @@ export default function CategoryPage({
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100">
-                  <div className="flex items-center justify-between">
-                    <div>
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100 overflow-hidden">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
-                        Price
+                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
+                        <span className="whitespace-nowrap">Price</span>
                       </p>
-                      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                      <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
                       <FontAwesomeIcon icon={faShoppingBag} className="text-white text-lg sm:text-xl md:text-2xl" />
                     </div>
                   </div>

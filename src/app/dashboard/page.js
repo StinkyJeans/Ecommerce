@@ -6,6 +6,7 @@ import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/header";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faPlus, 
@@ -37,6 +38,8 @@ export default function Dashboard() {
   const router = useRouter();
   const { username } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  useLoadingFavicon(loading, "Dashboard");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -177,12 +180,12 @@ export default function Dashboard() {
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
             <Header />
             {!isScrolled && (
-              <div className="pb-4 pt-3">
-                <div className="max-w-3xl mx-auto">
+              <div className="pb-4 pt-3 flex justify-center">
+                <div className="w-full max-w-2xl">
                   <SearchBar
                     placeholder="Search products..."
                     onSearch={handleSearch}
-                    className="w-full"
+                    className="w-full mx-auto"
                   />
                 </div>
               </div>
@@ -191,12 +194,12 @@ export default function Dashboard() {
         </div>
         {isScrolled && (
           <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
-            <div className="px-4 sm:px-6 lg:px-8 py-3">
-              <div className="max-w-3xl mx-auto">
+            <div className="px-4 sm:px-6 lg:px-8 py-3 flex justify-center">
+              <div className="w-full max-w-2xl">
                 <SearchBar
                   placeholder="Search products..."
                   onSearch={handleSearch}
-                  className="w-full"
+                  className="w-full mx-auto"
                 />
               </div>
             </div>
@@ -374,8 +377,14 @@ export default function Dashboard() {
         </div>
 
         {popupVisible && selectedProduct && (
-          <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200"
+            onClick={closePopup}
+          >
+            <div 
+              className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="relative">
                 <img
                   src={selectedProduct.id_url}
@@ -441,31 +450,31 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-2 sm:mb-3">
-                    <div className="flex-1">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">
-                        <FontAwesomeIcon icon={faTag} className="mr-2 text-sm" />
-                        Unit Price
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100 overflow-hidden">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 md:gap-4 mb-2 sm:mb-3 min-w-0">
+                    <div className="flex-1 min-w-0 w-full sm:w-auto">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faTag} className="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
+                        <span className="whitespace-nowrap">Unit Price</span>
                       </p>
-                      <p className="text-xl sm:text-2xl font-bold text-gray-800">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words overflow-wrap-anywhere">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
-                    <div className="text-center px-2 sm:px-4">
+                    <div className="text-center px-2 sm:px-4 flex-shrink-0">
                       <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">
                         ×
                       </p>
-                      <p className="text-xl sm:text-2xl font-bold text-gray-800">
+                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
                         {quantity}
                       </p>
                     </div>
-                    <div className="text-left sm:text-right flex-1">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">
-                        <FontAwesomeIcon icon={faCalculator} className="mr-2" />
-                        Total
+                    <div className="text-left sm:text-right flex-1 min-w-0 w-full sm:w-auto">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center sm:justify-end">
+                        <FontAwesomeIcon icon={faCalculator} className="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
+                        <span className="whitespace-nowrap">Total</span>
                       </p>
-                      <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                      <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
                         ₱{calculateTotalPrice()}
                       </p>
                     </div>

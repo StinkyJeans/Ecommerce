@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUsers,
@@ -33,6 +34,8 @@ export default function AdminDashboard() {
   const [showIdModal, setShowIdModal] = useState(false);
   const [processingSeller, setProcessingSeller] = useState(null);
   const [message, setMessage] = useState({ text: "", type: "" });
+
+  useLoadingFavicon(authLoading || loading, "Admin Dashboard");
 
   useEffect(() => {
     if (!authLoading) {
@@ -107,18 +110,7 @@ export default function AdminDashboard() {
     setShowIdModal(true);
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (role !== "admin") {
+  if (role !== "admin" && !authLoading) {
     return null;
   }
 
@@ -138,14 +130,23 @@ export default function AdminDashboard() {
       <AdminNavbar />
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-3 sm:pb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-1 sm:mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600">Manage sellers, view statistics, and monitor website activity</p>
+        {authLoading || loading ? (
+          <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              <p className="text-gray-600 font-medium">Loading dashboard...</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+              <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-3 sm:pb-4">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-1 sm:mb-2">
+                  Admin Dashboard
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600">Manage sellers, view statistics, and monitor website activity</p>
+              </div>
+            </div>
 
         {message.text && (
           <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-4 z-50 px-4 py-3 rounded-lg shadow-lg max-w-sm sm:max-w-md mx-auto sm:mx-0 ${
@@ -377,6 +378,8 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+          </>
+        )}
       </main>
 
       {showIdModal && selectedSeller && (

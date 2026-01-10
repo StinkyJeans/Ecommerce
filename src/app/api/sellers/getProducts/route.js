@@ -39,7 +39,7 @@ export async function GET(request) {
       updatedAt: product.updated_at,
     }));
     
-    return NextResponse.json({ products: transformedProducts, count: transformedProducts.length });
+    return NextResponse.json({ success: true, products: transformedProducts, count: transformedProducts.length });
   } catch (err) {
     console.error("Failed to fetch products:", err);
     return NextResponse.json(
