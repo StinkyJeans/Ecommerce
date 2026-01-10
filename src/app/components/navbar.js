@@ -109,17 +109,6 @@ export default function Navbar() {
               <p className="text-sm text-gray-500 -mt-0.5">User Portal</p>
             </div>
           </div>
-                    <div
-            onClick={FeaturedProducts}
-            className="hidden md:flex items-center gap-3 p-6 border-b border-gray-200 cursor-pointer group hover:bg-gray-50 transition-colors"
-          >
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faStar} className="text-white text-lg" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-700">Featured Products</p>          
-            </div>
-          </div>
 
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
