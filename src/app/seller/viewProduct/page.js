@@ -4,7 +4,24 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faEdit,
+  faBoxes,
+  faPlusCircle,
+  faBoxOpen,
+  faSpinner,
+  faEye,
+  faTimes,
+  faCheckCircle,
+  faExclamationCircle,
+  faDesktop,
+  faMobileAlt,
+  faClock,
+  faTag,
+  faCalendar,
+  faAlignLeft
+} from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/seller/components/sellerNavbar";
 
 export default function ViewProduct() {
@@ -99,13 +116,13 @@ export default function ViewProduct() {
   const getCategoryIcon = (category) => {
     switch (category) {
       case "Pc":
-        return "fa-desktop";
+        return faDesktop;
       case "Mobile":
-        return "fa-mobile-alt";
+        return faMobileAlt;
       case "Watch":
-        return "fa-watch";
+        return faClock;
       default:
-        return "fa-box";
+        return faBoxOpen;
     }
   };
 
@@ -122,7 +139,7 @@ export default function ViewProduct() {
         {successMessage && (
           <div className="max-w-7xl mx-auto mb-4 animate-in slide-in-from-top-2 fade-in">
             <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
-              <i className="fas fa-check-circle text-green-600 text-lg sm:text-xl flex-shrink-0"></i>
+              <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-lg sm:text-xl flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-green-800 font-semibold text-sm sm:text-base break-words">{successMessage}</p>
               </div>
@@ -131,7 +148,7 @@ export default function ViewProduct() {
                 className="text-green-600 hover:text-green-800 flex-shrink-0 p-1 touch-manipulation"
                 aria-label="Close"
               >
-                <i className="fas fa-times text-sm sm:text-base"></i>
+                <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
               </button>
             </div>
           </div>
@@ -139,7 +156,7 @@ export default function ViewProduct() {
         {errorMessage && (
           <div className="max-w-7xl mx-auto mb-4 animate-in slide-in-from-top-2 fade-in">
             <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
-              <i className="fas fa-exclamation-circle text-red-600 text-lg sm:text-xl flex-shrink-0"></i>
+              <FontAwesomeIcon icon={faExclamationCircle} className="text-red-600 text-lg sm:text-xl flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-red-800 font-semibold text-sm sm:text-base break-words">{errorMessage}</p>
               </div>
@@ -148,7 +165,7 @@ export default function ViewProduct() {
                 className="text-red-600 hover:text-red-800 flex-shrink-0 p-1 touch-manipulation"
                 aria-label="Close"
               >
-                <i className="fas fa-times text-sm sm:text-base"></i>
+                <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
               </button>
             </div>
           </div>
@@ -157,7 +174,7 @@ export default function ViewProduct() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <i className="fas fa-boxes text-white text-xl sm:text-2xl"></i>
+                <FontAwesomeIcon icon={faBoxes} className="text-white text-xl sm:text-2xl" />
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -175,7 +192,7 @@ export default function ViewProduct() {
               onClick={() => router.push("/seller/addProduct")}
               className="cursor-pointer px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base touch-manipulation w-full sm:w-auto"
             >
-              <i className="fas fa-plus-circle"></i>
+              <FontAwesomeIcon icon={faPlusCircle} />
               <span className="hidden sm:inline">Add New Product</span>
               <span className="sm:hidden">Add Product</span>
             </button>
@@ -198,7 +215,7 @@ export default function ViewProduct() {
             <div className="flex flex-col items-center justify-center h-96">
               <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md text-center border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="fas fa-box-open text-5xl text-red-500"></i>
+                  <FontAwesomeIcon icon={faBoxOpen} className="text-5xl text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   No Products Yet
@@ -209,9 +226,9 @@ export default function ViewProduct() {
                 </p>
                 <button
                   onClick={() => router.push("/seller/addProduct")}
-                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl"
+                  className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
-                  <i className="fas fa-plus-circle mr-2"></i>
+                  <FontAwesomeIcon icon={faPlusCircle} />
                   Add Your First Product
                 </button>
               </div>
@@ -225,21 +242,21 @@ export default function ViewProduct() {
                     removingId === product._id ? "opacity-50 scale-95" : ""
                   }`}
                 >
-                  <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden">
                     <img
                       src={product.id_url}
                       alt={product.product_name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      style={{ minHeight: '100%', minWidth: '100%' }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                     <div className="absolute top-3 left-3">
                       <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-                        <i
-                          className={`fas ${getCategoryIcon(
-                            product.category
-                          )} text-red-600 text-sm`}
-                        ></i>
+                        <FontAwesomeIcon
+                          icon={getCategoryIcon(product.category)}
+                          className="text-red-600 text-sm"
+                        />
                         <span className="text-xs font-semibold text-gray-700">
                           {product.category}
                         </span>
@@ -253,7 +270,7 @@ export default function ViewProduct() {
                       title="Delete product"
                     >
                       {removingId === product._id ? (
-                        <i className="fas fa-spinner fa-spin text-red-600"></i>
+                        <FontAwesomeIcon icon={faSpinner} className="text-red-600 animate-spin" />
                       ) : (
                         <FontAwesomeIcon
                           icon={faTrash}
@@ -291,7 +308,7 @@ export default function ViewProduct() {
                       onClick={() => handleViewDetails(product)}
                       className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
                     >
-                      <i className="fas fa-eye"></i>
+                      <FontAwesomeIcon icon={faEye} />
                       View Details
                     </button>
                   </div>
@@ -309,21 +326,21 @@ export default function ViewProduct() {
                   src={selectedProduct.id_url}
                   alt={selectedProduct.product_name}
                   className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
+                  style={{ objectPosition: 'center', minHeight: '100%', minWidth: '100%' }}
                 />
                 <button
                   onClick={closeModal}
                   className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"
                 >
-                  <i className="fas fa-times text-lg sm:text-xl"></i>
+                  <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
                 </button>
 
                 <div className="absolute top-4 left-4">
                   <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-xl">
-                    <i
-                      className={`fas ${getCategoryIcon(
-                        selectedProduct.category
-                      )} text-red-600`}
-                    ></i>
+                    <FontAwesomeIcon
+                      icon={getCategoryIcon(selectedProduct.category)}
+                      className="text-red-600"
+                    />
                     <span className="font-semibold text-gray-800">
                       {selectedProduct.category}
                     </span>
@@ -339,8 +356,9 @@ export default function ViewProduct() {
 
               <div className="p-6 sm:p-8">
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <i className="fas fa-align-left mr-2"></i>Description
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+                    Description
                   </h3>
                   <p className="text-gray-700 leading-relaxed text-base">
                     {selectedProduct.description || "No description available"}
@@ -350,16 +368,18 @@ export default function ViewProduct() {
                 <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1 font-medium">
-                        <i className="fas fa-tag mr-2"></i>Price
+                      <p className="text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faTag} className="mr-2" />
+                        Price
                       </p>
                       <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 mb-1 font-medium">
-                        <i className="fas fa-calendar mr-2"></i>Added On
+                      <p className="text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+                        Added On
                       </p>
                       <p className="text-lg font-bold text-gray-800">
                         {new Date(selectedProduct.createdAt).toLocaleDateString(
@@ -383,7 +403,7 @@ export default function ViewProduct() {
                   >
                     {removingId === selectedProduct._id ? (
                       <>
-                        <i className="fas fa-spinner fa-spin text-xl"></i>
+                        <FontAwesomeIcon icon={faSpinner} className="text-xl animate-spin" />
                         Deleting...
                       </>
                     ) : (

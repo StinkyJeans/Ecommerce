@@ -61,11 +61,14 @@ export default function ViewCart() {
                 key={item._id}
                 className="bg-white shadow-lg rounded-xl p-5 hover:shadow-xl transition relative"
               >
-                <img
-                  src={item.idUrl}
-                  alt={item.productName}
-                  className="h-48 w-full object-cover rounded-lg mb-4"
-                />
+                <div className="relative h-48 w-full rounded-lg overflow-hidden mb-4">
+                  <img
+                    src={item.idUrl}
+                    alt={item.productName}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ minHeight: '100%', minWidth: '100%' }}
+                  />
+                </div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">
                   {item.productName}
                 </h2>

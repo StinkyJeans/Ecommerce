@@ -5,6 +5,27 @@ import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faImage,
+  faSyncAlt,
+  faCloudUploadAlt,
+  faCheckCircle,
+  faInfoCircle,
+  faEdit,
+  faTag,
+  faAlignLeft,
+  faDollarSign,
+  faFolder,
+  faPlusCircle,
+  faLightbulb,
+  faStar,
+  faTimes,
+  faDesktop,
+  faMobileAlt,
+  faClock
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function AddProduct() {
   const [image, setImage] = useState(null);
@@ -111,7 +132,7 @@ export default function AddProduct() {
         <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-2">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <i className="fas fa-plus text-white text-lg sm:text-xl"></i>
+              <FontAwesomeIcon icon={faPlus} className="text-white text-lg sm:text-xl" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
@@ -130,7 +151,7 @@ export default function AddProduct() {
         >
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
-              <i className="fas fa-image text-red-600"></i>
+              <FontAwesomeIcon icon={faImage} className="text-red-600" />
               <label className="text-gray-800 font-semibold text-lg">
                 Product Image
               </label>
@@ -145,19 +166,20 @@ export default function AddProduct() {
                   <img
                     src={idPreview}
                     alt="Product Preview"
-                    className="w-full h-full object-cover rounded-xl"
+                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                    style={{ minHeight: '100%', minWidth: '100%' }}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                      <i className="fas fa-sync-alt text-white text-4xl mb-2"></i>
-                      <p className="text-white font-semibold">Change Image</p>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center rounded-xl z-10">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                        <FontAwesomeIcon icon={faSyncAlt} className="text-white text-4xl mb-2" />
+                        <p className="text-white font-semibold">Change Image</p>
+                      </div>
                     </div>
-                  </div>
                 </>
               ) : (
                 <div className="text-center p-8">
                   <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="fas fa-cloud-upload-alt text-4xl text-red-600"></i>
+                    <FontAwesomeIcon icon={faCloudUploadAlt} className="text-4xl text-red-600" />
                   </div>
                   <p className="text-gray-700 font-semibold mb-2 text-lg">
                     Upload Product Image
@@ -166,7 +188,7 @@ export default function AddProduct() {
                     Click to browse or drag and drop
                   </p>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-                    <i className="fas fa-check-circle text-green-500"></i>
+                    <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
                     <span>JPG, PNG, GIF supported</span>
                   </div>
                 </div>
@@ -183,14 +205,14 @@ export default function AddProduct() {
             />
 
             <p className="mt-4 text-xs text-gray-500 flex items-center gap-2">
-              <i className="fas fa-info-circle text-blue-500"></i>
+              <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500" />
               Recommended: High-quality images with 1:1 aspect ratio
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-6">
-              <i className="fas fa-edit text-red-600"></i>
+              <FontAwesomeIcon icon={faEdit} className="text-red-600" />
               <h2 className="text-gray-800 font-semibold text-lg">
                 Product Details
               </h2>
@@ -199,7 +221,7 @@ export default function AddProduct() {
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <i className="fas fa-tag mr-2 text-gray-400"></i>
+                  <FontAwesomeIcon icon={faTag} className="mr-2 text-gray-400" />
                   Product Name
                 </label>
                 <input
@@ -214,7 +236,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <i className="fas fa-align-left mr-2 text-gray-400"></i>
+                  <FontAwesomeIcon icon={faAlignLeft} className="mr-2 text-gray-400" />
                   Description
                 </label>
                 <textarea
@@ -231,7 +253,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <i className="fas fa-dollar-sign mr-2 text-gray-400"></i>
+                  <FontAwesomeIcon icon={faDollarSign} className="mr-2 text-gray-400" />
                   Price
                 </label>
                 <div className="relative">
@@ -253,7 +275,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <i className="fas fa-folder mr-2 text-gray-400"></i>
+                  <FontAwesomeIcon icon={faFolder} className="mr-2 text-gray-400" />
                   Category
                 </label>
                 <select
@@ -290,7 +312,7 @@ export default function AddProduct() {
                   </>
                 ) : (
                   <>
-                    <i className="fas fa-plus-circle"></i>
+                    <FontAwesomeIcon icon={faPlusCircle} />
                     <span>Add Product</span>
                   </>
                 )}
@@ -302,7 +324,7 @@ export default function AddProduct() {
         <div className="max-w-6xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <i className="fas fa-lightbulb text-blue-600 text-xl mt-1"></i>
+              <FontAwesomeIcon icon={faLightbulb} className="text-blue-600 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 text-sm mb-1">
                   Pro Tip
@@ -316,7 +338,7 @@ export default function AddProduct() {
 
           <div className="bg-green-50 border border-green-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <i className="fas fa-check-circle text-green-600 text-xl mt-1"></i>
+              <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 text-sm mb-1">
                   Best Practice
@@ -330,7 +352,7 @@ export default function AddProduct() {
 
           <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <i className="fas fa-star text-purple-600 text-xl mt-1"></i>
+              <FontAwesomeIcon icon={faStar} className="text-purple-600 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 text-sm mb-1">
                   Pricing Tip
@@ -346,7 +368,7 @@ export default function AddProduct() {
 
       {showPopup && (
         <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3">
-          <i className="fas fa-check-circle text-2xl"></i>
+          <FontAwesomeIcon icon={faCheckCircle} className="text-2xl" />
           <div>
             <p className="font-semibold">{popupMessage}</p>
             <p className="text-xs text-green-100 mt-1">

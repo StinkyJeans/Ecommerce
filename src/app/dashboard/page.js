@@ -287,11 +287,12 @@ export default function Dashboard() {
                       key={product._id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
                     >
-                      <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                      <div className="relative h-56 overflow-hidden">
                         <img
                           src={product.id_url}
                           alt={product.product_name}
-                          className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          style={{ minHeight: '100%', minWidth: '100%' }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -330,11 +331,12 @@ export default function Dashboard() {
                       key={product._id}
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
-                      <div className="relative w-full sm:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex-shrink-0">
+                      <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
                         <img
                           src={product.id_url}
                           alt={product.product_name}
-                          className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          style={{ minHeight: '100%', minWidth: '100%' }}
                         />
                       </div>
                       <div className="flex-1 p-6 flex flex-col justify-between">

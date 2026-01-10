@@ -258,11 +258,12 @@ export default function ViewCart() {
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
-                      <div className="relative w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group">
+                      <div className="relative w-full sm:w-32 h-48 sm:h-32 flex-shrink-0 rounded-xl overflow-hidden group">
                         <img
                           src={item.id_url || item.idUrl}
                           alt={item.product_name || item.productName}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          style={{ minHeight: '100%', minWidth: '100%' }}
                         />
                       </div>
 
