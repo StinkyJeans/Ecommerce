@@ -14,7 +14,8 @@ import {
   faGripHorizontal, 
   faChevronRight, 
   faUser, 
-  faEllipsisV 
+  faEllipsisV,
+  faChartLine
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
@@ -29,6 +30,13 @@ export default function Navbar() {
   const FeaturedProducts = () => router.push("/dashboard");
 
   const menuItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: faChartLine,
+      path: "/dashboard",
+      action: dashboard,
+    },
     {
       id: "categoryPC",
       label: "Computers",
@@ -83,8 +91,8 @@ export default function Navbar() {
       </div>
 
       <aside
-        className={`fixed md:sticky top-0 right-0 md:right-auto h-screen bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out z-50 shadow-xl md:shadow-none
-        ${open ? "translate-x-0" : "translate-x-full"} md:translate-x-0 w-72 md:w-72`}
+        className={`fixed md:sticky top-0 left-0 md:left-auto h-screen bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out z-50 shadow-xl md:shadow-none
+        ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 w-72 md:w-72`}
       >
         <div className="flex flex-col h-full">
           <div

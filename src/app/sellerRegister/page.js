@@ -125,7 +125,7 @@ export default function SellerRegisterPage() {
 
       <form
         onSubmit={handleRegister}
-        className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl max-w-5xl w-full overflow-y-auto max-h-[95vh] sm:max-h-auto"
+        className="relative bg-white p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-2xl max-w-4xl w-full overflow-y-auto max-h-[95vh] sm:max-h-auto"
       >
 
         {loading && (
@@ -137,19 +137,19 @@ export default function SellerRegisterPage() {
           </div>
         )}
 
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <FontAwesomeIcon icon={faStore} className="text-white text-2xl" />
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-3 shadow-lg">
+            <FontAwesomeIcon icon={faStore} className="text-white text-xl" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
             Become a Seller
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-xs sm:text-sm">
             Start selling on  totallynormalstore today
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
 
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -157,7 +157,7 @@ export default function SellerRegisterPage() {
               Upload Valid ID
             </label>
             <div
-              className="w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden touch-manipulation"
+              className="w-full h-40 sm:h-52 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden touch-manipulation"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (
@@ -165,12 +165,13 @@ export default function SellerRegisterPage() {
                   <img
                     src={idPreview}
                     alt="ID Preview"
-                    className="w-full h-full object-cover rounded-xl"
+                    className="absolute inset-0 w-full h-full object-cover rounded-xl z-0"
+                    style={{ minHeight: '100%', minWidth: '100%' }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <FontAwesomeIcon icon={faSyncAlt} className="text-white text-3xl" />
-                      <p className="text-white font-medium mt-2">Change Image</p>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center rounded-xl z-10">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                      <FontAwesomeIcon icon={faSyncAlt} className="text-white text-3xl mb-2" />
+                      <p className="text-white font-medium">Change Image</p>
                     </div>
                   </div>
                 </>
@@ -200,7 +201,7 @@ export default function SellerRegisterPage() {
             </p>
           </div>
 
-          <div className="flex-1 space-y-5">
+          <div className="flex-1 space-y-4">
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

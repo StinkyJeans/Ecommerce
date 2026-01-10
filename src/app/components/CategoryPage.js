@@ -337,12 +337,12 @@ export default function CategoryPage({
 
         {popupVisible && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.idUrl}
                   alt={selectedProduct.productName}
-                  className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
+                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
                 />
                 <button
                   onClick={closePopup}
@@ -350,37 +350,37 @@ export default function CategoryPage({
                 >
                   <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 md:p-8">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-2xl">
                     {selectedProduct.productName}
                   </h2>
                 </div>
               </div>
 
-              <div className="p-6 sm:p-8">
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+              <div className="p-4 sm:p-6 md:p-8">
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                     Description
                   </h3>
-                  <p className="text-gray-700 leading-relaxed text-base">
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                     {selectedProduct.description || "No description available"}
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1 font-medium">
-                        <FontAwesomeIcon icon={faTag} className="mr-2" />
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
+                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                         Price
                       </p>
-                      <p className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                         ₱{selectedProduct.price}
                       </p>
                     </div>
-                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-                      <FontAwesomeIcon icon={faShoppingBag} className="text-white text-2xl" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                      <FontAwesomeIcon icon={faShoppingBag} className="text-white text-lg sm:text-xl md:text-2xl" />
                     </div>
                   </div>
                 </div>
@@ -388,9 +388,9 @@ export default function CategoryPage({
                 <button
                   onClick={handleAddToCart}
                   disabled={cartMessage !== ""}
-                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
+                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-2.5 sm:py-3 md:py-4 rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-sm sm:text-base md:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
                 >
-                  <FontAwesomeIcon icon={faCartPlus} className="text-lg sm:text-xl" />
+                  <FontAwesomeIcon icon={faCartPlus} className="text-base sm:text-lg md:text-xl" />
                   Add to Cart
                 </button>
 

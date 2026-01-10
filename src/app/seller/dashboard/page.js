@@ -176,7 +176,7 @@ export default function Dashboard() {
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
         <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-4">
+          <div className="px-4 sm:px-5 lg:px-6 pt-3 sm:pt-4">
             <Header />
             {!isScrolled && (
               <div className="pb-4 pt-3">
@@ -193,7 +193,7 @@ export default function Dashboard() {
         </div>
         {isScrolled && (
           <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
-            <div className="px-4 sm:px-6 lg:px-8 py-3">
+            <div className="px-4 sm:px-5 lg:px-6 py-2.5">
               <div className="max-w-3xl mx-auto">
                 <SearchBar
                   placeholder="Search products..."
@@ -205,7 +205,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex-1 overflow-auto px-4 sm:px-5 lg:px-6 py-5 sm:py-6">
           {loading ? (
             <div className="flex justify-center items-center h-96">
               <div className="text-center">
@@ -219,7 +219,7 @@ export default function Dashboard() {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 text-center">
-              <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
+              <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-10 max-w-md border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <FontAwesomeIcon icon={faSearch} className="text-5xl text-red-500" />
                 </div>
@@ -274,7 +274,7 @@ export default function Dashboard() {
               </div>
 
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                   {filteredProducts.map((product) => (
                     <div
                       key={product._id}
@@ -332,7 +332,7 @@ export default function Dashboard() {
                           style={{ minHeight: '100%', minWidth: '100%' }}
                         />
                       </div>
-                      <div className="flex-1 p-6 flex flex-col justify-between">
+                      <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between">
                         <div>
                           <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
                             {product.product_name}

@@ -375,12 +375,12 @@ export default function Dashboard() {
 
         {popupVisible && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-md md:max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.id_url}
                   alt={selectedProduct.product_name}
-                  className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
+                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
                 />
                 <button
                   onClick={closePopup}
@@ -388,27 +388,27 @@ export default function Dashboard() {
                 >
                   <FontAwesomeIcon icon={faTimes} className="text-xl" />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 md:p-8">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-2xl">
                     {selectedProduct.product_name}
                   </h2>
                 </div>
               </div>
 
-              <div className="p-6 sm:p-8">
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+              <div className="p-4 sm:p-6 md:p-8">
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                     Description
                   </h3>
-                  <p className="text-gray-700 leading-relaxed text-base">
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                     {selectedProduct.description || "No description available"}
                   </p>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center">
+                    <FontAwesomeIcon icon={faShoppingCart} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
                     Quantity
                   </h3>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -441,8 +441,8 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-6 mb-6 border border-red-100">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-3">
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-2 sm:mb-3">
                     <div className="flex-1">
                       <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">
                         <FontAwesomeIcon icon={faTag} className="mr-2" />

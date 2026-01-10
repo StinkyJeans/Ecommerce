@@ -128,17 +128,17 @@ export default function AddProduct() {
 
       <Navbar />
 
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 mt-16 md:mt-0 overflow-auto relative">
-        <div className="max-w-6xl mx-auto mb-6 sm:mb-8">
-          <div className="flex items-center gap-3 sm:gap-4 mb-2">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <FontAwesomeIcon icon={faPlus} className="text-white text-lg sm:text-xl" />
+      <div className="flex-1 p-4 sm:p-5 lg:p-6 mt-16 md:mt-0 overflow-auto relative">
+        <div className="max-w-5xl mx-auto mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <FontAwesomeIcon icon={faPlus} className="text-white text-lg" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Add New Product
               </h1>
-              <p className="text-gray-600 text-xs sm:text-sm mt-1">
+              <p className="text-gray-600 text-xs sm:text-sm mt-0.5">
                 Fill in the details to add a product to your inventory
               </p>
             </div>
@@ -147,18 +147,18 @@ export default function AddProduct() {
 
         <form
           onSubmit={handleSubmit}
-          className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
+          className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6"
         >
-          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 border border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
               <FontAwesomeIcon icon={faImage} className="text-red-600" />
-              <label className="text-gray-800 font-semibold text-lg">
+              <label className="text-gray-800 font-semibold text-base">
                 Product Image
               </label>
             </div>
 
             <div
-              className="relative w-full h-64 sm:h-80 md:h-96 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all overflow-hidden group touch-manipulation"
+              className="relative w-full h-56 sm:h-64 md:h-72 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all overflow-hidden group touch-manipulation"
               onClick={() => document.getElementById("idFileInput").click()}
             >
               {idPreview ? (
@@ -210,15 +210,15 @@ export default function AddProduct() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-            <div className="flex items-center gap-2 mb-6">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 border border-gray-100">
+            <div className="flex items-center gap-2 mb-4">
               <FontAwesomeIcon icon={faEdit} className="text-red-600" />
-              <h2 className="text-gray-800 font-semibold text-lg">
+              <h2 className="text-gray-800 font-semibold text-base">
                 Product Details
               </h2>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FontAwesomeIcon icon={faTag} className="mr-2 text-gray-400" />
@@ -321,7 +321,7 @@ export default function AddProduct() {
           </div>
         </form>
 
-        <div className="max-w-6xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="max-w-5xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <FontAwesomeIcon icon={faLightbulb} className="text-blue-600 text-xl mt-1" />

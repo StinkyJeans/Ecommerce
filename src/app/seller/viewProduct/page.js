@@ -135,7 +135,7 @@ export default function ViewProduct() {
 
       <Navbar />
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto mt-16 md:mt-0 relative">
+      <main className="flex-1 p-4 sm:p-5 lg:p-6 overflow-auto mt-16 md:mt-0 relative">
         {successMessage && (
           <div className="max-w-7xl mx-auto mb-4 animate-in slide-in-from-top-2 fade-in">
             <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
@@ -170,17 +170,17 @@ export default function ViewProduct() {
             </div>
           </div>
         )}
-        <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <FontAwesomeIcon icon={faBoxes} className="text-white text-xl sm:text-2xl" />
+        <div className="max-w-6xl mx-auto mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <FontAwesomeIcon icon={faBoxes} className="text-white text-lg sm:text-xl" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                   My Products
                 </h1>
-                <p className="text-gray-600 text-xs sm:text-sm mt-1">
+                <p className="text-gray-600 text-xs sm:text-sm mt-0.5">
                   {products.length}{" "}
                   {products.length === 1 ? "product" : "products"} in your
                   inventory
@@ -199,7 +199,7 @@ export default function ViewProduct() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96">
               <div className="relative mb-6">
@@ -234,7 +234,7 @@ export default function ViewProduct() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {products.map((product) => (
                 <div
                   key={product._id}
@@ -320,12 +320,12 @@ export default function ViewProduct() {
 
         {viewModalOpen && selectedProduct && (
           <div className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
               <div className="relative">
                 <img
                   src={selectedProduct.id_url}
                   alt={selectedProduct.product_name}
-                  className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
+                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
                   style={{ objectPosition: 'center', minHeight: '100%', minWidth: '100%' }}
                 />
                 <button
@@ -335,20 +335,20 @@ export default function ViewProduct() {
                   <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
                 </button>
 
-                <div className="absolute top-4 left-4">
-                  <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-xl">
+                <div className="absolute top-2 left-2 sm:top-4 sm:left-4">
+                  <div className="bg-white/95 backdrop-blur-sm px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-xl">
                     <FontAwesomeIcon
                       icon={getCategoryIcon(selectedProduct.category)}
-                      className="text-red-600"
+                      className="text-red-600 text-xs sm:text-sm"
                     />
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-semibold text-gray-800 text-xs sm:text-sm">
                       {selectedProduct.category}
                     </span>
                   </div>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 md:p-8">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-2xl">
                     {selectedProduct.product_name}
                   </h2>
                 </div>
