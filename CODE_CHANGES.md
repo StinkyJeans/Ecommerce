@@ -3448,26 +3448,30 @@ ORDER BY created_at;
 1. `src/lib/supabase.js` - Admin client
 2. `src/lib/supabase/server.js` - Server-side client
 3. `src/lib/supabase/client.js` - Client-side browser client
-4. `supabase/schema.sql` - Database schema
-5. `supabase/reset.sql` - Database reset script
-6. `supabase/fix-rls-policy.sql` - RLS policy fix
-7. `src/app/admin/dashboard/page.js` - Admin dashboard
-8. `src/app/admin/viewUsers/page.js` - User management page
-9. `src/app/admin/viewSellers/page.js` - Seller management page
-10. `src/app/admin/components/adminNavbar.js` - Admin navigation
-11. `src/app/api/admin/statistics/route.js` - Statistics API
-12. `src/app/api/admin/pendingSellers/route.js` - Pending sellers API
-13. `src/app/api/admin/approveSeller/route.js` - Approve/reject seller API
-14. `src/app/api/admin/users/route.js` - Users API
-15. `src/app/api/admin/sellers/route.js` - Sellers API
-16. `src/app/api/trackVisit/route.js` - Visit tracking API
-17. `src/app/components/VisitTracker.js` - Visit tracking component
-18. `supabase/add-seller-status-column.sql` - Seller status migration
-19. `supabase/add-website-visits-table.sql` - Website visits table migration
-20. `scripts/create-admin.js` - Admin account creation script
-21. `scripts/clear-database.js` - Database clearing script
-22. `ADMIN_ACCOUNT_SETUP.md` - Admin setup documentation
-23. `CLEAR_DATABASE_GUIDE.md` - Database clearing guide
+4. `src/lib/formatPrice.js` - Price formatting utility
+5. `src/app/hooks/useLoadingFavicon.js` - Browser tab loading indicator hook
+6. `supabase/schema.sql` - Database schema
+7. `supabase/reset.sql` - Database reset script
+8. `supabase/fix-rls-policy.sql` - RLS policy fix
+9. `src/app/admin/dashboard/page.js` - Admin dashboard
+10. `src/app/admin/viewUsers/page.js` - User management page
+11. `src/app/admin/viewSellers/page.js` - Seller management page
+12. `src/app/admin/components/adminNavbar.js` - Admin navigation
+13. `src/app/api/admin/statistics/route.js` - Statistics API
+14. `src/app/api/admin/pendingSellers/route.js` - Pending sellers API
+15. `src/app/api/admin/approveSeller/route.js` - Approve/reject seller API
+16. `src/app/api/admin/users/route.js` - Users API
+17. `src/app/api/admin/sellers/route.js` - Sellers API
+18. `src/app/api/trackVisit/route.js` - Visit tracking API
+19. `src/app/components/VisitTracker.js` - Visit tracking component
+20. `src/app/api/sellers/updateProduct/route.js` - Product update API
+21. `src/app/seller/editProduct/page.js` - Product editing page
+22. `supabase/add-seller-status-column.sql` - Seller status migration
+23. `supabase/add-website-visits-table.sql` - Website visits table migration
+24. `scripts/create-admin.js` - Admin account creation script
+25. `scripts/clear-database.js` - Database clearing script
+26. `ADMIN_ACCOUNT_SETUP.md` - Admin setup documentation
+27. `CLEAR_DATABASE_GUIDE.md` - Database clearing guide
 
 ### Files Modified
 1. `src/app/api/login/route.js` - Username-based login, seller approval blocking
@@ -3492,14 +3496,24 @@ ORDER BY created_at;
 20. `src/app/admin/viewSellers/page.js` - Seller management page
 21. `src/app/admin/components/adminNavbar.js` - Admin navigation
 22. `src/app/admin/page.js` - Route protection and redirect logic
-23. `src/app/seller/addProduct/page.js` - Font Awesome icons, compact layout, route protection
-24. `src/app/seller/viewProduct/page.js` - Font Awesome icons, compact layout, image fixes, route protection
-25. `src/app/seller/sellerCart/page.js` - Image coverage fixes, route protection
+23. `src/app/seller/addProduct/page.js` - Font Awesome icons, compact layout, route protection, loading favicon
+24. `src/app/seller/viewProduct/page.js` - Font Awesome icons, compact layout, image fixes, route protection, price formatting, click-outside-to-close, button alignment
+25. `src/app/seller/sellerCart/page.js` - Image coverage fixes, route protection, price formatting
+26. `src/app/seller/editProduct/page.js` - Loading state fix, Suspense boundary for useSearchParams, loading favicon, price formatting
+27. `src/app/page.js` - Seller approval popup messages, icon sizing, loading favicon
+28. `src/app/register/page.js` - Icon sizing, loading favicon
+29. `src/app/sellerRegister/page.js` - Approval process messages, image preview fix, icon sizing, loading favicon
+30. `src/app/admin/page.js` - Route protection and redirect logic, loading favicon
+31. `src/app/dashboard/page.js` - Field name compatibility, responsive modals, React key prop fix, icon sizing, price formatting, click-outside-to-close, button alignment
+32. `src/app/components/CategoryPage.js` - Field name compatibility, responsive modals, icon sizing, price formatting, click-outside-to-close, button alignment
+33. `src/app/cart/viewCart/page.js` - UUID support (14 changes), image coverage fixes, icon sizing, price formatting
 
 ### Functions Created/Modified
 - `createSupabaseAdminClient()` - Admin operations
 - `createClient()` (server) - Server-side Supabase client
 - `createClient()` (client) - Browser Supabase client
+- `formatPrice()` - Price formatting with comma separators
+- `useLoadingFavicon()` - Browser tab loading spinner hook
 - `fetchUserData()` - User data lookup
 - Field transformation functions in API routes
 - Auto-confirmation logic in registration routes
@@ -3510,14 +3524,21 @@ ORDER BY created_at;
 - `createAdmin()` - Admin account creation function
 - Seller approval workflow functions
 - Visit statistics aggregation functions
+- `handleEdit()` - Product editing handler
+- `closePopup()` / `closeModal()` - Modal close handlers with click-outside support
 
 ---
 
-**Version**: 2.2  
-**Last Updated**: December 2024  
-**Total Code Changes**: 110+ files modified/created
+**Version**: 2.3  
+**Last Updated**: January 2025  
+**Total Code Changes**: 120+ files modified/created
 
 ### Latest Updates
+- **Price Formatting**: Implemented automatic comma formatting for prices (e.g., 1234567 → 1,234,567)
+- **Modal Click-Outside-to-Close**: Added ability to close product viewing modals by clicking outside the container
+- **View Details Button Alignment**: Fixed button alignment so all "View Details" buttons align at the bottom of product cards
+- **Edit Product Loading State**: Fixed loading state to appear in content area while navbar remains visible
+- **Loading Favicon System**: Implemented browser tab loading spinner across all pages (standard website behavior)
 - **Icon Sizing Fix**: Fixed FontAwesome icon overflow during page load/refresh with global CSS constraints, explicit size classes, and inline styles
 - **Route Protection**: Implemented role-based access control for all seller and admin pages
 - **Security Enhancement**: Unauthorized users are redirected when accessing protected routes
