@@ -177,7 +177,7 @@ export default function ViewCart() {
                 onClick={() => setErrorMessage("")}
                 className="text-red-600 hover:text-red-800"
               >
-                <FontAwesomeIcon icon={faTimes} />
+                <FontAwesomeIcon icon={faTimes} className="text-base" />
               </button>
             </div>
           </div>

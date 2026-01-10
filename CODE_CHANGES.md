@@ -12,7 +12,8 @@ Complete record of all code changes made during the MongoDB to Supabase migratio
 6. [Database Schema](#database-schema)
 7. [Admin Dashboard System](#admin-dashboard-system)
 8. [UI/UX Improvements](#uiux-improvements)
-9. [Code Cleanup - Comment Removal](#code-cleanup---comment-removal)
+9. [Route Protection](#route-protection)
+10. [Code Cleanup - Comment Removal](#code-cleanup---comment-removal)
 
 ---
 
@@ -2714,6 +2715,497 @@ const menuItems = [
 
 ---
 
+### 7. Icon Sizing Fix
+
+#### Fixed Icon Overflow During Page Load/Refresh
+
+**Files Modified**:
+- `src/app/globals.css`
+- `src/app/layout.js`
+- `src/app/page.js`
+- `src/app/register/page.js`
+- `src/app/sellerRegister/page.js`
+- `src/app/dashboard/page.js`
+- `src/app/seller/dashboard/page.js`
+- `src/app/components/CategoryPage.js`
+- `src/app/cart/viewCart/page.js`
+
+**Problem**:
+- FontAwesome icons were appearing oversized or out of bounds when pages load or refresh
+- Icons would flash at their natural size before CSS loaded, causing layout shifts
+- Some icons lacked explicit size constraints, allowing them to render at default/uncontrolled sizes
+- This created a poor user experience with icons breaking layouts during initial page render
+
+**Root Cause**:
+- SVG icons (FontAwesome renders as SVG) don't have inherent size constraints
+- During initial render, before CSS fully loads, icons render at their natural SVG dimensions
+- FontAwesome's auto-injected CSS can conflict with custom styles
+- Missing explicit size classes on many icons allowed uncontrolled sizing
+
+**Solution**:
+
+**1. Global CSS Constraints** (`src/app/globals.css`):
+
+**Code Added**:
+```css
+svg {
+  display: inline-block !important;
+  vertical-align: middle;
+  max-width: 100% !important;
+  height: auto;
+  flex-shrink: 0;
+  box-sizing: content-box !important;
+  width: auto !important;
+}
+
+svg[data-icon] {
+  width: 1em !important;
+  height: 1em !important;
+  overflow: visible;
+  max-width: 100% !important;
+  max-height: 1em !important;
+}
+
+.svg-inline--fa {
+  display: inline-block !important;
+  font-size: inherit !important;
+  height: 1em !important;
+  overflow: visible;
+  vertical-align: -0.125em;
+  width: 1em !important;
+  max-width: 100% !important;
+  max-height: 1em !important;
+  box-sizing: border-box !important;
+}
+
+.fa, .fas, .far, .fal, .fab {
+  display: inline-block;
+  font-size: inherit;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+[class*="fa-"] {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+```
+
+**Detailed Explanation**:
+- **`svg` rules**: Constrains all SVG elements with `max-width: 100%` and proper box-sizing
+- **`svg[data-icon]` rules**: FontAwesome icons have `data-icon` attribute - this targets them specifically with `!important` to override any conflicting styles
+- **`.svg-inline--fa` rules**: FontAwesome's inline SVG class - enforces 1em sizing with `!important` flags
+- **`!important` flags**: Ensures these rules take precedence over FontAwesome's auto-injected CSS
+- **`1em` sizing**: Icons scale with their parent's font size (responsive and consistent)
+- **`max-width/max-height`**: Prevents icons from exceeding container boundaries
+- **Why needed**: Provides global constraints that apply immediately, even during initial render
+
+**Function**: Ensures all SVG icons are properly constrained globally, preventing overflow during page load
+
+---
+
+**2. FontAwesome Configuration** (`src/app/layout.js`):
+
+**Code Added**:
+```javascript
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
+config.autoAddCss = false;
+```
+
+**Detailed Explanation**:
+- **`config.autoAddCss = false`**: Prevents FontAwesome from automatically injecting CSS
+- **Why needed**: 
+  - FontAwesome's auto-injected CSS can conflict with our custom constraints
+  - Manual import gives us control over when and how styles are applied
+  - Prevents style conflicts during initial render
+- **`import "@fortawesome/fontawesome-svg-core/styles.css"`**: Manually imports FontAwesome styles for better control
+- **Result**: We have full control over icon styling without conflicts
+
+**Function**: Prevents FontAwesome CSS conflicts and gives us full control over icon styling
+
+---
+
+**3. Explicit Size Classes on Icons**:
+
+**Files Modified**:
+- `src/app/page.js` (Login page)
+- `src/app/register/page.js`
+- `src/app/sellerRegister/page.js`
+- `src/app/dashboard/page.js`
+- `src/app/seller/dashboard/page.js`
+- `src/app/components/CategoryPage.js`
+- `src/app/cart/viewCart/page.js`
+
+**Code Added**:
+```javascript
+// Login button icon
+<FontAwesomeIcon icon={faSignInAlt} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
+
+// Register button icon
+<FontAwesomeIcon icon={faUserPlus} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
+
+// Input field icons
+<FontAwesomeIcon icon={faUser} className="text-gray-400 text-sm" />
+<FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
+<FontAwesomeIcon icon={faEye} className="text-sm" />
+
+// Dashboard icons
+<FontAwesomeIcon icon={faMinus} className="text-base" />
+<FontAwesomeIcon icon={faPlus} className="text-base" />
+<FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
+<FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
+<FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
+<FontAwesomeIcon icon={faCheckCircle} className="mr-1 text-sm" />
+<FontAwesomeIcon icon={faTag} className="mr-2 text-sm" />
+```
+
+**Detailed Explanation**:
+- **Size classes**: Added explicit Tailwind text size classes (`text-sm`, `text-base`, `text-lg`)
+  - `text-sm`: Small icons (12px-14px)
+  - `text-base`: Base size icons (16px)
+  - `text-lg`: Large icons (18px)
+  - Responsive: `text-base sm:text-lg` adapts to screen size
+- **Inline styles**: Added `style={{ width: '1em', height: '1em', maxWidth: '100%' }}` to critical icons
+  - Provides immediate constraint before CSS loads
+  - `1em` ensures icons scale with font size
+  - `maxWidth: '100%'` prevents overflow
+- **Why needed**: 
+  - Explicit sizing prevents icons from rendering at uncontrolled sizes
+  - Inline styles provide immediate constraint (no waiting for CSS)
+  - Size classes ensure consistent sizing across the app
+- **Pattern**: 
+  - Button icons: `text-base sm:text-lg` (responsive)
+  - Input icons: `text-sm` (small, unobtrusive)
+  - Action icons: `text-base` (standard size)
+  - Large icons: `text-lg` or `text-xl` (for emphasis)
+
+**Function**: Provides explicit size constraints on individual icons, preventing uncontrolled rendering
+
+---
+
+**4. Comprehensive Icon Updates**:
+
+**Icons Fixed Across Project**:
+- Login page: `faSignInAlt`, `faUser`, `faLock`, `faEye`, `faEyeSlash`
+- Register page: `faUserPlus`, `faUser`, `faEnvelope`, `faLock`, `faEye`, `faEyeSlash`
+- Seller register: `faUser`, `faLock`, `faEye`, `faEyeSlash`
+- Dashboard: `faTh`, `faList`, `faEye`, `faMinus`, `faPlus`, `faCheckCircle`, `faTag`
+- Seller dashboard: `faTh`, `faList`, `faEye`, `faMinus`, `faPlus`, `faCheckCircle`, `faTag`, `faAlignLeft`
+- Category page: `faTh`, `faList`, `faEye`
+- Cart page: `faTimes`
+
+**Total Icons Updated**: 30+ icons across 8+ files
+
+**Function**: Ensures all icons have proper size constraints throughout the application
+
+---
+
+**How the Solution Works**:
+
+1. **Global CSS (First Line of Defense)**:
+   - CSS rules with `!important` apply immediately when stylesheet loads
+   - Constrains all SVG elements globally
+   - Prevents icons from exceeding container boundaries
+
+2. **FontAwesome Configuration (Prevents Conflicts)**:
+   - Disables auto-injected CSS that could conflict
+   - Gives us full control over styling
+
+3. **Explicit Size Classes (Component Level)**:
+   - Tailwind classes provide responsive sizing
+   - Icons scale appropriately for their context
+   - Consistent sizing across similar use cases
+
+4. **Inline Styles (Immediate Constraint)**:
+   - Applied directly to DOM elements
+   - No waiting for CSS to load
+   - Prevents flash of unstyled content (FOUC)
+
+**Result**:
+- Icons maintain proper size during page load
+- No layout shifts or overflow issues
+- Consistent sizing across all pages
+- Responsive behavior maintained
+- Better user experience with smooth page loads
+
+**Function**: Comprehensive solution that prevents icon overflow at multiple levels (global CSS, configuration, component classes, inline styles)
+
+---
+
+## Route Protection
+
+### Overview
+
+**Purpose**: Implement route protection to prevent unauthorized access to seller and admin pages
+
+**Date**: Latest security enhancement
+
+**Scope**: All seller pages and admin pages now have role-based access control
+
+---
+
+### 1. Seller Pages Protection
+
+#### Updated All Seller Pages
+
+**Files Modified**:
+- `src/app/seller/dashboard/page.js`
+- `src/app/seller/addProduct/page.js`
+- `src/app/seller/viewProduct/page.js`
+- `src/app/seller/sellerCart/page.js`
+
+**Code Added**:
+```javascript
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+
+export default function SellerPage() {
+  const router = useRouter();
+  const { username, role, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
+
+  // Rest of component code...
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Checks user authentication and role before allowing access to seller pages
+- **Access rules**:
+  - User must be logged in (`username` exists)
+  - User role must be `'seller'` OR `'admin'`
+  - Admins can access seller pages for management purposes
+- **Unauthorized access**: Redirects to home page (`/`)
+- **Loading state**: Waits for `authLoading` to complete before checking (prevents false redirects)
+- **Why needed**: Prevents regular users from accessing seller-only features
+
+**Function**: Restricts seller pages to sellers and admins only
+
+---
+
+#### Example: Seller Dashboard Protection
+
+**File**: `src/app/seller/dashboard/page.js`
+
+**BEFORE**:
+```javascript
+export default function Dashboard() {
+  const router = useRouter();
+  const { username, sellerUsername } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      // ... fetch products
+    };
+    fetchProducts();
+  }, []);
+}
+```
+
+**AFTER**:
+```javascript
+export default function Dashboard() {
+  const router = useRouter();
+  const { username, sellerUsername, role, loading: authLoading } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!username || (role !== "seller" && role !== "admin")) {
+        router.push("/");
+        return;
+      }
+    }
+  }, [username, role, authLoading, router]);
+
+  useEffect(() => {
+    if (!username || (role !== "seller" && role !== "admin")) {
+      return;
+    }
+    const fetchProducts = async () => {
+      // ... fetch products
+    };
+    fetchProducts();
+  }, [username, role]);
+}
+```
+
+**Key Changes**:
+- Added `role` and `authLoading` from `useAuth()`
+- Added protection `useEffect` that checks role and redirects if unauthorized
+- Modified data fetching `useEffect` to only run if user is authorized
+- Prevents data fetching for unauthorized users
+
+---
+
+### 2. Admin Pages Protection
+
+#### Verified All Admin Pages
+
+**Files Verified**:
+- `src/app/admin/dashboard/page.js` - Already had protection
+- `src/app/admin/viewUsers/page.js` - Already had protection
+- `src/app/admin/viewSellers/page.js` - Already had protection
+- `src/app/admin/page.js` - Updated to redirect to dashboard
+
+**Existing Protection Pattern**:
+```javascript
+useEffect(() => {
+  if (!authLoading) {
+    if (role !== "admin") {
+      router.push("/");
+      return;
+    }
+    fetchData();
+  }
+}, [role, authLoading, router]);
+```
+
+**Detailed Explanation**:
+- **What it does**: Ensures only admin users can access admin pages
+- **Access rules**: User role must be exactly `'admin'`
+- **Unauthorized access**: Redirects to home page (`/`)
+- **Why needed**: Admin pages contain sensitive data and management functions
+
+**Function**: Restricts admin pages to admins only
+
+---
+
+#### Updated Admin Login Page
+
+**File**: `src/app/admin/page.js`
+
+**BEFORE**:
+```javascript
+export default function AdminLoginPage() {
+   return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-3xl font-bold">Admin Login Page</h1>
+    </div>
+   )
+};
+```
+
+**AFTER**:
+```javascript
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const { role, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (role !== "admin") {
+        router.push("/");
+        return;
+      } else {
+        router.push("/admin/dashboard");
+      }
+    }
+  }, [role, authLoading, router]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center">
+        <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600 font-medium">Loading...</p>
+      </div>
+    </div>
+  );
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Redirects admin users to dashboard, blocks non-admins
+- **Behavior**:
+  - If user is admin: Redirects to `/admin/dashboard`
+  - If user is not admin: Redirects to home page (`/`)
+  - While loading: Shows loading spinner
+- **Why needed**: Provides proper routing for admin login page
+
+**Function**: Handles admin login page routing and protection
+
+---
+
+### 3. Security Implementation Details
+
+#### Protection Flow
+
+1. **Component Mounts**: Page component loads
+2. **Check Loading State**: Waits for `authLoading` to complete
+3. **Verify Authentication**: Checks if user is logged in (`username` exists)
+4. **Verify Role**: Checks if user has required role
+5. **Authorize or Redirect**:
+   - If authorized: Component continues to render
+   - If unauthorized: Redirects to home page
+
+#### Role-Based Access Matrix
+
+| Page Type | Allowed Roles | Redirect If Unauthorized |
+|-----------|--------------|-------------------------|
+| Seller Pages | `seller`, `admin` | `/` (home) |
+| Admin Pages | `admin` | `/` (home) |
+| User Pages | `user`, `seller`, `admin` | No restriction |
+
+#### Seller Status Consideration
+
+- **Pending/Rejected Sellers**: Already blocked at login (cannot authenticate)
+- **Approved Sellers**: Can access seller pages normally
+- **Admins**: Can access seller pages for management purposes
+
+**Why this works**: Since pending/rejected sellers are blocked at login, any authenticated seller accessing seller pages is guaranteed to be approved.
+
+---
+
+### 4. Files Modified Summary
+
+**Seller Pages (4 files)**:
+1. `src/app/seller/dashboard/page.js` - Added role check
+2. `src/app/seller/addProduct/page.js` - Added role check and useEffect import
+3. `src/app/seller/viewProduct/page.js` - Updated existing check to include admin
+4. `src/app/seller/sellerCart/page.js` - Added role check
+
+**Admin Pages (1 file)**:
+1. `src/app/admin/page.js` - Added protection and redirect logic
+
+**Total Changes**: 5 files modified
+
+---
+
+### 5. Benefits
+
+1. **Security**: Prevents unauthorized access to sensitive pages
+2. **User Experience**: Clear redirect behavior for unauthorized users
+3. **Data Protection**: Prevents unauthorized data fetching
+4. **Role Management**: Proper separation between user, seller, and admin access
+5. **Admin Flexibility**: Admins can access seller pages for management
+
+---
+
 ## Code Cleanup - Comment Removal
 
 ### Overview
@@ -2984,24 +3476,25 @@ ORDER BY created_at;
 4. `src/app/api/addToCart/route.js` - Field name compatibility
 5. `src/app/api/getCart/route.js` - Field transformation
 6. `src/app/context/AuthContext.js` - Supabase session management
-7. `src/app/cart/viewCart/page.js` - UUID support (14 changes)
-8. `src/app/seller/dashboard/page.js` - Username fix, React key prop fix
-9. `src/app/dashboard/page.js` - Field name compatibility, responsive modals
-10. `src/app/components/CategoryPage.js` - Field name compatibility, responsive modals
-11. `src/app/page.js` - Seller approval popup messages
-12. `src/app/sellerRegister/page.js` - Approval process messages, image preview fix
-13. `src/app/layout.js` - VisitTracker integration, Inter font
-14. `src/app/components/navbar.js` - Dashboard menu item, removed Featured Products
-15. `src/app/components/header.js` - Mobile header improvements
-16. `src/app/globals.css` - Inter font implementation
-17. `src/app/admin/dashboard/page.js` - Complete admin dashboard
-18. `src/app/admin/viewUsers/page.js` - User management page
-19. `src/app/admin/viewSellers/page.js` - Seller management page
-20. `src/app/admin/components/adminNavbar.js` - Admin navigation
-21. `src/app/seller/addProduct/page.js` - Font Awesome icons, compact layout
-22. `src/app/seller/viewProduct/page.js` - Font Awesome icons, compact layout, image fixes
-23. `src/app/cart/viewCart/page.js` - Image coverage fixes
-24. `src/app/seller/sellerCart/page.js` - Image coverage fixes
+7. `src/app/cart/viewCart/page.js` - UUID support (14 changes), image coverage fixes, icon sizing
+8. `src/app/seller/dashboard/page.js` - Username fix, React key prop fix, route protection, icon sizing
+9. `src/app/dashboard/page.js` - Field name compatibility, responsive modals, React key prop fix, icon sizing
+10. `src/app/components/CategoryPage.js` - Field name compatibility, responsive modals, icon sizing
+11. `src/app/page.js` - Seller approval popup messages, icon sizing
+12. `src/app/register/page.js` - Icon sizing
+13. `src/app/sellerRegister/page.js` - Approval process messages, image preview fix, icon sizing
+14. `src/app/layout.js` - VisitTracker integration, Inter font, FontAwesome configuration
+15. `src/app/components/navbar.js` - Dashboard menu item, removed Featured Products
+16. `src/app/components/header.js` - Mobile header improvements
+17. `src/app/globals.css` - Inter font implementation, icon sizing constraints
+18. `src/app/admin/dashboard/page.js` - Complete admin dashboard
+19. `src/app/admin/viewUsers/page.js` - User management page
+20. `src/app/admin/viewSellers/page.js` - Seller management page
+21. `src/app/admin/components/adminNavbar.js` - Admin navigation
+22. `src/app/admin/page.js` - Route protection and redirect logic
+23. `src/app/seller/addProduct/page.js` - Font Awesome icons, compact layout, route protection
+24. `src/app/seller/viewProduct/page.js` - Font Awesome icons, compact layout, image fixes, route protection
+25. `src/app/seller/sellerCart/page.js` - Image coverage fixes, route protection
 
 ### Functions Created/Modified
 - `createSupabaseAdminClient()` - Admin operations
@@ -3020,14 +3513,17 @@ ORDER BY created_at;
 
 ---
 
-**Version**: 2.0  
+**Version**: 2.2  
 **Last Updated**: December 2024  
-**Total Code Changes**: 100+ files modified/created
+**Total Code Changes**: 110+ files modified/created
 
 ### Latest Updates
+- **Icon Sizing Fix**: Fixed FontAwesome icon overflow during page load/refresh with global CSS constraints, explicit size classes, and inline styles
+- **Route Protection**: Implemented role-based access control for all seller and admin pages
+- **Security Enhancement**: Unauthorized users are redirected when accessing protected routes
 - **Admin Dashboard System**: Complete admin interface with seller management, statistics, and visit tracking
 - **Seller Approval Workflow**: Pending/rejected sellers blocked from login with user-friendly messages
 - **Visit Tracking System**: Automatic page visit tracking with admin exclusion
-- **UI/UX Improvements**: Responsive design, image fixes, font implementation, mobile improvements
+- **UI/UX Improvements**: Responsive design, image fixes, font implementation, mobile improvements, icon sizing
 - **Comment Removal**: Removed all comments from JavaScript, SQL, and script files (25+ files)
 - **Code Cleanup**: Improved code readability and maintainability

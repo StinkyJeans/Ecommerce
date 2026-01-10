@@ -268,7 +268,7 @@ export default function Dashboard() {
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2" />
+                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">Grid</span>
                   </button>
                   <button
@@ -279,7 +279,7 @@ export default function Dashboard() {
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2" />
+                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">List</span>
                   </button>
                 </div>
@@ -302,7 +302,7 @@ export default function Dashboard() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <FontAwesomeIcon icon={faEye} className="text-red-600" />
+                            <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
                           </div>
                         </div>
                       </div>
@@ -322,7 +322,7 @@ export default function Dashboard() {
                           onClick={() => handleView(product)}
                           className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                         >
-                          <FontAwesomeIcon icon={faEye} />
+                          <FontAwesomeIcon icon={faEye} className="text-base" />
                           View Details
                         </button>
                       </div>
@@ -364,7 +364,7 @@ export default function Dashboard() {
                             onClick={() => handleView(product)}
                             className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                           >
-                            <FontAwesomeIcon icon={faEye} />
+                            <FontAwesomeIcon icon={faEye} className="text-base" />
                             View Details
                           </button>
                         </div>
@@ -402,7 +402,7 @@ export default function Dashboard() {
               <div className="p-6 sm:p-8">
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2" />
+                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2 text-base" />
                     Description
                   </h3>
                   <p className="text-gray-700 leading-relaxed text-base">
@@ -421,7 +421,7 @@ export default function Dashboard() {
                         onClick={decreaseQuantity}
                         className="cursor-pointer w-10 h-10 flex items-center justify-center bg-white rounded-lg hover:bg-red-50 hover:text-red-600 transition-all shadow-sm"
                       >
-                        <FontAwesomeIcon icon={faMinus} />
+                        <FontAwesomeIcon icon={faMinus} className="text-base" />
                       </button>
                       <span className="w-16 text-center font-bold text-gray-800 text-xl">
                         {quantity}
@@ -430,13 +430,13 @@ export default function Dashboard() {
                         onClick={increaseQuantity}
                         className="cursor-pointer w-10 h-10 flex items-center justify-center bg-white rounded-lg hover:bg-green-50 hover:text-green-600 transition-all shadow-sm"
                       >
-                        <FontAwesomeIcon icon={faPlus} />
+                        <FontAwesomeIcon icon={faPlus} className="text-base" />
                       </button>
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-gray-500">Available in stock</p>
                       <p className="text-sm text-green-600 font-semibold">
-                        <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                        <FontAwesomeIcon icon={faCheckCircle} className="mr-1 text-sm" />
                         Ready to ship
                       </p>
                     </div>
@@ -447,7 +447,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <p className="text-sm text-gray-600 mb-1 font-medium">
-                        <FontAwesomeIcon icon={faTag} className="mr-2" />
+                        <FontAwesomeIcon icon={faTag} className="mr-2 text-sm" />
                         Unit Price
                       </p>
                       <p className="text-2xl font-bold text-gray-800">

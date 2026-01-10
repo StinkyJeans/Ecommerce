@@ -102,7 +102,7 @@ export default function RegisterPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faUser} className="text-gray-400" />
+              <FontAwesomeIcon icon={faUser} className="text-gray-400 text-sm" />
             </div>
             <input
               type="text"
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
+              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 text-sm" />
             </div>
             <input
               type="email"
@@ -140,7 +140,7 @@ export default function RegisterPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+              <FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
             </div>
             <input
               type={showPassword ? "text" : "password"}
@@ -155,7 +155,7 @@ export default function RegisterPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
             </button>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
           className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
         >
           <span className="flex items-center justify-center gap-2">
-            <FontAwesomeIcon icon={faUserPlus} />
+            <FontAwesomeIcon icon={faUserPlus} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
             Register
           </span>
         </button>

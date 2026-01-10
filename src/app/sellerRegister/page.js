@@ -227,7 +227,7 @@ export default function SellerRegisterPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400" />
+              <FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
             </div>
             <input
               type={showPassword ? "text" : "password"}
@@ -242,7 +242,7 @@ export default function SellerRegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
                 </button>
               </div>
             </div>

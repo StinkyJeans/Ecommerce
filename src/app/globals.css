@@ -67,3 +67,26 @@ input, textarea, select {
   }
 }
 
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.fa, .fas, .far, .fal, .fab, .svg-inline--fa {
+  display: inline-block;
+  font-size: inherit;
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+}
+
+[class*="fa-"] {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}

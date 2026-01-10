@@ -217,7 +217,7 @@ export default function CategoryPage({
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2" />
+                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">Grid</span>
                   </button>
                   <button
@@ -228,7 +228,7 @@ export default function CategoryPage({
                         : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2" />
+                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">List</span>
                   </button>
                 </div>
@@ -252,7 +252,7 @@ export default function CategoryPage({
 
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
                           <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <FontAwesomeIcon icon={faEye} className="text-red-600" />
+                            <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
                           </div>
                         </div>
 
@@ -277,7 +277,7 @@ export default function CategoryPage({
                           onClick={() => handleView(product)}
                           className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
                         >
-                          <FontAwesomeIcon icon={faEye} />
+                          <FontAwesomeIcon icon={faEye} className="text-base" />
                           View Details
                         </button>
                       </div>
@@ -321,7 +321,7 @@ export default function CategoryPage({
                             onClick={() => handleView(product)}
                             className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation text-sm sm:text-base whitespace-nowrap"
                           >
-                            <FontAwesomeIcon icon={faEye} />
+                            <FontAwesomeIcon icon={faEye} className="text-base" />
                             <span className="hidden sm:inline">View Details</span>
                             <span className="sm:hidden">View</span>
                           </button>
