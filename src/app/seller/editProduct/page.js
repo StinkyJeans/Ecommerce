@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -23,9 +23,7 @@ import {
   faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 
-export const dynamic = 'force-dynamic';
-
-export default function EditProduct() {
+function EditProductContent() {
   const [image, setImage] = useState(null);
   const [idPreview, setIdPreview] = useState(null);
   const [productName, setProductName] = useState("");
@@ -370,5 +368,25 @@ export default function EditProduct() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function EditProduct() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+        <Navbar />
+        <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
+          <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              <p className="text-gray-600 font-medium">Loading...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    }>
+      <EditProductContent />
+    </Suspense>
   );
 }
