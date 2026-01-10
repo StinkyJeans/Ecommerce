@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { formatPrice } from "@/app/utils/formatPrice";
 import {
   faTrash,
   faEdit,
@@ -254,11 +255,11 @@ export default function ViewProduct() {
               {products.map((product) => (
                 <div
                   key={product._id}
-                  className={`group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden ${
+                  className={`group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden flex flex-col ${
                     removingId === product._id ? "opacity-50 scale-95" : ""
                   }`}
                 >
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden flex-shrink-0">
                     <img
                       src={product.id_url}
                       alt={product.product_name}
@@ -296,33 +297,35 @@ export default function ViewProduct() {
                     </button>
                   </div>
 
-                  <div className="p-5">
-                    <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                      {product.product_name}
-                    </h2>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+                        {product.product_name}
+                      </h2>
 
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
-                      {product.description}
-                    </p>
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+                        {product.description}
+                      </p>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Price</p>
-                        <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                          ₱{product.price}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">Added</p>
-                        <p className="text-xs font-semibold text-gray-700">
-                          {new Date(product.createdAt).toLocaleDateString()}
-                        </p>
+                      <div className="flex items-center justify-between mb-4 gap-2">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-xs text-gray-500 mb-1">Price</p>
+                            <p className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
+                              ₱{formatPrice(product.price)}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">Added</p>
+                          <p className="text-xs font-semibold text-gray-700">
+                            {new Date(product.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleViewDetails(product)}
-                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
+                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
                     >
                       <FontAwesomeIcon icon={faEye} />
                       View Details
@@ -387,15 +390,15 @@ export default function ViewProduct() {
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 border border-red-100">
+                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 mb-4 sm:mb-5 border border-red-100 overflow-hidden">
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
+                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
                         Price
                       </p>
-                      <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words">
-                        ₱{selectedProduct.price}
+                      <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere min-w-0">
+                        ₱{formatPrice(selectedProduct.price)}
                       </p>
                     </div>
                     <div>

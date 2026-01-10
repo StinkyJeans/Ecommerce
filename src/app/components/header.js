@@ -73,14 +73,14 @@ export default function Header() {
         <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
           Featured Products
         </h1>
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto cursor-pointer">
           <button
             onClick={() => router.push("/cart/viewCart")}
-            className="relative p-2 sm:p-2.5 md:p-3 bg-gradient-to-br from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation group"
+            className="cursor-pointer relative p-2 sm:p-2.5 md:p-3 bg-gradient-to-br from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation group"
           >
             <FontAwesomeIcon
               icon={faShoppingCart}
-              className="text-red-600 text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform"
+              className="text-red-600 text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform cursor-pointer"
             />
             {cartCount > 0 && (
               <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-5 flex items-center justify-center px-1 sm:px-1.5 shadow-lg ring-2 ring-white animate-in zoom-in-50 duration-200">

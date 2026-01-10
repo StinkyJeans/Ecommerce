@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { formatPrice } from "@/app/utils/formatPrice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import {
@@ -344,10 +345,10 @@ export default function ViewCart() {
                             </p>
                             <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                               ₱
-                              {calculateSubtotal(
+                              {formatPrice(calculateSubtotal(
                                 item.price,
                                 item.quantity || 1
-                              )}
+                              ))}
                             </p>
                           </div>
                         </div>

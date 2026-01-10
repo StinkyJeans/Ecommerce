@@ -87,7 +87,7 @@ export default function ViewCart() {
                   {item.description}
                 </p>
                 <p className="text-red-600 font-bold text-lg mb-4">
-                  ₱{item.price}
+                  ₱{formatPrice(item.price)}
                 </p>
 
                 <button className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition cursor-pointer">

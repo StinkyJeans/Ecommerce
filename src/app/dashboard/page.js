@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/header";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { formatPrice } from "@/app/utils/formatPrice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faPlus, 
@@ -288,9 +289,9 @@ export default function Dashboard() {
                   {filteredProducts.map((product) => (
                     <div
                       key={product.id || product._id || product.product_id}
-                      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
+                      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
                     >
-                      <div className="relative h-56 overflow-hidden">
+                      <div className="relative h-56 overflow-hidden flex-shrink-0">
                         <img
                           src={product.id_url}
                           alt={product.product_name}
@@ -304,21 +305,23 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="p-5">
-                        <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                          {product.product_name}
-                        </h2>
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Price</p>
-                            <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                              ₱{product.price}
-                            </p>
+                      <div className="p-5 flex flex-col flex-1">
+                        <div className="flex-1">
+                          <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+                            {product.product_name}
+                          </h2>
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Price</p>
+                              <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                                ₱{formatPrice(product.price)}
+                              </p>
+                            </div>
                           </div>
                         </div>
                         <button
                           onClick={() => handleView(product)}
-                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base"
+                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
                         >
                           <FontAwesomeIcon icon={faEye} className="text-base" />
                           View Details
@@ -355,7 +358,7 @@ export default function Dashboard() {
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Price</p>
                             <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                              ₱{product.price}
+                              ₱{formatPrice(product.price)}
                             </p>
                           </div>
                           <button
@@ -458,7 +461,7 @@ export default function Dashboard() {
                         <span className="whitespace-nowrap">Unit Price</span>
                       </p>
                       <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words overflow-wrap-anywhere">
-                        ₱{selectedProduct.price}
+                        ₱{formatPrice(selectedProduct.price)}
                       </p>
                     </div>
                     <div className="text-center px-2 sm:px-4 flex-shrink-0">
