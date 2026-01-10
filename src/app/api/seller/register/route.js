@@ -58,7 +58,8 @@ export async function POST(req) {
         email: email,
         contact: contact,
         id_url: idUrl,
-        role: "seller"
+        role: "seller",
+        seller_status: "pending"
       });
 
     if (userError) {
@@ -66,7 +67,10 @@ export async function POST(req) {
       return NextResponse.json({ message: "Failed to create seller" }, { status: 500 });
     }
 
-    return NextResponse.json({ message: "Seller registered successfully!" }, { status: 201 });
+    return NextResponse.json({ 
+      message: "Seller registration successful!",
+      details: "Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours)."
+    }, { status: 201 });
   } catch (err) {
     console.error("Seller register error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });

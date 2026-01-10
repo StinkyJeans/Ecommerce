@@ -7,7 +7,9 @@
     "build": "next build --turbopack",
     "start": "next start",
     "setup:db": "node scripts/setup-database.js",
-    "reset:db": "node scripts/reset-database.js"
+    "reset:db": "node scripts/reset-database.js",
+    "create:admin": "node scripts/create-admin.js",
+    "clear:data": "node scripts/clear-database.js"
   },
   "dependencies": {
     "@edgestore/react": "^0.5.4",

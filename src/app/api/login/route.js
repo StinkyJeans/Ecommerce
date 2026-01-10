@@ -13,7 +13,7 @@ export async function POST(req) {
 
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('username, role, email')
+      .select('username, role, email, seller_status')
       .eq('username', username)
       .single();
 
@@ -23,6 +23,31 @@ export async function POST(req) {
         { message: "Invalid Username or Password" },
         { status: 401 }
       );
+    }
+
+    // Check if seller is pending approval
+    if (userData.role === 'seller') {
+      if (userData.seller_status === 'pending') {
+        return NextResponse.json(
+          { 
+            message: "Waiting for admin approval",
+            sellerStatus: "pending",
+            details: "Your seller account is pending approval. Please wait for admin approval before logging in."
+          },
+          { status: 403 }
+        );
+      }
+      
+      if (userData.seller_status === 'rejected') {
+        return NextResponse.json(
+          { 
+            message: "Seller account rejected",
+            sellerStatus: "rejected",
+            details: "Your seller account has been rejected. Please contact support for more information."
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const email = userData.email || `${username}@temp.local`;

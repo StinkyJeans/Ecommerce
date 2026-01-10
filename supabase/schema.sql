@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   contact TEXT,
   id_url TEXT,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'seller', 'admin')),
+  seller_status TEXT DEFAULT NULL CHECK (seller_status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -129,4 +130,26 @@ CREATE POLICY "Users can insert own orders" ON orders
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Sellers can read own orders" ON orders
+  FOR SELECT USING (true);
+
+-- Website visits table for statistics tracking
+CREATE TABLE IF NOT EXISTS website_visits (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  page_path TEXT NOT NULL,
+  visitor_id TEXT,
+  user_agent TEXT,
+  ip_address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_visits_created_at ON website_visits(created_at);
+CREATE INDEX IF NOT EXISTS idx_visits_page_path ON website_visits(page_path);
+CREATE INDEX IF NOT EXISTS idx_visits_visitor_id ON website_visits(visitor_id);
+
+ALTER TABLE website_visits ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can insert visits" ON website_visits
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins can read visits" ON website_visits
   FOR SELECT USING (true);

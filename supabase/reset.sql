@@ -3,6 +3,7 @@ DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 DROP TRIGGER IF EXISTS update_cart_items_updated_at ON cart_items;
 DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 
+DROP TABLE IF EXISTS website_visits CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS cart_items CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
@@ -20,6 +21,9 @@ DROP INDEX IF EXISTS idx_cart_items_product_id;
 DROP INDEX IF EXISTS idx_orders_username;
 DROP INDEX IF EXISTS idx_orders_seller_username;
 DROP INDEX IF EXISTS idx_orders_status;
+DROP INDEX IF EXISTS idx_visits_created_at;
+DROP INDEX IF EXISTS idx_visits_page_path;
+DROP INDEX IF EXISTS idx_visits_visitor_id;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -30,6 +34,7 @@ CREATE TABLE users (
   contact TEXT,
   id_url TEXT,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'seller', 'admin')),
+  seller_status TEXT DEFAULT NULL CHECK (seller_status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -152,4 +157,26 @@ CREATE POLICY "Users can insert own orders" ON orders
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Sellers can read own orders" ON orders
+  FOR SELECT USING (true);
+
+-- Website visits table for statistics tracking
+CREATE TABLE website_visits (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  page_path TEXT NOT NULL,
+  visitor_id TEXT,
+  user_agent TEXT,
+  ip_address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_visits_created_at ON website_visits(created_at);
+CREATE INDEX idx_visits_page_path ON website_visits(page_path);
+CREATE INDEX idx_visits_visitor_id ON website_visits(visitor_id);
+
+ALTER TABLE website_visits ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can insert visits" ON website_visits
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins can read visits" ON website_visits
   FOR SELECT USING (true);

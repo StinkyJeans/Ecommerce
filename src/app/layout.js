@@ -19,6 +19,8 @@ export const metadata = {
   viewport: "width=device-width, initial-scale=1, maximum-scale=5",
 };
 
+import VisitTracker from "./components/VisitTracker";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -27,6 +29,7 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <EdgeStoreProvider>
+            <VisitTracker />
             {children}
           </EdgeStoreProvider>
         </AuthProvider>

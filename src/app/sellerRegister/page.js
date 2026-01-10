@@ -18,6 +18,7 @@ import {
   faPhone,
   faCheckCircle,
   faInfoCircle,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function SellerRegisterPage() {
@@ -72,11 +73,21 @@ export default function SellerRegisterPage() {
       });
 
       const data = await response.json();
-      setPopupMessage(data.message || data.error || "Registration failed.");
-      setShowPopup(true);
-
+      
       if (response.ok) {
-        setTimeout(() => router.push("/"), 2000);
+        // Show success message with approval notice
+        const successMessage = data.details 
+          ? `${data.message}\n\n${data.details}`
+          : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
+        setPopupMessage(successMessage);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/");
+        }, 6000); // Give more time to read the message
+      } else {
+        setPopupMessage(data.message || data.error || "Registration failed.");
+        setShowPopup(true);
       }
     } catch (err) {
       setPopupMessage("Upload or registration failed. " + err.message);
@@ -95,9 +106,20 @@ export default function SellerRegisterPage() {
       </div>
 
       {showPopup && (
-        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-2 sm:gap-3 max-w-sm sm:max-w-md mx-auto sm:mx-0">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0" />
-          <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
+        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0">
+          <div className="flex items-start gap-3">
+            <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-sm sm:text-base mb-1">Registration Successful!</p>
+              <p className="text-sm break-words whitespace-pre-line">{popupMessage}</p>
+            </div>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
+            >
+              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            </button>
+          </div>
         </div>
       )}
 

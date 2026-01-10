@@ -11,6 +11,9 @@ import {
   faEye,
   faEyeSlash,
   faSignInAlt,
+  faExclamationTriangle,
+  faTimes,
+  faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function LoginPage() {
@@ -19,6 +22,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupType, setPopupType] = useState("error"); // "error", "warning", "success"
   const { setRole, setUsername: setAuthUsername } = useAuth();
   const router = useRouter();
 
@@ -38,7 +44,23 @@ export default function LoginPage() {
       console.log("Login response:", data);
 
       if (!res.ok) {
-        alert(data.message || "Invalid Username or Password");
+        // Check if it's a seller approval issue
+        if (res.status === 403 && data.sellerStatus === 'pending') {
+          setPopupMessage(data.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
+          setPopupType("warning");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 5000);
+        } else if (res.status === 403 && data.sellerStatus === 'rejected') {
+          setPopupMessage(data.details || "Your seller account has been rejected. Please contact support.");
+          setPopupType("error");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 5000);
+        } else {
+          setPopupMessage(data.message || "Invalid Username or Password");
+          setPopupType("error");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 4000);
+        }
         return;
       }
 
@@ -54,7 +76,10 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("Something went wrong. Please try again.");
+      setPopupMessage("Something went wrong. Please try again.");
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 4000);
     } finally {
       setLoading(false);
     }
@@ -66,6 +91,31 @@ export default function LoginPage() {
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
       </div>
+
+      {showPopup && (
+        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in ${
+          popupType === 'error' 
+            ? 'bg-gradient-to-r from-red-500 to-red-600' 
+            : popupType === 'warning'
+            ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+            : 'bg-gradient-to-r from-green-500 to-green-600'
+        } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3`}>
+          <div className="flex-shrink-0 mt-0.5">
+            {popupType === 'error' && <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />}
+            {popupType === 'warning' && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg sm:text-xl" />}
+            {popupType === 'success' && <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl" />}
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-sm sm:text-base break-words">{popupMessage}</p>
+          </div>
+          <button
+            onClick={() => setShowPopup(false)}
+            className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
+          >
+            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          </button>
+        </div>
+      )}
 
       <form
         onSubmit={handleLogin}
