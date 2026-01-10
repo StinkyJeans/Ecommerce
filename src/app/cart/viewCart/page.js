@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { formatPrice } from "../../utils/formatPrice";
+import { formatPrice } from "@/lib/formatPrice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import {

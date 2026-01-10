@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { formatPrice } from "../../utils/formatPrice";
+import { formatPrice } from "@/lib/formatPrice";
 import {
   faTrash,
   faEdit,
