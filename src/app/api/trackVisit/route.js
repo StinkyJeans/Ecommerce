@@ -11,7 +11,6 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
-    // Skip tracking for admin pages
     if (pagePath.startsWith('/admin')) {
       return NextResponse.json({ 
         success: true,
@@ -24,10 +23,8 @@ export async function POST(req) {
       return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
     }
 
-    // Check if the user is an admin - don't track admin visits
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      // Try to get user role from users table
       let userData = null;
       if (user.email) {
         const { data } = await supabase
@@ -38,7 +35,6 @@ export async function POST(req) {
         userData = data;
       }
       
-      // If not found by email, try username from metadata
       if (!userData && user.user_metadata?.username) {
         const { data } = await supabase
           .from('users')
@@ -48,7 +44,6 @@ export async function POST(req) {
         userData = data;
       }
 
-      // Skip tracking if user is an admin
       if (userData && userData.role === 'admin') {
         return NextResponse.json({ 
           success: true,
@@ -57,7 +52,6 @@ export async function POST(req) {
       }
     }
 
-    // Insert visit record
     const { error } = await supabase
       .from('website_visits')
       .insert({
@@ -69,7 +63,6 @@ export async function POST(req) {
 
     if (error) {
       console.error("Error tracking visit:", error);
-      // Don't fail the request if tracking fails
       return NextResponse.json({ 
         success: false,
         message: "Visit tracking failed",
@@ -83,7 +76,6 @@ export async function POST(req) {
     }, { status: 200 });
   } catch (err) {
     console.error("Track visit error:", err);
-    // Don't fail the request if tracking fails
     return NextResponse.json({ 
       success: false,
       message: "Server error",

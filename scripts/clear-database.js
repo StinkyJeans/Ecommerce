@@ -1,11 +1,3 @@
-/**
- * Script to clear all database data except admin accounts
- * 
- * Usage: node scripts/clear-database.js
- * 
- * WARNING: This will permanently delete all data except admin accounts!
- */
-
 import { createSupabaseAdminClient } from '../src/lib/supabase.js';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
@@ -52,7 +44,6 @@ async function clearDatabase() {
 
     const supabase = createSupabaseAdminClient();
 
-    // Step 1: Get admin count before deletion
     const { count: adminCountBefore } = await supabase
       .from('users')
       .select('*', { count: 'exact', head: true })
@@ -60,12 +51,11 @@ async function clearDatabase() {
 
     console.log(`📊 Found ${adminCountBefore || 0} admin account(s) that will be preserved\n`);
 
-    // Step 2: Delete cart items (delete all)
     console.log('🗑️  Deleting cart items...');
     const { data: cartItems, error: cartError } = await supabase
       .from('cart_items')
       .select('id')
-      .limit(1000); // Get all cart items
+      .limit(1000);
     
     if (cartItems && cartItems.length > 0) {
       const { error: deleteError } = await supabase
@@ -81,7 +71,6 @@ async function clearDatabase() {
       console.log('   ✅ No cart items to delete');
     }
 
-    // Step 3: Delete orders (delete all)
     console.log('🗑️  Deleting orders...');
     const { data: orders, error: ordersFetchError } = await supabase
       .from('orders')
@@ -102,7 +91,6 @@ async function clearDatabase() {
       console.log('   ✅ No orders to delete');
     }
 
-    // Step 4: Delete products (delete all)
     console.log('🗑️  Deleting products...');
     const { data: products, error: productsFetchError } = await supabase
       .from('products')
@@ -123,7 +111,6 @@ async function clearDatabase() {
       console.log('   ✅ No products to delete');
     }
 
-    // Step 5: Delete website visits (delete all)
     console.log('🗑️  Deleting website visits...');
     const { data: visits, error: visitsFetchError } = await supabase
       .from('website_visits')
@@ -144,10 +131,8 @@ async function clearDatabase() {
       console.log('   ✅ No visits to delete');
     }
 
-    // Step 6: Delete all users except admins
     console.log('🗑️  Deleting users (except admins)...');
     
-    // First, get all users to see what we have
     const { data: allUsers, error: allUsersError } = await supabase
       .from('users')
       .select('id, username, email, role');
@@ -158,7 +143,6 @@ async function clearDatabase() {
       console.log(`   📊 Found ${allUsers?.length || 0} total user(s)`);
       
       if (allUsers && allUsers.length > 0) {
-        // Show all users first
         console.log('\n   Current users:');
         allUsers.forEach(user => {
           console.log(`      - ${user.username} (${user.email || 'no email'}) [${user.role || 'NULL'}]`);
@@ -166,7 +150,6 @@ async function clearDatabase() {
         console.log('');
       }
       
-      // Filter out admins
       const nonAdminUsers = (allUsers || []).filter(user => {
         const role = user.role;
         return role !== 'admin' && role !== null;
@@ -186,7 +169,6 @@ async function clearDatabase() {
       console.log(`\n   🗑️  Non-admin users to delete: ${nonAdminUsers.length}`);
       
       if (nonAdminUsers.length > 0) {
-        // Delete each user individually to ensure it works
         let deletedCount = 0;
         let failedCount = 0;
         
@@ -218,7 +200,6 @@ async function clearDatabase() {
       }
     }
 
-    // Step 7: Verify admin accounts still exist
     const { data: remainingAdmins, count: adminCountAfter } = await supabase
       .from('users')
       .select('username, email, role', { count: 'exact' })
@@ -236,7 +217,6 @@ async function clearDatabase() {
       });
     }
 
-    // Get final counts
     const { count: productsCount } = await supabase
       .from('products')
       .select('*', { count: 'exact', head: true });

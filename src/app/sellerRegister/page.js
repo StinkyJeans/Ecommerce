@@ -75,7 +75,6 @@ export default function SellerRegisterPage() {
       const data = await response.json();
       
       if (response.ok) {
-        // Show success message with approval notice
         const successMessage = data.details 
           ? `${data.message}\n\n${data.details}`
           : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
@@ -84,7 +83,7 @@ export default function SellerRegisterPage() {
         setTimeout(() => {
           setShowPopup(false);
           router.push("/");
-        }, 6000); // Give more time to read the message
+        }, 6000);
       } else {
         setPopupMessage(data.message || data.error || "Registration failed.");
         setShowPopup(true);

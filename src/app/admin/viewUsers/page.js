@@ -124,7 +124,6 @@ export default function AdminViewUsers() {
               </div>
             </div>
 
-            {/* Search Bar */}
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <FontAwesomeIcon icon={faSearch} className="text-gray-400" />

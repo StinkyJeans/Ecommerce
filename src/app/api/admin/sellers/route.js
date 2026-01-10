@@ -8,14 +8,11 @@ export async function GET(req) {
       return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
     }
 
-    // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Match user by email or username from metadata
-    // Try email first, then username from metadata
     let userData = null;
     let userError = null;
     
@@ -29,7 +26,6 @@ export async function GET(req) {
       userError = error;
     }
     
-    // If not found by email, try username from metadata
     if (!userData && user.user_metadata?.username) {
       const { data, error } = await supabase
         .from('users')
@@ -55,7 +51,6 @@ export async function GET(req) {
       }, { status: 403 });
     }
 
-    // Get all sellers
     const { data: sellers, error } = await supabase
       .from('users')
       .select('id, username, email, contact, id_url, seller_status, created_at')
@@ -65,7 +60,6 @@ export async function GET(req) {
     if (error) {
       console.error("Error fetching sellers:", error);
       
-      // If error is about missing column, provide helpful message
       if (error.message && error.message.includes('seller_status')) {
         return NextResponse.json({ 
           success: false,
@@ -84,7 +78,6 @@ export async function GET(req) {
       }, { status: 500 });
     }
 
-    // Ensure seller_status is set (default to null if not present)
     const sellersWithStatus = (sellers || []).map(seller => ({
       ...seller,
       seller_status: seller.seller_status || null

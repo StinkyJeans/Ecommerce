@@ -1,7 +1,3 @@
--- Add seller_status column to users table if it doesn't exist
--- This migration adds the seller_status column for tracking seller approval status
-
--- Check if column exists, if not add it
 DO $$ 
 BEGIN
     IF NOT EXISTS (
@@ -20,6 +16,3 @@ BEGIN
         RAISE NOTICE 'seller_status column already exists';
     END IF;
 END $$;
-
--- Add comment for documentation
-COMMENT ON COLUMN users.seller_status IS 'Status of seller account: pending, approved, or rejected';

@@ -86,9 +86,7 @@ export default function AdminDashboard() {
           text: `Seller ${action === 'approve' ? 'approved' : 'rejected'} successfully`, 
           type: "success" 
         });
-        // Remove from pending list
         setPendingSellers(prev => prev.filter(s => s.id !== sellerId));
-        // Refresh statistics
         fetchData();
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       } else {
@@ -163,7 +161,6 @@ export default function AdminDashboard() {
         )}
 
         <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          {/* Statistics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -216,7 +213,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Pending Sellers Section */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Pending Seller Approvals</h2>
@@ -318,7 +314,6 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* Visit Statistics Section */}
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Visit Statistics (Last 30 Days)</h2>
             
@@ -384,7 +379,6 @@ export default function AdminDashboard() {
         </div>
       </main>
 
-      {/* ID Picture Modal */}
       {showIdModal && selectedSeller && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] overflow-auto relative m-2 sm:m-0 shadow-2xl">

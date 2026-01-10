@@ -22,14 +22,11 @@ export async function POST(req) {
       return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
     }
 
-    // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Match user by email or username from metadata
-    // Try email first, then username from metadata
     let userData = null;
     let userError = null;
     
@@ -43,7 +40,6 @@ export async function POST(req) {
       userError = error;
     }
     
-    // If not found by email, try username from metadata
     if (!userData && user.user_metadata?.username) {
       const { data, error } = await supabase
         .from('users')
@@ -69,7 +65,6 @@ export async function POST(req) {
       }, { status: 403 });
     }
 
-    // Update seller status
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     
     const { data: updatedSeller, error: updateError } = await supabase

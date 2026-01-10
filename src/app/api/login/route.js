@@ -25,7 +25,6 @@ export async function POST(req) {
       );
     }
 
-    // Check if seller is pending approval
     if (userData.role === 'seller') {
       if (userData.seller_status === 'pending') {
         return NextResponse.json(

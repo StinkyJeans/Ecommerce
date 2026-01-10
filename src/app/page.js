@@ -24,7 +24,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [popupType, setPopupType] = useState("error"); // "error", "warning", "success"
+  const [popupType, setPopupType] = useState("error");
   const { setRole, setUsername: setAuthUsername } = useAuth();
   const router = useRouter();
 
@@ -44,7 +44,6 @@ export default function LoginPage() {
       console.log("Login response:", data);
 
       if (!res.ok) {
-        // Check if it's a seller approval issue
         if (res.status === 403 && data.sellerStatus === 'pending') {
           setPopupMessage(data.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
           setPopupType("warning");

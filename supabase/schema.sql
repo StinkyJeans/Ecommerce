@@ -132,7 +132,6 @@ CREATE POLICY "Users can insert own orders" ON orders
 CREATE POLICY "Sellers can read own orders" ON orders
   FOR SELECT USING (true);
 
--- Website visits table for statistics tracking
 CREATE TABLE IF NOT EXISTS website_visits (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   page_path TEXT NOT NULL,

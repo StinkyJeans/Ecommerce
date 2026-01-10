@@ -1,11 +1,3 @@
-/**
- * Script to create an admin account
- * 
- * Usage: node scripts/create-admin.js <username> <password> <email>
- * 
- * Example: node scripts/create-admin.js admin mypassword admin@example.com
- */
-
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseAdminClient } from '../src/lib/supabase.js';
 import { readFileSync } from 'fs';
@@ -41,10 +33,8 @@ async function createAdmin() {
     console.log(`   Username: ${username}`);
     console.log(`   Email: ${email}\n`);
     
-    // Create Supabase client (anon key for regular operations)
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     
-    // Check if username already exists
     const { data: existingUser } = await supabase
       .from('users')
       .select('username')
@@ -56,7 +46,6 @@ async function createAdmin() {
       process.exit(1);
     }
     
-    // Create auth user
     console.log('📝 Creating authentication account...');
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email,
@@ -81,7 +70,6 @@ async function createAdmin() {
     
     console.log('✅ Auth account created');
     
-    // Auto-confirm the user using admin client
     console.log('🔐 Confirming email...');
     const adminClient = createSupabaseAdminClient();
     const { error: confirmError } = await adminClient.auth.admin.updateUserById(
@@ -95,7 +83,6 @@ async function createAdmin() {
       console.log('✅ Email confirmed');
     }
     
-    // Create user record in users table
     console.log('📋 Creating user record...');
     const { data: newUser, error: userError } = await supabase
       .from('users')

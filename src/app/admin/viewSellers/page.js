@@ -28,7 +28,7 @@ export default function AdminViewSellers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [showIdModal, setShowIdModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all"); // all, pending, approved, rejected
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (!authLoading) {
@@ -43,12 +43,10 @@ export default function AdminViewSellers() {
   useEffect(() => {
     let filtered = sellers;
 
-    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((seller) => seller.seller_status === statusFilter);
     }
 
-    // Apply search filter
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter(
         (seller) =>
@@ -165,9 +163,7 @@ export default function AdminViewSellers() {
               </div>
             </div>
 
-            {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
-              {/* Search Bar */}
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
@@ -181,7 +177,6 @@ export default function AdminViewSellers() {
                 />
               </div>
 
-              {/* Status Filter */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setStatusFilter("all")}
@@ -307,7 +302,6 @@ export default function AdminViewSellers() {
         </div>
       </main>
 
-      {/* ID Picture Modal */}
       {showIdModal && selectedSeller && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] overflow-auto relative m-2 sm:m-0 shadow-2xl">

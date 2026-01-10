@@ -87,7 +87,6 @@ export default function AddProduct() {
         );
         setShowPopup(true);
 
-        // Reset form fields...
         setProductName("");
         setDescription("");
         setPrice("");
