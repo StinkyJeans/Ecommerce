@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserPlus,
@@ -23,6 +24,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useLoadingFavicon(loading, "Register");
 
   const handleRegister = async (e) => {
     e.preventDefault();

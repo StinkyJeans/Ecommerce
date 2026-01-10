@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEdgeStore } from "@/lib/edgestore";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -35,6 +36,8 @@ export default function SellerRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+
+  useLoadingFavicon(loading, "Seller Registration");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];

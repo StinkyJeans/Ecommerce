@@ -28,18 +28,18 @@ export function useLoadingFavicon(isLoading, pageTitle = "Totally Normal Store")
         ctx.clearRect(0, 0, 32, 32);
 
         ctx.strokeStyle = "#dc2626";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3.5;
         ctx.lineCap = "round";
 
         const centerX = 16;
         const centerY = 16;
-        const radius = 12;
+        const radius = 11;
 
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, angle, angle + Math.PI * 1.5);
+        ctx.arc(centerX, centerY, radius, angle - Math.PI / 2, angle + Math.PI * 1.2);
         ctx.stroke();
 
-        angle += 0.2;
+        angle += 0.15;
         if (angle > Math.PI * 2) angle = 0;
 
         faviconLink.href = canvas.toDataURL("image/png");
@@ -60,10 +60,8 @@ export function useLoadingFavicon(isLoading, pageTitle = "Totally Normal Store")
     };
 
     if (isLoading) {
-      document.title = `⏳ Loading... - ${pageTitle}`;
       createSpinnerFavicon();
     } else {
-      document.title = pageTitle;
       restoreFavicon();
     }
 
@@ -74,7 +72,6 @@ export function useLoadingFavicon(isLoading, pageTitle = "Totally Normal Store")
       if (faviconLink && !isLoading) {
         faviconLink.href = originalFavicon || "/favicon.ico";
       }
-      document.title = pageTitle;
     };
   }, [isLoading, pageTitle]);
 }

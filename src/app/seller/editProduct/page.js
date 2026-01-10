@@ -5,6 +5,7 @@ import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faImage,
@@ -39,6 +40,8 @@ function EditProductContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { username, role, loading: authLoading } = useAuth();
+
+  useLoadingFavicon(authLoading || fetching || loading, "Edit Product");
 
   useEffect(() => {
     if (!authLoading) {

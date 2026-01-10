@@ -5,6 +5,7 @@ import Navbar from "../components/sellerNavbar";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
@@ -40,6 +41,8 @@ export default function AddProduct() {
   const { edgestore } = useEdgeStore();
   const router = useRouter();
   const { username, role, loading: authLoading } = useAuth();
+
+  useLoadingFavicon(authLoading || loading, "Add Product");
 
   useEffect(() => {
     if (!authLoading) {

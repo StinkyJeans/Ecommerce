@@ -43,16 +43,45 @@ export default function AdminDashboard() {
         router.push("/");
         return;
       }
-      fetchData();
+      if (role === "admin") {
+        fetchData();
+      }
     }
   }, [role, authLoading, router]);
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+    
+    if (role !== "admin") {
+      setLoading(false);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn("Loading timeout - setting loading to false");
+        setLoading(false);
+        setMessage({ text: "Loading took too long. Please refresh the page.", type: "error" });
+      }
+    }, 15000);
+
+    return () => clearTimeout(timeout);
+  }, [loading, authLoading, role]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [statsRes, sellersRes] = await Promise.all([
-        fetch("/api/admin/statistics"),
-        fetch("/api/admin/pendingSellers")
+        fetch("/api/admin/statistics").catch(err => {
+          console.error("Statistics fetch error:", err);
+          return { ok: false, json: async () => ({ success: false, message: "Failed to fetch statistics" }) };
+        }),
+        fetch("/api/admin/pendingSellers").catch(err => {
+          console.error("Pending sellers fetch error:", err);
+          return { ok: false, json: async () => ({ success: false, message: "Failed to fetch pending sellers" }) };
+        })
       ]);
 
       const statsData = await statsRes.json();
@@ -60,14 +89,30 @@ export default function AdminDashboard() {
 
       if (statsData.success) {
         setStatistics(statsData.statistics);
+      } else {
+        console.error("Statistics API error:", statsData.message);
+        setStatistics({
+          users: { total: 0, sellers: { total: 0, approved: 0, pending: 0 } },
+          products: { total: 0 },
+          visits: { total: 0, uniqueLast30Days: 0, dailyLast30Days: [], pageViews: {} }
+        });
       }
 
       if (sellersData.success) {
         setPendingSellers(sellersData.pendingSellers || []);
+      } else {
+        console.error("Pending sellers API error:", sellersData.message);
+        setPendingSellers([]);
       }
     } catch (err) {
       console.error("Failed to fetch data:", err);
       setMessage({ text: "Failed to load dashboard data", type: "error" });
+      setStatistics({
+        users: { total: 0, sellers: { total: 0, approved: 0, pending: 0 } },
+        products: { total: 0 },
+        visits: { total: 0, uniqueLast30Days: 0, dailyLast30Days: [], pageViews: {} }
+      });
+      setPendingSellers([]);
     } finally {
       setLoading(false);
     }

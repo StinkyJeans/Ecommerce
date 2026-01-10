@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -27,6 +28,8 @@ export default function LoginPage() {
   const [popupType, setPopupType] = useState("error");
   const { setRole, setUsername: setAuthUsername } = useAuth();
   const router = useRouter();
+
+  useLoadingFavicon(loading, "Login");
 
   const register = () => router.push("/register");
 
