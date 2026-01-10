@@ -123,7 +123,7 @@ export default function SellerRegisterPage() {
             Become a Seller
           </h1>
           <p className="text-gray-500 text-sm">
-            Start selling on Stupidshits Store today
+            Start selling on  totallynormalstore today
           </p>
         </div>
 
