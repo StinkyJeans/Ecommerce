@@ -118,29 +118,29 @@ export default function Header() {
             )}
           </button>
 
-          <div className="relative flex-1 sm:flex-initial" ref={dropdownRef}>
+          <div className="relative flex-1 sm:flex-initial min-w-0" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto min-w-0 ${
                 showDropdown 
                   ? 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200' 
                   : 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
               }`}
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
                 <FontAwesomeIcon
                   icon={faUser}
                   className="text-white text-[10px] sm:text-xs md:text-sm"
                 />
               </div>
-              <span className={`font-semibold text-[11px] sm:text-xs md:text-sm lg:text-base truncate max-w-[90px] sm:max-w-[100px] md:max-w-[120px] lg:max-w-none ${
+              <span className={`font-semibold text-[11px] sm:text-xs md:text-sm lg:text-base truncate min-w-0 flex-1 ${
                 showDropdown ? 'text-red-600' : 'text-gray-700'
               }`}>
                 {username ? `${username.toUpperCase()}'S ACCOUNT` : "Loading..."}
               </span>
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className={`text-[10px] sm:text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180 text-red-600' : 'text-gray-500'}`}
+                className={`text-[10px] sm:text-xs transition-transform duration-200 flex-shrink-0 ${showDropdown ? 'rotate-180 text-red-600' : 'text-gray-500'}`}
               />
             </button>
 

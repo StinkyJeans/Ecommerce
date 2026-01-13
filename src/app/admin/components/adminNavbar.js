@@ -198,11 +198,11 @@ export default function AdminNavbar() {
                 <div className="w-11 h-11 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-md">
                   <FontAwesomeIcon icon={faChartLine} className="text-lg" />
                 </div>
-                <div className="flex-1 text-left">
-                  <p className={`font-semibold text-sm ${showDropdown ? 'text-red-600' : 'text-gray-800'}`}>
+                <div className="flex-1 text-left min-w-0">
+                  <p className={`font-semibold text-sm truncate ${showDropdown ? 'text-red-600' : 'text-gray-800'}`}>
                     {username ? `${username.toUpperCase()}'S ACCOUNT` : "Admin Account"}
                   </p>
-                  <p className="text-xs text-gray-500">Full Access</p>
+                  <p className="text-xs text-gray-500 truncate">Full Access</p>
                 </div>
                 <FontAwesomeIcon
                   icon={faChevronDown}
