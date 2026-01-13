@@ -43,11 +43,9 @@ export async function GET(req) {
       })
     );
 
-    const transformedCart = cartWithSellers;
-
     return NextResponse.json({ 
-      cart: transformedCart,
-      count: transformedCart.length 
+      cart: cartWithSellers,
+      count: cartWithSellers.length 
     }, { status: 200 });
   } catch (err) {
     console.error("Get cart error:", err);

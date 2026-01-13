@@ -18,7 +18,6 @@ import {
   faSpinner,
   faHeart,
   faChevronRight,
-  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function ViewCart() {

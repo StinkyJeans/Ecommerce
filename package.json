@@ -6,7 +6,6 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "setup:db": "node scripts/setup-database.js",
     "reset:db": "node scripts/reset-database.js",
     "create:admin": "node scripts/create-admin.js",
     "clear:data": "node scripts/clear-database.js"
@@ -20,23 +19,15 @@
     "@fortawesome/react-fontawesome": "^3.1.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.89.0",
-    "cookie": "^1.0.2",
     "eslint-config-next": "^16.1.1",
-    "form-data": "^4.0.4",
-    "jose": "^6.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.546.0",
     "next": "^16.1.1",
     "postcss": "^8.5.6",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "zod": "^4.1.12"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
     "dotenv": "^16.4.5",
-    "mongodb": "^6.20.0",
-    "mongoose": "^8.19.1",
     "tailwindcss": "^4.1.14"
   }
 }
