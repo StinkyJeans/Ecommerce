@@ -2,8 +2,10 @@ DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 DROP TRIGGER IF EXISTS update_cart_items_updated_at ON cart_items;
 DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
+DROP TRIGGER IF EXISTS update_shipping_addresses_updated_at ON shipping_addresses;
 
 DROP TABLE IF EXISTS website_visits CASCADE;
+DROP TABLE IF EXISTS shipping_addresses CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS cart_items CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
@@ -24,6 +26,8 @@ DROP INDEX IF EXISTS idx_orders_status;
 DROP INDEX IF EXISTS idx_visits_created_at;
 DROP INDEX IF EXISTS idx_visits_page_path;
 DROP INDEX IF EXISTS idx_visits_visitor_id;
+DROP INDEX IF EXISTS idx_shipping_addresses_username;
+DROP INDEX IF EXISTS idx_shipping_addresses_default;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -112,10 +116,33 @@ CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TABLE shipping_addresses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  phone_number TEXT NOT NULL,
+  address_line1 TEXT NOT NULL,
+  address_line2 TEXT,
+  city TEXT NOT NULL,
+  province TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'Philippines',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_shipping_addresses_username ON shipping_addresses(username);
+CREATE INDEX idx_shipping_addresses_default ON shipping_addresses(username, is_default);
+
+CREATE TRIGGER update_shipping_addresses_updated_at BEFORE UPDATE ON shipping_addresses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shipping_addresses ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can read own data" ON users
   FOR SELECT USING (true);
@@ -179,3 +206,15 @@ CREATE POLICY "Anyone can insert visits" ON website_visits
 
 CREATE POLICY "Admins can read visits" ON website_visits
   FOR SELECT USING (true);
+
+CREATE POLICY "Users can read own addresses" ON shipping_addresses
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert own addresses" ON shipping_addresses
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update own addresses" ON shipping_addresses
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Users can delete own addresses" ON shipping_addresses
+  FOR DELETE USING (true);

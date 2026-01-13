@@ -35,10 +35,10 @@ export default function ShippedItems() {
       ) : (
         <ul className="space-y-4">
           {orders.map(order => (
-            <li key={order._id} className="p-4 border rounded-lg shadow-sm">
-              <p><strong>Product:</strong> {order.productName}</p>
+            <li key={order.id} className="p-4 border rounded-lg shadow-sm">
+              <p><strong>Product:</strong> {order.product_name}</p>
               <p><strong>Quantity:</strong> {order.quantity}</p>
-              <p><strong>Total:</strong> ₱{order.totalAmount.toFixed(2)}</p>
+              <p><strong>Total:</strong> ₱{parseFloat(order.total_amount).toFixed(2)}</p>
               <p><strong>Status:</strong> {order.status}</p>
             </li>
           ))}

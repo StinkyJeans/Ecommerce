@@ -20,6 +20,7 @@ Complete record of all code changes made during the MongoDB to Supabase migratio
 14. [Loading State Improvements](#loading-state-improvements)
 15. [Password Reset System](#password-reset-system)
 16. [Google OAuth Login](#google-oauth-login)
+17. [Account Management System](#account-management-system)
 
 ---
 
@@ -4005,6 +4006,473 @@ npm install @fortawesome/free-brands-svg-icons
 
 ---
 
+## Account Management System
+
+### Overview
+
+**Purpose**: Create a comprehensive account management page where users can manage their shipping addresses and view their order history
+
+**Date**: Latest feature addition
+
+**Scope**: Account management page, shipping addresses CRUD operations, order history display, and database schema updates
+
+---
+
+### 1. Created Shipping Addresses Database Schema
+
+#### Created `supabase/add-shipping-addresses-table.sql`
+
+**Purpose**: Database table for storing user shipping addresses
+
+**Code Created**:
+```sql
+CREATE TABLE IF NOT EXISTS shipping_addresses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  phone_number TEXT NOT NULL,
+  address_line1 TEXT NOT NULL,
+  address_line2 TEXT,
+  city TEXT NOT NULL,
+  province TEXT NOT NULL,
+  postal_code TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'Philippines',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_shipping_addresses_username ON shipping_addresses(username);
+CREATE INDEX IF NOT EXISTS idx_shipping_addresses_default ON shipping_addresses(username, is_default);
+
+ALTER TABLE shipping_addresses ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own addresses" ON shipping_addresses
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert own addresses" ON shipping_addresses
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update own addresses" ON shipping_addresses
+  FOR UPDATE USING (true);
+
+CREATE POLICY "Users can delete own addresses" ON shipping_addresses
+  FOR DELETE USING (true);
+
+CREATE TRIGGER update_shipping_addresses_updated_at BEFORE UPDATE ON shipping_addresses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+```
+
+**Detailed Explanation**:
+- **What it does**: Creates a table to store user shipping addresses with full address details
+- **Fields**:
+  - `id`: Unique identifier (UUID)
+  - `username`: Links address to user account
+  - `full_name`: Recipient's full name
+  - `phone_number`: Contact phone number
+  - `address_line1`: Primary address line (required)
+  - `address_line2`: Secondary address line (optional, for apartment/unit numbers)
+  - `city`: City name (required)
+  - `province`: Province/State (required)
+  - `postal_code`: Postal/ZIP code (required)
+  - `country`: Country (defaults to 'Philippines')
+  - `is_default`: Boolean flag for default address (only one per user)
+  - `created_at` / `updated_at`: Timestamps
+- **Indexes**: 
+  - Index on `username` for fast lookups
+  - Composite index on `username` and `is_default` for default address queries
+- **RLS Policies**: Users can only access their own addresses
+- **Default Address Logic**: Only one address per user can be marked as default (enforced in application logic)
+
+**Function**: Provides database structure for shipping address management
+
+---
+
+### 2. Created Shipping Addresses API Route
+
+#### Created `src/app/api/shipping-addresses/route.js`
+
+**Purpose**: Handle CRUD operations for shipping addresses
+
+**Code Created**:
+```javascript
+export async function GET(req) {
+  // Fetch all addresses for a user
+  const { searchParams } = new URL(req.url);
+  const username = searchParams.get('username');
+  
+  const { data: addresses, error } = await supabase
+    .from('shipping_addresses')
+    .select('*')
+    .eq('username', username)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: false });
+  
+  return NextResponse.json({ success: true, addresses });
+}
+
+export async function POST(req) {
+  // Add new address
+  const { username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault } = await req.json();
+  
+  // If setting as default, unset other defaults
+  if (isDefault) {
+    await supabase
+      .from('shipping_addresses')
+      .update({ is_default: false })
+      .eq('username', username)
+      .eq('is_default', true);
+  }
+  
+  const { data: newAddress } = await supabase
+    .from('shipping_addresses')
+    .insert({
+      username,
+      full_name: fullName,
+      phone_number: phoneNumber,
+      address_line1: addressLine1,
+      address_line2: addressLine2 || null,
+      city,
+      province,
+      postal_code: postalCode,
+      country: country || 'Philippines',
+      is_default: isDefault || false
+    })
+    .select()
+    .single();
+  
+  return NextResponse.json({ success: true, address: newAddress });
+}
+
+export async function PUT(req) {
+  // Update existing address
+  const { id, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault } = await req.json();
+  
+  // If setting as default, unset other defaults
+  if (isDefault) {
+    const { data: existingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('username')
+      .eq('id', id)
+      .single();
+    
+    await supabase
+      .from('shipping_addresses')
+      .update({ is_default: false })
+      .eq('username', existingAddress.username)
+      .eq('is_default', true)
+      .neq('id', id);
+  }
+  
+  const { data: updatedAddress } = await supabase
+    .from('shipping_addresses')
+    .update({ /* updated fields */ })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  return NextResponse.json({ success: true, address: updatedAddress });
+}
+
+export async function DELETE(req) {
+  // Delete address
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id');
+  
+  await supabase
+    .from('shipping_addresses')
+    .delete()
+    .eq('id', id);
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+**Detailed Explanation**:
+- **GET**: Fetches all addresses for a user, ordered by default status and creation date
+- **POST**: Creates new address, automatically unsetting other defaults if this is set as default
+- **PUT**: Updates existing address, handles default address logic
+- **DELETE**: Removes an address by ID
+- **Default Address Management**: When setting an address as default, all other addresses for that user are automatically set to `is_default = false`
+- **Field Name Transformation**: Converts between camelCase (frontend) and snake_case (database)
+
+**Function**: Provides complete CRUD API for shipping address management
+
+---
+
+### 3. Created Account Management Page
+
+#### Created `src/app/account/page.js`
+
+**Purpose**: User interface for managing shipping addresses and viewing order history
+
+**Code Created**:
+```javascript
+"use client";
+
+export default function AccountPage() {
+  const [activeTab, setActiveTab] = useState("addresses");
+  const [addresses, setAddresses] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+
+  // Fetch addresses and orders
+  const fetchAddresses = async () => {
+    const res = await fetch(`/api/shipping-addresses?username=${username}`);
+    const data = await res.json();
+    if (res.ok && data.success) {
+      setAddresses(data.addresses || []);
+    }
+  };
+
+  const fetchOrders = async () => {
+    const res = await fetch(`/api/getOrders?username=${username}`);
+    const data = await res.json();
+    if (res.ok) {
+      setOrders(data.orders || []);
+    }
+  };
+
+  // Address management functions
+  const handleAddAddress = () => {
+    setEditingAddress(null);
+    setFormData({ /* reset form */ });
+    setShowAddressForm(true);
+  };
+
+  const handleEditAddress = (address) => {
+    setEditingAddress(address);
+    setFormData({
+      fullName: address.full_name,
+      phoneNumber: address.phone_number,
+      // ... map all fields
+    });
+    setShowAddressForm(true);
+  };
+
+  const handleDeleteAddress = async (id) => {
+    if (!confirm("Are you sure you want to delete this address?")) return;
+    
+    const res = await fetch(`/api/shipping-addresses?id=${id}`, {
+      method: "DELETE"
+    });
+    
+    if (res.ok) {
+      fetchAddresses();
+    }
+  };
+
+  const handleSubmitAddress = async (e) => {
+    e.preventDefault();
+    const method = editingAddress ? "PUT" : "POST";
+    const res = await fetch("/api/shipping-addresses", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ /* form data */ })
+    });
+    
+    if (res.ok) {
+      setShowAddressForm(false);
+      fetchAddresses();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex">
+      <Navbar />
+      <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
+        <Header />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
+          <h1>Manage My Account</h1>
+          
+          {/* Tabs */}
+          <div className="flex gap-4 mb-6">
+            <button onClick={() => setActiveTab("addresses")}>
+              Shipping Addresses
+            </button>
+            <button onClick={() => setActiveTab("orders")}>
+              My Orders
+            </button>
+          </div>
+
+          {/* Addresses Tab */}
+          {activeTab === "addresses" && (
+            <div>
+              <button onClick={handleAddAddress}>Add Address</button>
+              
+              {addresses.map((address) => (
+                <div key={address.id}>
+                  {address.is_default && <span>Default Address</span>}
+                  <p>{address.full_name}</p>
+                  <p>{address.address_line1}</p>
+                  {/* ... display address details ... */}
+                  <button onClick={() => handleEditAddress(address)}>Edit</button>
+                  <button onClick={() => handleDeleteAddress(address.id)}>Delete</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Orders Tab */}
+          {activeTab === "orders" && (
+            <div>
+              {orders.map((order) => (
+                <div key={order.id}>
+                  <img src={order.id_url} alt={order.product_name} />
+                  <h3>{order.product_name}</h3>
+                  <p>Quantity: {order.quantity}</p>
+                  <p>Total: ₱{formatPrice(order.total_amount)}</p>
+                  <span>{order.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Provides a two-tab interface for managing addresses and viewing orders
+- **Layout Structure**: 
+  - Matches dashboard layout pattern (Navbar sidebar + main content)
+  - Header at top with dynamic title
+  - Tab navigation for switching between addresses and orders
+- **Address Management**:
+  - Add new addresses with full form validation
+  - Edit existing addresses
+  - Delete addresses with confirmation
+  - Set default address (only one per user)
+  - Visual indicator for default address
+- **Order History**:
+  - Displays all user orders
+  - Shows product image, name, quantity, price, status
+  - Formatted prices with comma separators
+  - Status badges (pending, shipped, delivered)
+- **Modal Form**: Address form appears in a modal overlay with click-outside-to-close functionality
+- **Error Handling**: Proper error handling for API calls with user-friendly messages
+- **Loading States**: Loading indicators during data fetching
+
+**Function**: Provides complete account management interface for users
+
+---
+
+### 4. Updated Header Component
+
+#### Updated `src/app/components/header.js`
+
+**Purpose**: Display "My Account" title when on account page instead of "Featured Products"
+
+**Code Added**:
+```javascript
+import { usePathname } from "next/navigation";
+
+export default function Header() {
+  const pathname = usePathname();
+  const pageTitle = pathname === "/account" ? "My Account" : "Featured Products";
+
+  return (
+    <div>
+      <h1>{pageTitle}</h1>
+      {/* ... rest of header ... */}
+    </div>
+  );
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Dynamically changes header title based on current route
+- **How it works**: Uses `usePathname()` hook to detect current route
+- **Conditional Logic**: If pathname is `/account`, shows "My Account", otherwise shows "Featured Products"
+- **Why needed**: Provides context-appropriate page title for better user experience
+
+**Function**: Displays context-appropriate page title in header
+
+---
+
+### 5. Updated Navigation Links
+
+#### Updated Header Dropdown Menus
+
+**Files Modified**:
+- `src/app/components/header.js`
+- `src/app/seller/components/sellerNavbar.js`
+- `src/app/admin/components/adminNavbar.js`
+
+**Code Changed**:
+```javascript
+// BEFORE
+<button onClick={() => router.push("/dashboard")}>
+  Manage My Account
+</button>
+
+// AFTER
+<button onClick={() => router.push("/account")}>
+  Manage My Account
+</button>
+```
+
+**Detailed Explanation**:
+- **What it does**: Updates all "Manage My Account" links to point to `/account` page
+- **Scope**: Updated in user header, seller navbar, and admin navbar
+- **Consistency**: All user types (user, seller, admin) can access account management from their respective navigation menus
+
+**Function**: Provides consistent navigation to account management page across all user types
+
+---
+
+### 6. Updated Database Schema Files
+
+#### Updated `supabase/schema.sql` and `supabase/reset.sql`
+
+**Purpose**: Include shipping addresses table in main schema files
+
+**Code Added**:
+```sql
+CREATE TABLE IF NOT EXISTS shipping_addresses (
+  -- ... table definition ...
+);
+
+CREATE INDEX IF NOT EXISTS idx_shipping_addresses_username ON shipping_addresses(username);
+CREATE INDEX IF NOT EXISTS idx_shipping_addresses_default ON shipping_addresses(username, is_default);
+
+ALTER TABLE shipping_addresses ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Users can read own addresses" ON shipping_addresses FOR SELECT USING (true);
+CREATE POLICY "Users can insert own addresses" ON shipping_addresses FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can update own addresses" ON shipping_addresses FOR UPDATE USING (true);
+CREATE POLICY "Users can delete own addresses" ON shipping_addresses FOR DELETE USING (true);
+
+CREATE TRIGGER update_shipping_addresses_updated_at BEFORE UPDATE ON shipping_addresses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+```
+
+**Function**: Ensures shipping addresses table is included in database setup and reset scripts
+
+---
+
+### 7. Created Setup Documentation
+
+#### Created `SHIPPING_ADDRESSES_SETUP.md`
+
+**Purpose**: Comprehensive guide for setting up shipping addresses feature
+
+**Contents**:
+- Database migration instructions
+- Table schema explanation
+- RLS policy details
+- API endpoint documentation
+- Usage instructions
+- Default address management explanation
+
+**Function**: Provides complete setup and usage documentation for shipping addresses feature
+
+---
+
 ## Summary
 
 ### Files Created
@@ -4039,6 +4507,10 @@ npm install @fortawesome/free-brands-svg-icons
 29. `src/app/auth/reset-password/page.js` - Password reset page
 30. `src/app/auth/callback/route.js` - OAuth callback handler
 31. `GOOGLE_OAUTH_SETUP.md` - Google OAuth setup documentation
+32. `src/app/account/page.js` - Account management page
+33. `src/app/api/shipping-addresses/route.js` - Shipping addresses CRUD API
+34. `supabase/add-shipping-addresses-table.sql` - Shipping addresses table migration
+35. `SHIPPING_ADDRESSES_SETUP.md` - Shipping addresses setup documentation
 
 ### Files Modified
 1. `src/app/api/login/route.js` - Username-based login, seller approval blocking
@@ -4095,14 +4567,23 @@ npm install @fortawesome/free-brands-svg-icons
 - `closePopup()` / `closeModal()` - Modal close handlers with click-outside support
 - `handleResetPassword()` - Password reset request handler
 - `handleGoogleLogin()` - Google OAuth login handler
+- `fetchAddresses()` - Fetch user shipping addresses
+- `fetchOrders()` - Fetch user order history
+- `handleAddAddress()` - Open address form for adding new address
+- `handleEditAddress()` - Open address form for editing existing address
+- `handleDeleteAddress()` - Delete shipping address
+- `handleSubmitAddress()` - Submit address form (add or update)
 
 ---
 
-**Version**: 2.4  
+**Version**: 2.5  
 **Last Updated**: January 2025  
-**Total Code Changes**: 125+ files modified/created
+**Total Code Changes**: 130+ files modified/created
 
 ### Latest Updates
+- **Account Management System**: Created comprehensive account management page with shipping address management and order history
+- **Shipping Addresses Feature**: Full CRUD operations for user shipping addresses with default address management
+- **Dynamic Header Title**: Header now displays "My Account" on account page, "Featured Products" elsewhere
 - **Password Reset System**: Implemented complete password reset functionality with email delivery and reset page
 - **Google OAuth Login**: Added "Continue with Google" button for easy one-click authentication
 - **Price Formatting**: Implemented automatic comma formatting for prices (e.g., 1234567 → 1,234,567)

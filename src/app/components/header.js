@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faUser, faSignOutAlt, faChevronDown, faUserCircle, faBox } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
@@ -8,11 +8,14 @@ import { useEffect, useState, useRef } from "react";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { logout, username } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+
+  const pageTitle = pathname === "/account" ? "My Account" : "Featured Products";
 
   useEffect(() => {
     const fetchCartCount = async () => {
@@ -97,7 +100,7 @@ export default function Header() {
     <div className={`pb-3 sm:pb-4 pt-2 transition-all duration-300 ease-in-out ${isScrolled ? 'h-0 overflow-hidden opacity-0 mb-0 pointer-events-none' : 'mb-4 sm:mb-6'}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-          Featured Products
+          {pageTitle}
         </h1>
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto cursor-pointer">
           <button
@@ -144,14 +147,14 @@ export default function Header() {
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <button
-                  onClick={() => handleMenuClick(() => router.push("/dashboard"))}
+                  onClick={() => handleMenuClick(() => router.push("/account"))}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                 >
                   <FontAwesomeIcon icon={faUserCircle} className="text-base text-gray-500 group-hover:text-red-600" />
                   <span className="font-medium text-sm">Manage My Account</span>
                 </button>
                 <button
-                  onClick={() => handleMenuClick(() => router.push("/shippedItems"))}
+                  onClick={() => handleMenuClick(() => router.push("/account?tab=orders"))}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                 >
                   <FontAwesomeIcon icon={faBox} className="text-base text-gray-500 group-hover:text-red-600" />
