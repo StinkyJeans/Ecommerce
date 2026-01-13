@@ -14,6 +14,12 @@ Complete record of all code changes made during the MongoDB to Supabase migratio
 8. [UI/UX Improvements](#uiux-improvements)
 9. [Route Protection](#route-protection)
 10. [Code Cleanup - Comment Removal](#code-cleanup---comment-removal)
+11. [Price Formatting System](#price-formatting-system)
+12. [Modal Interaction Improvements](#modal-interaction-improvements)
+13. [Button Alignment Fixes](#button-alignment-fixes)
+14. [Loading State Improvements](#loading-state-improvements)
+15. [Password Reset System](#password-reset-system)
+16. [Google OAuth Login](#google-oauth-login)
 
 ---
 
@@ -3442,6 +3448,563 @@ ORDER BY created_at;
 
 ---
 
+## Password Reset System
+
+### Overview
+
+**Purpose**: Implement password reset functionality allowing users to reset their passwords via email
+
+**Date**: Latest feature addition
+
+**Scope**: Password reset request, email delivery, and password reset page
+
+---
+
+### 1. Created Password Reset API Route
+
+#### Created `src/app/api/resetPassword/route.js`
+
+**Purpose**: Handle password reset requests by looking up user email and sending reset email
+
+**Code Created**:
+```javascript
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export async function POST(req) {
+  try {
+    const { username } = await req.json();
+
+    if (!username) {
+      return NextResponse.json({ 
+        message: "Username is required" 
+      }, { status: 400 });
+    }
+
+    const supabase = await createClient();
+    
+    // Look up user email from username
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('email, username')
+      .eq('username', username)
+      .single();
+
+    if (userError || !userData) {
+      // Return success message even if user doesn't exist (security best practice)
+      return NextResponse.json({ 
+        message: "If an account with that username exists, a password reset email has been sent." 
+      }, { status: 200 });
+    }
+
+    if (!userData.email) {
+      return NextResponse.json({ 
+        message: "This account does not have an email address. Please contact support." 
+      }, { status: 400 });
+    }
+
+    // Send password reset email via Supabase
+    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`;
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      userData.email,
+      {
+        redirectTo: resetUrl,
+      }
+    );
+
+    if (resetError) {
+      console.error("Password reset error:", resetError);
+      return NextResponse.json({ 
+        message: "Failed to send reset email. Please try again later." 
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: "If an account with that username exists, a password reset email has been sent to your email address." 
+    }, { status: 200 });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return NextResponse.json({ 
+      message: "Server error. Please try again later." 
+    }, { status: 500 });
+  }
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Accepts username, looks up associated email, and sends password reset email via Supabase
+- **Security practice**: Returns success message even if username doesn't exist (prevents username enumeration)
+- **How it works**:
+  1. Validates username is provided
+  2. Looks up user email from `users` table using username
+  3. If user not found, returns generic success message (security)
+  4. If user found but no email, returns error
+  5. Calls Supabase's `resetPasswordForEmail()` to send reset email
+  6. Returns success message
+- **Why needed**: Allows users to reset forgotten passwords without admin intervention
+
+**Function**: Handles password reset requests and sends reset emails via Supabase
+
+---
+
+### 2. Created Password Reset Page
+
+#### Created `src/app/auth/reset-password/page.js`
+
+**Purpose**: Page where users set their new password after clicking the reset link in email
+
+**Code Created**:
+```javascript
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+
+function ResetPasswordContent() {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (!password || !confirmPassword) {
+      setPopupMessage("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      setPopupMessage("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setPopupMessage("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
+
+      if (error) {
+        setPopupMessage(error.message || "Failed to reset password. The link may have expired.");
+        return;
+      }
+
+      setPopupMessage("Password reset successfully! Redirecting to login...");
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    } catch (error) {
+      setPopupMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    // Form with password and confirm password fields
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Provides a form for users to enter and confirm their new password
+- **How it works**:
+  1. User clicks reset link in email (contains auth token)
+  2. Supabase validates the token automatically
+  3. User enters new password and confirmation
+  4. Validates password length (minimum 6 characters)
+  5. Validates passwords match
+  6. Calls `supabase.auth.updateUser()` to update password
+  7. Redirects to login page on success
+- **Security**: Password reset link contains time-limited token (handled by Supabase)
+- **Suspense wrapper**: Required because component uses `useSearchParams()`
+
+**Function**: Allows users to set new password after clicking reset link in email
+
+---
+
+### 3. Updated Login Page
+
+#### Updated `src/app/page.js`
+
+**Purpose**: Add "Forgot password?" link and reset password functionality
+
+**Code Changes**:
+
+**BEFORE**:
+```javascript
+<div className="mb-6">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Password
+  </label>
+  <div className="relative">
+    {/* Password input */}
+  </div>
+  <p className="text-gray-500 text-sm">
+    Forgot password?{" "}
+    <span
+      // onClick={forgotPassword}
+      className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
+    >
+      Reset password
+    </span>
+  </p>
+</div>
+```
+
+**AFTER**:
+```javascript
+<div className="mb-6">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Password
+  </label>
+  <div className="relative">
+    {/* Password input */}
+  </div>
+  <div className="flex justify-end mt-2">
+    <button
+      type="button"
+      onClick={handleResetPassword}
+      disabled={resetLoading || !username}
+      className="text-sm text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+    >
+      {resetLoading ? "Sending..." : "Forgot password?"}
+    </button>
+  </div>
+</div>
+```
+
+**Code Added**:
+```javascript
+const [resetLoading, setResetLoading] = useState(false);
+
+const handleResetPassword = async (e) => {
+  e.preventDefault();
+  if (!username) {
+    setPopupMessage("Please enter your username first");
+    setPopupType("error");
+    setShowPopup(true);
+    return;
+  }
+
+  setResetLoading(true);
+  try {
+    const res = await fetch("/api/resetPassword", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      setPopupMessage(data.message || "Password reset email sent! Please check your email.");
+      setPopupType("success");
+    } else {
+      setPopupMessage(data.message || "If an account with that username exists, a password reset email has been sent.");
+      setPopupType("success");
+    }
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 6000);
+  } catch (error) {
+    setPopupMessage("Something went wrong. Please try again later.");
+    setPopupType("error");
+    setShowPopup(true);
+  } finally {
+    setResetLoading(false);
+  }
+};
+```
+
+**Detailed Explanation**:
+- **What it does**: Adds functional "Forgot password?" button that triggers password reset
+- **Positioning**: Moved to right side using `flex justify-end`
+- **User experience**: 
+  - Button disabled if username is empty
+  - Shows "Sending..." while processing
+  - Displays success/error popup messages
+- **Security**: Always shows success message (even if username doesn't exist) to prevent username enumeration
+
+**Function**: Provides easy access to password reset functionality from login page
+
+---
+
+## Google OAuth Login
+
+### Overview
+
+**Purpose**: Implement Google OAuth login for easy authentication without username/password
+
+**Date**: Latest feature addition
+
+**Scope**: Google OAuth integration, user account creation, and callback handling
+
+---
+
+### 1. Created OAuth Callback Handler
+
+#### Created `src/app/auth/callback/route.js`
+
+**Purpose**: Handle OAuth callback from Google and create user records
+
+**Code Created**:
+```javascript
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+
+export async function GET(request) {
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next") || "/";
+
+  if (code) {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error && data.user) {
+      const email = data.user.email;
+      const provider = data.user.app_metadata?.provider || "google";
+
+      if (provider === "google" && email) {
+        // Check if user exists in users table
+        const { data: existingUser, error: userError } = await supabase
+          .from("users")
+          .select("id, username, email, role")
+          .eq("email", email)
+          .maybeSingle();
+
+        // Create user record if doesn't exist
+        if (!existingUser && !userError) {
+          const emailUsername = email.split("@")[0];
+          const baseUsername = emailUsername.replace(/[^a-zA-Z0-9]/g, "");
+          let finalUsername = baseUsername || `user${Date.now()}`;
+          let counter = 1;
+
+          // Generate unique username
+          while (true) {
+            const { data: checkUser } = await supabase
+              .from("users")
+              .select("username")
+              .eq("username", finalUsername)
+              .maybeSingle();
+
+            if (!checkUser) {
+              break;
+            }
+            finalUsername = `${baseUsername}${counter}`;
+            counter++;
+          }
+
+          // Insert new user
+          const { error: insertError } = await supabase
+            .from("users")
+            .insert({
+              username: finalUsername,
+              email: email,
+              role: "user",
+            });
+
+          if (insertError) {
+            console.error("Error creating user record:", insertError);
+          }
+        } else if (existingUser) {
+          // Redirect based on role
+          const userRole = existingUser.role || "user";
+          if (userRole === "admin") {
+            return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+          } else if (userRole === "seller") {
+            return NextResponse.redirect(new URL("/seller/dashboard", request.url));
+          }
+        }
+      }
+    }
+
+    return NextResponse.redirect(new URL(next, request.url));
+  }
+
+  return NextResponse.redirect(new URL("/", request.url));
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Handles OAuth callback from Google, creates user records, and redirects appropriately
+- **How it works**:
+  1. Receives authorization code from Google via URL parameter
+  2. Exchanges code for session using `exchangeCodeForSession()`
+  3. Checks if user exists in `users` table by email
+  4. If new user: Generates unique username from email and creates user record
+  5. If existing user: Redirects based on role (admin/seller/user)
+  6. Redirects to appropriate dashboard
+- **Username generation**: 
+  - Extracts username from email (e.g., `john.doe@gmail.com` → `johndoe`)
+  - Removes special characters
+  - Appends number if username already exists (e.g., `johndoe1`, `johndoe2`)
+- **Why needed**: Automatically creates user accounts for first-time Google users
+
+**Function**: Handles OAuth callback and creates/manages user accounts
+
+---
+
+### 2. Updated Login Page
+
+#### Updated `src/app/page.js`
+
+**Purpose**: Add "Continue with Google" button and OAuth login functionality
+
+**Code Added**:
+```javascript
+import { createClient } from "@/lib/supabase/client";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+
+export default function LoginPage() {
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleGoogleLogin = async () => {
+    if (!supabase) {
+      setPopupMessage("Unable to initialize. Please try again.");
+      setPopupType("error");
+      setShowPopup(true);
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback?next=/dashboard`;
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        console.error("Google OAuth error:", error);
+        
+        let errorMessage = "Failed to sign in with Google. Please try again.";
+        
+        if (error.message && error.message.includes("provider is not enabled")) {
+          errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
+        }
+        
+        setPopupMessage(errorMessage);
+        setPopupType("error");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 6000);
+        setGoogleLoading(false);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      setPopupMessage("Something went wrong. Please try again.");
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 6000);
+      setGoogleLoading(false);
+    }
+  };
+
+  return (
+    <form>
+      {/* Username/password fields */}
+      
+      <button type="submit">Login</button>
+
+      <div className="mt-6 flex items-center gap-4">
+        <div className="flex-1 h-px bg-gray-300"></div>
+        <span className="text-gray-500 text-sm">OR</span>
+        <div className="flex-1 h-px bg-gray-300"></div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        disabled={loading || googleLoading}
+        className="w-full mt-4 py-3 sm:py-3.5 px-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base flex items-center justify-center gap-3"
+      >
+        <FontAwesomeIcon icon={faGoogle} className="text-xl text-red-600" />
+        <span>Continue with Google</span>
+      </button>
+    </form>
+  );
+}
+```
+
+**Detailed Explanation**:
+- **What it does**: Adds Google OAuth login button with proper error handling
+- **How it works**:
+  1. User clicks "Continue with Google" button
+  2. Calls `supabase.auth.signInWithOAuth()` with Google provider
+  3. User is redirected to Google sign-in page
+  4. After authentication, Google redirects to `/auth/callback`
+  5. Callback handler processes the authentication
+- **Error handling**: 
+  - Detects if Google OAuth is not enabled in Supabase
+  - Shows user-friendly error messages
+  - Handles network errors gracefully
+- **UI design**: 
+  - Visual separator ("OR") between regular login and Google login
+  - Google icon from FontAwesome brands
+  - Styled to match existing design theme
+- **Loading state**: Shows loading indicator while redirecting to Google
+
+**Function**: Provides one-click Google authentication for users
+
+---
+
+### 3. Package Installation
+
+#### Installed `@fortawesome/free-brands-svg-icons`
+
+**Purpose**: Provide Google icon for OAuth button
+
+**Command**:
+```bash
+npm install @fortawesome/free-brands-svg-icons
+```
+
+**Function**: Adds Google brand icon to project
+
+---
+
+### 4. Created Setup Documentation
+
+#### Created `GOOGLE_OAUTH_SETUP.md`
+
+**Purpose**: Comprehensive guide for setting up Google OAuth in Supabase
+
+**Contents**:
+- Step-by-step Google Cloud Console setup
+- Supabase configuration instructions
+- Redirect URL configuration
+- Troubleshooting guide (including "provider is not enabled" error)
+- Testing instructions
+
+**Function**: Provides complete setup instructions for Google OAuth integration
+
+---
+
 ## Summary
 
 ### Files Created
@@ -3472,6 +4035,10 @@ ORDER BY created_at;
 25. `scripts/clear-database.js` - Database clearing script
 26. `ADMIN_ACCOUNT_SETUP.md` - Admin setup documentation
 27. `CLEAR_DATABASE_GUIDE.md` - Database clearing guide
+28. `src/app/api/resetPassword/route.js` - Password reset API route
+29. `src/app/auth/reset-password/page.js` - Password reset page
+30. `src/app/auth/callback/route.js` - OAuth callback handler
+31. `GOOGLE_OAUTH_SETUP.md` - Google OAuth setup documentation
 
 ### Files Modified
 1. `src/app/api/login/route.js` - Username-based login, seller approval blocking
@@ -3500,7 +4067,7 @@ ORDER BY created_at;
 24. `src/app/seller/viewProduct/page.js` - Font Awesome icons, compact layout, image fixes, route protection, price formatting, click-outside-to-close, button alignment
 25. `src/app/seller/sellerCart/page.js` - Image coverage fixes, route protection, price formatting
 26. `src/app/seller/editProduct/page.js` - Loading state fix, Suspense boundary for useSearchParams, loading favicon, price formatting
-27. `src/app/page.js` - Seller approval popup messages, icon sizing, loading favicon
+27. `src/app/page.js` - Seller approval popup messages, icon sizing, loading favicon, reset password functionality, Google OAuth login
 28. `src/app/register/page.js` - Icon sizing, loading favicon
 29. `src/app/sellerRegister/page.js` - Approval process messages, image preview fix, icon sizing, loading favicon
 30. `src/app/admin/page.js` - Route protection and redirect logic, loading favicon
@@ -3526,14 +4093,18 @@ ORDER BY created_at;
 - Visit statistics aggregation functions
 - `handleEdit()` - Product editing handler
 - `closePopup()` / `closeModal()` - Modal close handlers with click-outside support
+- `handleResetPassword()` - Password reset request handler
+- `handleGoogleLogin()` - Google OAuth login handler
 
 ---
 
-**Version**: 2.3  
+**Version**: 2.4  
 **Last Updated**: January 2025  
-**Total Code Changes**: 120+ files modified/created
+**Total Code Changes**: 125+ files modified/created
 
 ### Latest Updates
+- **Password Reset System**: Implemented complete password reset functionality with email delivery and reset page
+- **Google OAuth Login**: Added "Continue with Google" button for easy one-click authentication
 - **Price Formatting**: Implemented automatic comma formatting for prices (e.g., 1234567 → 1,234,567)
 - **Modal Click-Outside-to-Close**: Added ability to close product viewing modals by clicking outside the container
 - **View Details Button Alignment**: Fixed button alignment so all "View Details" buttons align at the bottom of product cards

@@ -2,15 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faUser, faSignOutAlt, faChevronDown, faUserCircle, faBox } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Header() {
   const router = useRouter();
   const { logout, username } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchCartCount = async () => {
@@ -61,10 +63,34 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
+
   const handleLogout = async () => {
+    setShowDropdown(false);
     await fetch("/api/logout", { method: "POST" });
     logout();
     router.replace("/");
+  };
+
+  const handleMenuClick = (action) => {
+    setShowDropdown(false);
+    if (action) {
+      action();
+    }
   };
 
   return (
@@ -89,25 +115,59 @@ export default function Header() {
             )}
           </button>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation flex-1 sm:flex-initial">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm">
+          <div className="relative flex-1 sm:flex-initial" ref={dropdownRef}>
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto ${
+                showDropdown 
+                  ? 'bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200' 
+                  : 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+              }`}
+            >
+              <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm">
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="text-white text-[10px] sm:text-xs md:text-sm"
+                />
+              </div>
+              <span className={`font-semibold text-[11px] sm:text-xs md:text-sm lg:text-base truncate max-w-[90px] sm:max-w-[100px] md:max-w-[120px] lg:max-w-none ${
+                showDropdown ? 'text-red-600' : 'text-gray-700'
+              }`}>
+                {username ? `${username.toUpperCase()}'S ACCOUNT` : "Loading..."}
+              </span>
               <FontAwesomeIcon
-                icon={faUser}
-                className="text-white text-[10px] sm:text-xs md:text-sm"
+                icon={faChevronDown}
+                className={`text-[10px] sm:text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180 text-red-600' : 'text-gray-500'}`}
               />
-            </div>
-            <span className="font-semibold text-gray-700 text-[11px] sm:text-xs md:text-sm lg:text-base truncate max-w-[90px] sm:max-w-[100px] md:max-w-[120px] lg:max-w-none">
-              {username || "Loading..."}
-            </span>
+            </button>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <button
+                  onClick={() => handleMenuClick(() => router.push("/dashboard"))}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                >
+                  <FontAwesomeIcon icon={faUserCircle} className="text-base text-gray-500 group-hover:text-red-600" />
+                  <span className="font-medium text-sm">Manage My Account</span>
+                </button>
+                <button
+                  onClick={() => handleMenuClick(() => router.push("/shippedItems"))}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                >
+                  <FontAwesomeIcon icon={faBox} className="text-base text-gray-500 group-hover:text-red-600" />
+                  <span className="font-medium text-sm">My Orders</span>
+                </button>
+                <div className="border-t border-gray-200 my-1"></div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
+                >
+                  <FontAwesomeIcon icon={faSignOutAlt} className="text-base text-gray-500 group-hover:text-red-600" />
+                  <span className="font-medium text-sm">Logout</span>
+                </button>
+              </div>
+            )}
           </div>
-          
-          <button
-            onClick={handleLogout}
-            className="px-2.5 sm:px-3 md:px-4 lg:px-5 py-1.5 sm:py-2 md:py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg sm:rounded-xl md:rounded-2xl text-white transition-all duration-200 cursor-pointer text-[11px] sm:text-xs md:text-sm lg:text-base whitespace-nowrap flex items-center gap-1 sm:gap-1.5 md:gap-2 touch-manipulation shadow-md hover:shadow-lg active:scale-95"
-          >
-            <FontAwesomeIcon icon={faSignOutAlt} className="text-[10px] sm:text-xs md:text-sm" />
-            <span className="hidden xs:inline">Logout</span>
-          </button>
         </div>
       </div>
     </div>

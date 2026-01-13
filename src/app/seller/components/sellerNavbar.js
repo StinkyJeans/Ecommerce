@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -13,17 +13,56 @@ import {
   faStore, 
   faGripHorizontal, 
   faChevronRight, 
-  faEllipsisV 
+  faEllipsisV,
+  faSignOutAlt,
+  faChevronDown,
+  faUserCircle,
+  faBox,
+  faStar
 } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { logout, username } = useAuth();
   const [open, setOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   const addProduct = () => router.push("/seller/addProduct");
   const viewProduct = () => router.push("/seller/viewProduct");
   const dashboard = () => router.push("/seller/dashboard");
+
+  const handleLogout = async () => {
+    setShowDropdown(false);
+    await fetch("/api/logout", { method: "POST" });
+    logout();
+    router.replace("/");
+  };
+
+  const handleMenuClick = (action) => {
+    setShowDropdown(false);
+    if (action) {
+      action();
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const menuItems = [
     {
@@ -154,17 +193,68 @@ export default function Navbar() {
           </div>
 
           <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex items-center gap-3 px-2 py-3">
-              <div className="w-11 h-11 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md">
-                <FontAwesomeIcon icon={faStore} className="text-lg" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-800 text-sm">Seller Account</p>
-                <p className="text-xs text-gray-500">Active Status</p>
-              </div>
-              <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                <FontAwesomeIcon icon={faEllipsisV} className="text-gray-600" />
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className={`w-full flex items-center gap-3 px-2 py-3 rounded-lg transition-colors group ${
+                  showDropdown ? 'bg-red-50' : 'hover:bg-gray-100'
+                }`}
+              >
+                <div className="w-11 h-11 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                  <FontAwesomeIcon icon={faStore} className="text-lg" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className={`font-semibold text-sm ${showDropdown ? 'text-red-600' : 'text-gray-800'}`}>
+                    {username ? `${username.toUpperCase()}'S ACCOUNT` : "Seller Account"}
+                  </p>
+                  <p className="text-xs text-gray-500">Active Status</p>
+                </div>
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180 text-red-600' : 'text-gray-400'}`}
+                />
               </button>
+
+              {showDropdown && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 w-64">
+                  <button
+                    onClick={() => handleMenuClick(() => router.push("/seller/dashboard"))}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                  >
+                    <FontAwesomeIcon icon={faUserCircle} className="text-base text-gray-500 group-hover:text-red-600" />
+                    <span className="font-medium text-sm">Manage My Account</span>
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick(() => router.push("/seller/sellerCart"))}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                  >
+                    <FontAwesomeIcon icon={faBox} className="text-base text-gray-500 group-hover:text-red-600" />
+                    <span className="font-medium text-sm">My Orders</span>
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick(() => router.push("/seller/viewProduct"))}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                  >
+                    <FontAwesomeIcon icon={faBoxes} className="text-base text-gray-500 group-hover:text-red-600" />
+                    <span className="font-medium text-sm">My Products</span>
+                  </button>
+                  <button
+                    onClick={() => handleMenuClick()}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                  >
+                    <FontAwesomeIcon icon={faStar} className="text-base text-gray-500 group-hover:text-red-600" />
+                    <span className="font-medium text-sm">My Reviews</span>
+                  </button>
+                  <div className="border-t border-gray-200 my-1"></div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
+                  >
+                    <FontAwesomeIcon icon={faSignOutAlt} className="text-base text-gray-500 group-hover:text-red-600" />
+                    <span className="font-medium text-sm">Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

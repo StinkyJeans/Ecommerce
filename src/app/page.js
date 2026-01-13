@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { createClient } from "@/lib/supabase/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -16,6 +17,7 @@ import {
   faTimes,
   faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 export default function LoginPage() {
   const [sellerUsername, setSellerUsername] = useState("");
@@ -23,15 +25,112 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("error");
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { setRole, setUsername: setAuthUsername } = useAuth();
   const router = useRouter();
+  const supabase = createClient();
 
-  useLoadingFavicon(loading, "Login");
+  useLoadingFavicon(loading || googleLoading, "Login");
 
   const register = () => router.push("/register");
+
+  const handleGoogleLogin = async () => {
+    if (!supabase) {
+      setPopupMessage("Unable to initialize. Please try again.");
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 4000);
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback?next=/dashboard`;
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        console.error("Google OAuth error:", error);
+        
+        let errorMessage = "Failed to sign in with Google. Please try again.";
+        
+        if (error.message && error.message.includes("provider is not enabled")) {
+          errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
+        } else if (error.message) {
+          errorMessage = `Google login error: ${error.message}`;
+        }
+        
+        setPopupMessage(errorMessage);
+        setPopupType("error");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 6000);
+        setGoogleLoading(false);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (error.message && error.message.includes("provider is not enabled")) {
+        errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
+      }
+      
+      setPopupMessage(errorMessage);
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 6000);
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!username) {
+      setPopupMessage("Please enter your username first");
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 4000);
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const res = await fetch("/api/resetPassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setPopupMessage(data.message || "Password reset email sent! Please check your email.");
+        setPopupType("success");
+      } else {
+        setPopupMessage(data.message || "If an account with that username exists, a password reset email has been sent.");
+        setPopupType("success");
+      }
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 6000);
+    } catch (error) {
+      console.error("Reset password error:", error);
+      setPopupMessage("Something went wrong. Please try again later.");
+      setPopupType("error");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 4000);
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -123,11 +222,11 @@ export default function LoginPage() {
         onSubmit={handleLogin}
         className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
       >
-        {loading && (
+        {(loading || googleLoading) && (
           <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-3">
               <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Logging in...</p>
+              <p className="text-gray-600 font-medium">{googleLoading ? "Redirecting to Google..." : "Logging in..."}</p>
             </div>
           </div>
         )}
@@ -190,17 +289,43 @@ export default function LoginPage() {
               />
             </button>
           </div>
+          <div className="flex justify-end mt-2">
+            <button
+              type="button"
+              onClick={handleResetPassword}
+              disabled={resetLoading || !username}
+              className="text-sm text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+            >
+              {resetLoading ? "Sending..." : "Forgot password?"}
+            </button>
+          </div>
         </div>
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || googleLoading}
           className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
         >
           <span className="cursor-pointer flex items-center justify-center gap-2">
             <FontAwesomeIcon icon={faSignInAlt} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
             Login
           </span>
+        </button>
+
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1 h-px bg-gray-300"></div>
+          <span className="text-gray-500 text-sm">OR</span>
+          <div className="flex-1 h-px bg-gray-300"></div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={loading || googleLoading}
+          className="w-full mt-4 py-3 sm:py-3.5 px-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base flex items-center justify-center gap-3"
+        >
+          <FontAwesomeIcon icon={faGoogle} className="text-xl text-red-600" />
+          <span>Continue with Google</span>
         </button>
 
         <div className="mt-6 text-center">
