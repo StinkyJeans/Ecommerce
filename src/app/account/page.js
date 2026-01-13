@@ -540,7 +540,7 @@ function AccountPageContent() {
                   {addresses.map((address) => (
                     <div
                       key={address.id}
-                      className={`bg-white rounded-xl shadow-md p-5 sm:p-6 border-2 transition-all ${
+                      className={`bg-white rounded-xl shadow-md p-5 sm:p-6 border-2 transition-all flex flex-col ${
                         address.is_default
                           ? "border-red-500 bg-red-50"
                           : "border-gray-200 hover:border-gray-300"
@@ -552,7 +552,7 @@ function AccountPageContent() {
                           Default Address
                         </div>
                       )}
-                      <div className="space-y-2">
+                      <div className="space-y-2 flex-1">
                         <p className="font-bold text-lg text-gray-800">{address.full_name}</p>
                         <p className="text-gray-600 text-sm">{address.phone_number}</p>
                         <p className="text-gray-700">
@@ -574,7 +574,7 @@ function AccountPageContent() {
                         </button>
                         <button
                           onClick={() => handleDeleteAddress(address.id)}
-                          className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2"
+                          className="flex-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2"
                         >
                           <FontAwesomeIcon icon={faTrash} className="text-xs" />
                           Delete
