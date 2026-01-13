@@ -605,12 +605,19 @@ function AccountPageContent() {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-start gap-4">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                              <img
-                                src={order.id_url || "/placeholder.png"}
-                                alt={order.product_name}
-                                className="w-full h-full object-cover"
-                              />
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+                              {order.id_url ? (
+                                <img
+                                  src={order.id_url}
+                                  alt={order.product_name}
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                  style={{ minHeight: '100%', minWidth: '100%' }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                  <FontAwesomeIcon icon={faBox} className="text-gray-400 text-2xl" />
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <h3 className="font-bold text-lg text-gray-800 mb-1 truncate">

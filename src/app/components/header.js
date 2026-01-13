@@ -15,7 +15,7 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  const pageTitle = pathname === "/account" ? "My Account" : "Featured Products";
+  const pageTitle = pathname === "/account" ? "My Account" : pathname === "/checkout" ? "Checkout Item's" : "Featured Products";
 
   useEffect(() => {
     const fetchCartCount = async () => {

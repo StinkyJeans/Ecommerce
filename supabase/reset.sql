@@ -81,6 +81,7 @@ CREATE TABLE orders (
   quantity INTEGER NOT NULL DEFAULT 1,
   total_amount NUMERIC NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
+  id_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

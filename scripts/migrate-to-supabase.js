@@ -209,14 +209,12 @@ async function main() {
   console.log('🚀 Starting MongoDB to Supabase migration...\n');
   
   try {
-    // Connect to MongoDB
     console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI, {
       dbName: 'Ecomerce'
     });
     console.log('✅ Connected to MongoDB\n');
     
-    // Run migrations
     const results = {
       users: await migrateUsers(),
       sellers: await migrateSellers(),
@@ -225,7 +223,6 @@ async function main() {
       orders: await migrateOrders()
     };
     
-    // Print summary
     console.log('\n📊 Migration Summary:');
     console.log('===================');
     console.log(`Users: ${results.users.count}`);

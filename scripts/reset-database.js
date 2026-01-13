@@ -39,7 +39,6 @@ async function checkTablesExist(supabase) {
         existingTables.push(table);
       }
     } catch (err) {
-      // Table doesn't exist or error accessing it
     }
   }
   
@@ -141,5 +140,4 @@ async function resetDatabase() {
   }
 }
 
-// Run the reset
 resetDatabase();

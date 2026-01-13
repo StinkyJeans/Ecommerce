@@ -26,11 +26,24 @@ export async function GET(req) {
       }, { status: 500 });
     }
 
-    const transformedCart = (cart || []).map(item => ({
-      ...item,
-      idUrl: item.id_url,
-      productName: item.product_name,
-    }));
+    const cartWithSellers = await Promise.all(
+      (cart || []).map(async (item) => {
+        const { data: product } = await supabase
+          .from('products')
+          .select('seller_username')
+          .eq('product_id', item.product_id)
+          .single();
+
+        return {
+          ...item,
+          idUrl: item.id_url,
+          productName: item.product_name,
+          seller_username: product?.seller_username || 'Unknown',
+        };
+      })
+    );
+
+    const transformedCart = cartWithSellers;
 
     return NextResponse.json({ 
       cart: transformedCart,
