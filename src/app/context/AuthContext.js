@@ -8,7 +8,6 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [username, setUsername] = useState(null);
-  const [sellerUsername, setSellerUsername] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const supabase = createClient();
@@ -21,7 +20,7 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        fetchUserData(session.user.email || session.user.user_metadata?.username);
+        fetchUserData(session.user.email);
       } else {
         setLoading(false);
       }
@@ -33,11 +32,10 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        fetchUserData(session.user.email || session.user.user_metadata?.username);
+        fetchUserData(session.user.email);
       } else {
         setRole(null);
         setUsername(null);
-        setSellerUsername(null);
         setLoading(false);
       }
     });
@@ -49,8 +47,8 @@ export function AuthProvider({ children }) {
     };
   }, [supabase]);
 
-  const fetchUserData = async (emailOrUsername) => {
-    if (!supabase) {
+  const fetchUserData = async (email) => {
+    if (!supabase || !email) {
       setLoading(false);
       return;
     }
@@ -59,15 +57,20 @@ export function AuthProvider({ children }) {
       const { data: userData, error } = await supabase
         .from('users')
         .select('username, role')
-        .or(`email.eq.${emailOrUsername},username.eq.${emailOrUsername}`)
+        .eq('email', email)
         .single();
 
-      if (userData && !error) {
-        setUsername(userData.username);
-        setRole(userData.role);
-        if (userData.role === 'seller') {
-          setSellerUsername(userData.username);
-        }
+      if (error) {
+        console.error("Error fetching user data:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (userData) {
+        setUsername(userData.username || null);
+        setRole(userData.role || null);
+      } else {
+        console.warn("User data not found for email:", email);
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -83,11 +86,10 @@ export function AuthProvider({ children }) {
     await fetch("/api/logout", { method: "POST" });
     setRole(null);
     setUsername(null);
-    setSellerUsername(null);
   };
 
   return (
-    <AuthContext.Provider value={{ role, setRole, username, setUsername, sellerUsername, setSellerUsername, logout, loading }}>
+    <AuthContext.Provider value={{ role, setRole, username, setUsername, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

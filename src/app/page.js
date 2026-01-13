@@ -16,21 +16,20 @@ import {
   faExclamationTriangle,
   faTimes,
   faCheckCircle,
+  faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 
 export default function LoginPage() {
-  const [sellerUsername, setSellerUsername] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("error");
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { setRole, setUsername: setAuthUsername } = useAuth();
+  const { setRole } = useAuth();
   const router = useRouter();
   const supabase = createClient();
 
@@ -92,45 +91,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    if (!username) {
-      setPopupMessage("Please enter your username first");
-      setPopupType("error");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 4000);
-      return;
-    }
-
-    setResetLoading(true);
-    try {
-      const res = await fetch("/api/resetPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setPopupMessage(data.message || "Password reset email sent! Please check your email.");
-        setPopupType("success");
-      } else {
-        setPopupMessage(data.message || "If an account with that username exists, a password reset email has been sent.");
-        setPopupType("success");
-      }
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 6000);
-    } catch (error) {
-      console.error("Reset password error:", error);
-      setPopupMessage("Something went wrong. Please try again later.");
-      setPopupType("error");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 4000);
-    } finally {
-      setResetLoading(false);
-    }
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -139,7 +99,7 @@ export default function LoginPage() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -157,7 +117,7 @@ export default function LoginPage() {
           setShowPopup(true);
           setTimeout(() => setShowPopup(false), 5000);
         } else {
-          setPopupMessage(data.message || "Invalid Username or Password");
+          setPopupMessage(data.message || "Invalid Email or Password");
           setPopupType("error");
           setShowPopup(true);
           setTimeout(() => setShowPopup(false), 4000);
@@ -166,7 +126,6 @@ export default function LoginPage() {
       }
 
       setRole(data.role);
-      setAuthUsername(data.username, data.sellerUsername);
 
       if (data.role === "admin") {
         router.push("/admin/dashboard");
@@ -245,17 +204,17 @@ export default function LoginPage() {
 
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Username
+            Email
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faUser} className="text-gray-400 text-sm" />
+              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 text-sm" />
             </div>
             <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
               required
             />
@@ -292,11 +251,10 @@ export default function LoginPage() {
           <div className="flex justify-end mt-2">
             <button
               type="button"
-              onClick={handleResetPassword}
-              disabled={resetLoading || !username}
-              className="text-sm text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+              onClick={() => router.push("/auth/forgot-password")}
+              className="text-sm text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
             >
-              {resetLoading ? "Sending..." : "Forgot password?"}
+              Forgot password?
             </button>
           </div>
         </div>

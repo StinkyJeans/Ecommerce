@@ -165,7 +165,7 @@ export default function AdminDashboard() {
     visits: { total: 0, uniqueLast30Days: 0, dailyLast30Days: [], pageViews: {} }
   };
 
-  return (
+   return (
     <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>

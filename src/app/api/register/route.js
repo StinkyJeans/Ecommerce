@@ -4,48 +4,44 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export async function POST(req) {
   try {
-    const { username, password, role, email, contact, idUrl } = await req.json();
+    const { displayName, password, role, email, contact, idUrl } = await req.json();
 
-    if (!username || !password) {
-      return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
+    if (!displayName || !password || !email) {
+      return NextResponse.json({ error: "Display name, email, and password are required" }, { status: 400 });
     }
 
     const supabase = await createClient();
 
-    const { data: existingUser, error: checkError } = await supabase
+    // Check if email already exists
+    const { data: existingEmail, error: emailCheckError } = await supabase
       .from('users')
-      .select('username')
-      .eq('username', username)
+      .select('email')
+      .eq('email', email)
       .maybeSingle();
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error("Error checking existing user:", checkError);
+    if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+      console.error("Error checking existing email:", emailCheckError);
       
-      if (checkError.message && checkError.message.includes('schema cache')) {
+      if (emailCheckError.message && emailCheckError.message.includes('schema cache')) {
         return NextResponse.json({ 
           error: "Database table not found. Please run the schema setup first.",
           details: "The 'users' table doesn't exist. Go to Supabase Dashboard → SQL Editor and run supabase/schema.sql"
         }, { status: 500 });
       }
       
-      return NextResponse.json({ error: "Error checking username availability" }, { status: 500 });
+      return NextResponse.json({ error: "Error checking email availability" }, { status: 500 });
     }
 
-    if (existingUser) {
-      return NextResponse.json({ error: "Username already exists" }, { status: 400 });
-    }
-
-    const authEmail = email || `${username}@temp.local`;
-
-    if (email) {
+    if (existingEmail) {
+      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: authEmail,
+      email: email,
       password: password,
       options: {
         data: {
-          username: username,
+          display_name: displayName,
           role: role || "user"
         },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
@@ -81,8 +77,8 @@ export async function POST(req) {
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert({
-        username,
-        email: authEmail,
+        username: displayName,
+        email: email,
         contact: contact || null,
         id_url: idUrl || null,
         role: role || "user"
@@ -102,7 +98,7 @@ export async function POST(req) {
       
       if (userError.code === '23505') {
         if (userError.message.includes('username')) {
-          return NextResponse.json({ error: "Username already exists" }, { status: 400 });
+          return NextResponse.json({ error: "Display name already exists" }, { status: 400 });
         }
         if (userError.message.includes('email')) {
           return NextResponse.json({ error: "Email already exists" }, { status: 400 });

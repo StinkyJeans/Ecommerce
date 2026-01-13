@@ -9,7 +9,7 @@ import { useEffect, useState, useRef } from "react";
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { logout, username } = useAuth();
+  const { logout, username, loading } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -136,7 +136,7 @@ export default function Header() {
               <span className={`font-semibold text-[11px] sm:text-xs md:text-sm lg:text-base truncate min-w-0 flex-1 ${
                 showDropdown ? 'text-red-600' : 'text-gray-700'
               }`}>
-                {username ? `${username.toUpperCase()}'S ACCOUNT` : "Loading..."}
+                {loading ? "Loading..." : (username ? `${username.toUpperCase()}'S ACCOUNT` : "Account")}
               </span>
               <FontAwesomeIcon
                 icon={faChevronDown}

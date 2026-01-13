@@ -44,11 +44,21 @@ function EditProductContent() {
   useLoadingFavicon(authLoading || fetching || loading, "Edit Product");
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!username || (role !== "seller" && role !== "admin")) {
-        router.push("/");
-        return;
-      }
+    // Wait for auth to finish loading before checking
+    if (authLoading) {
+      return;
+    }
+    
+    // Only redirect if role is explicitly not seller/admin
+    if (role && role !== "seller" && role !== "admin") {
+      router.push("/");
+      return;
+    }
+    
+    // If no role at all after loading, redirect
+    if (!role) {
+      router.push("/");
+      return;
     }
   }, [username, role, authLoading, router]);
 

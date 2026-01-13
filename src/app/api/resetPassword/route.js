@@ -3,11 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req) {
   try {
-    const { username } = await req.json();
+    const { email } = await req.json();
 
-    if (!username) {
+    if (!email) {
       return NextResponse.json({ 
-        message: "Username is required" 
+        message: "Email is required" 
       }, { status: 400 });
     }
 
@@ -18,15 +18,17 @@ export async function POST(req) {
       }, { status: 500 });
     }
 
+    // Check if email exists (case-insensitive)
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('email, username')
-      .eq('username', username)
-      .single();
+      .select('email')
+      .ilike('email', email)
+      .maybeSingle();
 
+    // Always return success to prevent email enumeration
     if (userError || !userData) {
       return NextResponse.json({ 
-        message: "If an account with that username exists, a password reset email has been sent." 
+        message: "If an account with that email exists, a password reset email has been sent." 
       }, { status: 200 });
     }
 
@@ -39,7 +41,7 @@ export async function POST(req) {
     const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`;
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      userData.email,
+      email,
       {
         redirectTo: resetUrl,
       }
@@ -54,7 +56,7 @@ export async function POST(req) {
 
     return NextResponse.json({ 
       success: true,
-      message: "If an account with that username exists, a password reset email has been sent to your email address." 
+      message: "If an account with that email exists, a password reset email has been sent to your email address." 
     }, { status: 200 });
 
   } catch (error) {

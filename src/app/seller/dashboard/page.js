@@ -38,21 +38,35 @@ export default function Dashboard() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
-  const { username, sellerUsername, role, loading: authLoading } = useAuth();
+  const { username, role, loading: authLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useLoadingFavicon(authLoading || loading, "Seller Dashboard");
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!username || (role !== "seller" && role !== "admin")) {
-        router.push("/");
-        return;
-      }
+    // Wait for auth to finish loading before checking
+    if (authLoading) {
+      return;
+    }
+    
+    // Only redirect if role is explicitly not seller/admin
+    // Don't redirect just because username is null (it might still be loading)
+    if (role && role !== "seller" && role !== "admin") {
+      router.push("/");
+      return;
+    }
+    
+    // If no role at all after loading, redirect
+    if (!role) {
+      router.push("/");
+      return;
     }
   }, [username, role, authLoading, router]);
 
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for auth to finish loading
+    }
     if (!username || (role !== "seller" && role !== "admin")) {
       return;
     }
@@ -133,7 +147,6 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: username,
           productId: selectedProduct.product_id || selectedProduct.productId,
           productName: selectedProduct.product_name || selectedProduct.productName,
           description: selectedProduct.description,

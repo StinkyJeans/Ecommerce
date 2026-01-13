@@ -3,25 +3,34 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req) {
   try {
-    const { username, password } = await req.json();
+    const { email, password } = await req.json();
 
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
     }
 
     const supabase = await createClient();
 
+    // Find user by email only
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('username, role, email, seller_status')
-      .eq('username', username)
+      .select('role, email, seller_status')
+      .eq('email', email)
       .single();
 
     if (userError || !userData) {
       console.error("User lookup error:", userError);
       return NextResponse.json(
-        { message: "Invalid Username or Password" },
+        { message: "Invalid Email or Password" },
         { status: 401 }
+      );
+    }
+
+    // Ensure we have an email for Supabase Auth
+    if (!userData.email) {
+      return NextResponse.json(
+        { message: "User account does not have an email. Please contact support." },
+        { status: 400 }
       );
     }
 
@@ -49,12 +58,10 @@ export async function POST(req) {
       }
     }
 
-    const email = userData.email || `${username}@temp.local`;
-    
-    console.log("Login attempt - Username:", username, "Using email:", email);
+    console.log("Login attempt - Email:", userData.email);
 
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: email,
+      email: userData.email,
       password: password,
     });
 
@@ -74,7 +81,7 @@ export async function POST(req) {
       if (authError.message.includes('Invalid login credentials')) {
         return NextResponse.json(
           { 
-            message: "Invalid Username or Password",
+            message: "Invalid Email or Password",
             error: authError.message 
           },
           { status: 401 }
@@ -99,12 +106,11 @@ export async function POST(req) {
       );
     }
 
-    console.log("Login successful for user:", userData.username);
+    console.log("Login successful for user:", userData.email);
 
     return NextResponse.json({
       message: "Login successful",
       role: userData.role || "user",
-      username: userData.username,
       user: authData.user
     });
 

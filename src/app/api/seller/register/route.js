@@ -4,22 +4,23 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export async function POST(req) {
   try {
-    const { sellerUsername, password, email, contact, idUrl } = await req.json();
+    const { displayName, password, email, contact, idUrl } = await req.json();
 
-    if (!sellerUsername || !password || !email || !contact || !idUrl) {
+    if (!displayName || !password || !email || !contact || !idUrl) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
     }
 
     const supabase = await createClient();
 
-    const { data: existing } = await supabase
+    // Check if email already exists
+    const { data: existingEmail } = await supabase
       .from('users')
-      .select('username')
-      .eq('username', sellerUsername)
-      .single();
+      .select('email')
+      .eq('email', email)
+      .maybeSingle();
 
-    if (existing) {
-      return NextResponse.json({ message: "Username already taken" }, { status: 400 });
+    if (existingEmail) {
+      return NextResponse.json({ message: "Email already registered" }, { status: 400 });
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -27,7 +28,7 @@ export async function POST(req) {
       password: password,
       options: {
         data: {
-          username: sellerUsername,
+          display_name: displayName,
           role: "seller"
         }
       }
@@ -54,7 +55,7 @@ export async function POST(req) {
     const { error: userError } = await supabase
       .from('users')
       .insert({
-        username: sellerUsername,
+        username: displayName,
         email: email,
         contact: contact,
         id_url: idUrl,
