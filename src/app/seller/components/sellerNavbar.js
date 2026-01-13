@@ -15,10 +15,8 @@ import {
   faChevronRight, 
   faEllipsisV,
   faSignOutAlt,
-  faChevronDown,
   faUserCircle,
-  faBox,
-  faStar
+  faBox
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "@/app/context/AuthContext";
 
@@ -210,13 +208,13 @@ export default function Navbar() {
                   <p className="text-xs text-gray-500 truncate">Active Status</p>
                 </div>
                 <FontAwesomeIcon
-                  icon={faChevronDown}
-                  className={`text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180 text-red-600' : 'text-gray-400'}`}
+                  icon={faBars}
+                  className={`text-sm transition-colors duration-200 ${showDropdown ? 'text-red-600' : 'text-gray-400'}`}
                 />
               </button>
 
               {showDropdown && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 w-64">
+                <div className="absolute bottom-0 left-full ml-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-left-2 duration-200 w-64">
                   <button
                     onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
@@ -237,13 +235,6 @@ export default function Navbar() {
                   >
                     <FontAwesomeIcon icon={faBoxes} className="text-base text-gray-500 group-hover:text-red-600" />
                     <span className="font-medium text-sm">My Products</span>
-                  </button>
-                  <button
-                    onClick={() => handleMenuClick()}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
-                  >
-                    <FontAwesomeIcon icon={faStar} className="text-base text-gray-500 group-hover:text-red-600" />
-                    <span className="font-medium text-sm">My Reviews</span>
                   </button>
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
