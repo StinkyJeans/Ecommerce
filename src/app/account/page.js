@@ -7,6 +7,7 @@ import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import Header from "@/app/components/header";
 import Navbar from "@/app/components/navbar";
+import SellerNavbar from "@/app/seller/components/sellerNavbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMapMarkerAlt,
@@ -27,7 +28,7 @@ import {
 function AccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { username, loading: authLoading } = useAuth();
+  const { username, role, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("addresses");
   const [addresses, setAddresses] = useState([]);
@@ -53,6 +54,8 @@ function AccountPageContent() {
     const tabParam = searchParams.get("tab");
     if (tabParam === "orders") {
       setActiveTab("orders");
+    } else if (tabParam === "addresses") {
+      setActiveTab("addresses");
     } else {
       setActiveTab("addresses");
     }
@@ -228,7 +231,7 @@ function AccountPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex">
-      <Navbar />
+      {role === 'seller' || role === 'admin' ? <SellerNavbar /> : <Navbar />}
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
         <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
           <div className="px-4 sm:px-6 lg:px-8 pt-4">
@@ -275,7 +278,10 @@ function AccountPageContent() {
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8 border-b border-gray-200">
             <button
-              onClick={() => setActiveTab("addresses")}
+              onClick={() => {
+                setActiveTab("addresses");
+                router.push("/account?tab=addresses");
+              }}
               className={`px-4 py-2 sm:py-2.5 rounded-lg font-semibold transition-all ${
                 activeTab === "addresses"
                   ? "bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg"
@@ -286,7 +292,10 @@ function AccountPageContent() {
               Shipping Addresses
             </button>
             <button
-              onClick={() => setActiveTab("orders")}
+              onClick={() => {
+                setActiveTab("orders");
+                router.push("/account?tab=orders");
+              }}
               className={`px-4 py-2 sm:py-2.5 rounded-lg font-semibold transition-all ${
                 activeTab === "orders"
                   ? "bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg"

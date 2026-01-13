@@ -147,7 +147,7 @@ export default function Header() {
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <button
-                  onClick={() => handleMenuClick(() => router.push("/account"))}
+                  onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                 >
                   <FontAwesomeIcon icon={faUserCircle} className="text-base text-gray-500 group-hover:text-red-600" />
