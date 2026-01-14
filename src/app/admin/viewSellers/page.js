@@ -83,7 +83,6 @@ export default function AdminViewSellers() {
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: "Unknown error" }));
-        console.error("Failed to fetch sellers:", errorData);
         
         if (res.status === 401 || res.status === 403) {
           alert("Access denied. Please make sure you're logged in as an admin.");
@@ -101,11 +100,9 @@ export default function AdminViewSellers() {
         setSellers(data.sellers || []);
         setFilteredSellers(data.sellers || []);
       } else {
-        console.error("Failed to fetch sellers:", data.message);
         alert(`Failed to fetch sellers: ${data.message || "Unknown error"}`);
       }
     } catch (err) {
-      console.error("Failed to fetch sellers:", err);
       alert(`Network error: ${err.message}. Please check your connection and try again.`);
     } finally {
       setLoading(false);

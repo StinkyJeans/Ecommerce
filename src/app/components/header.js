@@ -36,7 +36,7 @@ export default function Header() {
           setCartCount(data.count || 0);
         }
       } catch (err) {
-        console.error("Failed to fetch cart count:", err);
+        // Failed to fetch cart count
       }
     };
 

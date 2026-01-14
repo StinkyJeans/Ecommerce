@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
@@ -51,7 +52,7 @@ export async function POST(req) {
     }
 
     if (!userData) {
-      console.error("User not found in users table:", { email: user.email, username: user.user_metadata?.username });
+      // User not found in users table
       return NextResponse.json({ 
         message: "User not found in database",
         error: userError?.message || "Unable to identify user"
@@ -76,11 +77,7 @@ export async function POST(req) {
       .single();
 
     if (updateError) {
-      console.error("Error updating seller status:", updateError);
-      return NextResponse.json({ 
-        message: "Failed to update seller status",
-        error: updateError.message 
-      }, { status: 500 });
+      return handleError(updateError, 'approveSeller');
     }
 
     if (!updatedSeller) {
@@ -95,10 +92,6 @@ export async function POST(req) {
       seller: updatedSeller
     }, { status: 200 });
   } catch (err) {
-    console.error("Approve seller error:", err);
-    return NextResponse.json({ 
-      message: "Server error",
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'approveSeller');
   }
 }

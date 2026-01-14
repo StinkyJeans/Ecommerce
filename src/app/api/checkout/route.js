@@ -1,20 +1,51 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString, isValidQuantity, isValidPrice } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const { username, items, shipping_address_id, payment_method, delivery_option } = body;
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
-    if (!username || !items || items.length === 0) {
-      return NextResponse.json({ 
-        message: "Username and items are required." 
-      }, { status: 400 });
+    const body = await req.json();
+    const username = sanitizeString(body.username, 50);
+    const items = body.items;
+    const shipping_address_id = body.shipping_address_id;
+    const payment_method = body.payment_method;
+    const delivery_option = body.delivery_option;
+
+    // Input validation
+    if (!username || !items || !Array.isArray(items) || items.length === 0) {
+      return createValidationErrorResponse("Username and items are required");
+    }
+
+    // Verify ownership
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
+    }
+
+    // Validate items
+    for (const item of items) {
+      if (!item.product_id || !item.product_name || item.price === null || item.price === undefined) {
+        return createValidationErrorResponse("Invalid item data");
+      }
+      if (!isValidPrice(item.price)) {
+        return createValidationErrorResponse("Invalid price in item");
+      }
+      if (!isValidQuantity(item.quantity)) {
+        return createValidationErrorResponse("Invalid quantity in item");
+      }
     }
 
     const supabase = await createClient();
     if (!supabase) {
-      return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
+      return handleError(new Error("Supabase client not initialized"), 'checkout');
     }
 
     const orders = [];
@@ -42,11 +73,7 @@ export async function POST(req) {
         .single();
 
       if (orderError) {
-        console.error("Create order error:", orderError);
-        return NextResponse.json({ 
-          message: "Failed to create order", 
-          error: orderError.message 
-        }, { status: 500 });
+        return handleError(orderError, 'checkout');
       }
 
       orders.push(order);
@@ -60,7 +87,7 @@ export async function POST(req) {
         .eq('id', cartItemId);
 
       if (deleteError) {
-        console.error("Delete cart item error:", deleteError);
+        // Error deleting cart item - log but continue (order already created)
       }
     }
 
@@ -70,10 +97,6 @@ export async function POST(req) {
       orders: orders
     }, { status: 200 });
   } catch (err) {
-    console.error("Checkout error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'checkout');
   }
 }

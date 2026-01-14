@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import ProductImage from "@/app/components/ProductImage";
+import Pagination from "@/app/components/Pagination";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -30,6 +31,8 @@ export default function ViewCart() {
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [voucherCode, setVoucherCode] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { username } = useAuth();
   const router = useRouter();
 
@@ -51,7 +54,6 @@ export default function ViewCart() {
       const allItemIds = new Set((data.cart || []).map(item => item.id));
       setSelectedItems(allItemIds);
     } catch (e) {
-      console.error("Fetch cart error:", e);
       setErrorMessage("Failed to load cart");
     } finally {
       setLoading(false);
@@ -100,7 +102,6 @@ export default function ViewCart() {
         setErrorMessage(data.message || "Failed to update quantity");
       }
     } catch (error) {
-      console.error("Update quantity failed:", error);
       setErrorMessage(`Error: ${error.message}`);
     } finally {
       setUpdatingId(null);
@@ -138,7 +139,6 @@ export default function ViewCart() {
         setErrorMessage(data.message || "Failed to remove item");
       }
     } catch (error) {
-      console.error("Remove failed:", error);
       setErrorMessage(`Error: ${error.message}`);
     } finally {
       setRemovingId(null);
@@ -237,6 +237,21 @@ export default function ViewCart() {
   const selectedCount = getSelectedItemCount();
   const selectedSubtotal = calculateSelectedSubtotal();
 
+  // Calculate pagination for seller groups
+  const sellerGroups = Object.entries(groupedItems);
+  const paginatedSellerGroups = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sellerGroups.slice(startIndex, endIndex);
+  }, [sellerGroups, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sellerGroups.length / itemsPerPage);
+
+  // Reset to page 1 when cart items change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [cartItems.length]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex">
       <Navbar />
@@ -321,7 +336,7 @@ export default function ViewCart() {
                     </button>
                   </div>
 
-                  {Object.entries(groupedItems).map(([sellerUsername, items]) => {
+                  {paginatedSellerGroups.map(([sellerUsername, items]) => {
                     const sellerSelected = items.every(item => selectedItems.has(item.id));
                     const sellerItemCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
@@ -439,6 +454,15 @@ export default function ViewCart() {
                     );
                   })}
                 </div>
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={sellerGroups.length}
+                  />
+                )}
 
                 <div className="lg:col-span-1">
                   <div className="bg-white rounded-xl shadow-xl p-6 border border-gray-100 lg:sticky lg:top-6">

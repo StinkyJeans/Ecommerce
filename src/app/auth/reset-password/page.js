@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { validatePasswordStrength } from "@/lib/validation";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -48,11 +49,13 @@ function ResetPasswordContent() {
       return;
     }
 
-    if (password.length < 6) {
-      setPopupMessage("Password must be at least 6 characters long");
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
+      setPopupMessage(passwordValidation.errors.join(". "));
       setPopupType("error");
       setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 4000);
+      setTimeout(() => setShowPopup(false), 5000);
       return;
     }
 
@@ -79,7 +82,6 @@ function ResetPasswordContent() {
       });
 
       if (error) {
-        console.error("Password reset error:", error);
         setPopupMessage(error.message || "Failed to reset password. The link may have expired.");
         setPopupType("error");
         setShowPopup(true);
@@ -94,8 +96,7 @@ function ResetPasswordContent() {
           headers: { "Content-Type": "application/json" },
         });
       } catch (err) {
-        console.error("Failed to update password changed timestamp:", err);
-        // Don't block the success flow if this fails
+        // Failed to update password changed timestamp - don't block the success flow
       }
 
       setPopupMessage("Password reset successfully! Redirecting to login...");
@@ -106,7 +107,6 @@ function ResetPasswordContent() {
         router.push("/");
       }, 2000);
     } catch (error) {
-      console.error("Reset password error:", error);
       setPopupMessage("Something went wrong. Please try again.");
       setPopupType("error");
       setShowPopup(true);

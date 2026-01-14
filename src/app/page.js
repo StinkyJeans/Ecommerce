@@ -60,7 +60,7 @@ export default function LoginPage() {
       });
 
       if (error) {
-        console.error("Google OAuth error:", error);
+        // Google OAuth error
         
         let errorMessage = "Failed to sign in with Google. Please try again.";
         
@@ -77,7 +77,7 @@ export default function LoginPage() {
         setGoogleLoading(false);
       }
     } catch (error) {
-      console.error("Google login error:", error);
+      // Google login error
       
       let errorMessage = "Something went wrong. Please try again.";
       
@@ -105,7 +105,6 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-      console.log("Login response:", data);
 
       if (!res.ok) {
         // Clear password changed message on new login attempt
@@ -149,7 +148,6 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (error) {
-      console.error("Login error:", error);
       setPopupMessage("Something went wrong. Please try again.");
       setPopupType("error");
       setShowPopup(true);

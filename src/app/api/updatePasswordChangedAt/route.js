@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/auth";
 
 export async function POST(req) {
   try {
-    const supabase = await createClient();
-    
-    // Get the authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
+    const { user } = authResult;
+
+    const supabase = await createClient();
 
     // Update password_changed_at timestamp in users table
     // First, find the user by email
@@ -24,8 +22,7 @@ export async function POST(req) {
       .maybeSingle();
 
     if (userError || !userData) {
-      console.error("Error finding user:", userError);
-      // Don't fail the request, just log the error
+      // Don't fail the request, just return success
       return NextResponse.json(
         { success: true, message: "Password changed" },
         { status: 200 }
@@ -39,8 +36,7 @@ export async function POST(req) {
       .eq('id', userData.id);
 
     if (updateError) {
-      console.error("Error updating password_changed_at:", updateError);
-      // Don't fail the request, just log the error
+      // Don't fail the request, just return success
     }
 
     return NextResponse.json(
@@ -48,7 +44,6 @@ export async function POST(req) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Update password changed at error:", error);
     // Don't fail the request, just return success
     return NextResponse.json(
       { success: true, message: "Password changed" },

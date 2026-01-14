@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
 import Image from "next/image";
 import ProductImage from "@/app/components/ProductImage";
+import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -39,6 +40,8 @@ function CheckoutContent() {
   const [voucherCode, setVoucherCode] = useState("");
   const [shippingFee, setShippingFee] = useState(128.16);
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useLoadingFavicon(authLoading || loading || placingOrder, "Checkout");
 
@@ -77,7 +80,6 @@ function CheckoutContent() {
       const selectedItems = (data.cart || []).filter(item => itemIds.includes(item.id));
       setCartItems(selectedItems);
     } catch (error) {
-      console.error("Fetch cart items error:", error);
       setErrorMessage("Failed to load cart items");
       router.push("/cart/viewCart");
     } finally {
@@ -93,7 +95,7 @@ function CheckoutContent() {
         setAddresses(data.addresses || []);
       }
     } catch (error) {
-      console.error("Failed to fetch addresses:", error);
+      // Failed to fetch addresses
     }
   };
 
@@ -159,7 +161,6 @@ function CheckoutContent() {
         setTimeout(() => setErrorMessage(""), 3000);
       }
     } catch (error) {
-      console.error("Place order error:", error);
       setErrorMessage("Something went wrong. Please try again.");
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {
@@ -170,6 +171,21 @@ function CheckoutContent() {
   const groupedItems = groupItemsBySeller();
   const subtotal = calculateSubtotal();
   const total = calculateTotal();
+
+  // Calculate pagination for seller groups (packages)
+  const sellerGroups = Object.entries(groupedItems);
+  const paginatedSellerGroups = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sellerGroups.slice(startIndex, endIndex);
+  }, [sellerGroups, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(sellerGroups.length / itemsPerPage);
+
+  // Reset to page 1 when cart items change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [cartItems.length]);
 
   if (authLoading || loading) {
     return (
@@ -256,12 +272,14 @@ function CheckoutContent() {
                   )}
                 </div>
 
-                {Object.entries(groupedItems).map(([sellerUsername, items], packageIndex) => (
+                {paginatedSellerGroups.map(([sellerUsername, items], packageIndex) => {
+                  const actualPackageIndex = (currentPage - 1) * itemsPerPage + packageIndex;
+                  return (
                   <div key={sellerUsername} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
                     <div className="p-4 border-b border-gray-200 bg-gray-50">
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-gray-800">
-                          Package {packageIndex + 1} of {Object.keys(groupedItems).length}
+                          Package {actualPackageIndex + 1} of {sellerGroups.length}
                         </span>
                         <span className="text-sm text-gray-600">Fulfilled by {sellerUsername}</span>
                       </div>
@@ -348,7 +366,17 @@ function CheckoutContent() {
                       })}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={sellerGroups.length}
+                  />
+                )}
               </div>
 
               <div className="lg:col-span-1">

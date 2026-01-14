@@ -33,7 +33,7 @@ export default function VisitTracker() {
           }),
         });
       } catch (error) {
-        console.error('Failed to track visit:', error);
+        // Failed to track visit
       }
     };
 

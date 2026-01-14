@@ -54,7 +54,7 @@ export async function GET(request) {
             });
 
           if (insertError) {
-            console.error("Error creating user record:", insertError);
+            // Error creating user record - log but continue
           }
         } else if (existingUser) {
           const userRole = existingUser.role || "user";

@@ -1,27 +1,65 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString, validateLength, isValidPrice, isValidQuantity, isValidImageUrl } from "@/lib/validation";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
+import { createErrorResponse, createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 
 export async function POST(req) {
   try {
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+    const { userData } = authResult;
+
+    // Rate limiting (production only)
+    const rateLimitResult = checkRateLimit(req, 'addToCart', userData.username);
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
+
     const body = await req.json();
     
-    const username = body.username;
-    const product_id = body.productId || body.product_id;
-    const product_name = body.productName || body.product_name;
-    const description = body.description;
+    // Sanitize inputs
+    const username = sanitizeString(body.username, 50);
+    const product_id = sanitizeString(body.productId || body.product_id, 100);
+    const product_name = sanitizeString(body.productName || body.product_name, 200);
+    const description = sanitizeString(body.description, 1000);
     const price = body.price;
-    const id_url = body.idUrl || body.id_url;
-    const quantity = body.quantity;
-    
-    console.log("Add to cart request body:", body);
-    console.log("Parsed fields:", { username, product_id, product_name, description, price, id_url, quantity });
+    const id_url = sanitizeString(body.idUrl || body.id_url, 500);
+    const quantity = body.quantity || 1;
 
-    if (!username || !product_id || !product_name || !description || !price || !id_url) {
-      console.error("Missing fields:", { username: !!username, product_id: !!product_id, product_name: !!product_name, description: !!description, price: !!price, id_url: !!id_url });
-      return NextResponse.json({ 
-        message: "All fields are required.",
-        received: { username: !!username, product_id: !!product_id, product_name: !!product_name, description: !!description, price: !!price, id_url: !!id_url }
-      }, { status: 400 });
+    // Input validation
+    if (!username || !product_id || !product_name || !description || price === null || price === undefined || !id_url) {
+      return createValidationErrorResponse("All fields are required");
+    }
+
+    // Verify ownership - user can only add to their own cart
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
+    }
+
+    // Validate inputs
+    if (!validateLength(product_id, 1, 100)) {
+      return createValidationErrorResponse("Product ID must be between 1 and 100 characters");
+    }
+    if (!validateLength(product_name, 1, 200)) {
+      return createValidationErrorResponse("Product name must be between 1 and 200 characters");
+    }
+    if (!validateLength(description, 1, 1000)) {
+      return createValidationErrorResponse("Description must be between 1 and 1000 characters");
+    }
+    if (!isValidPrice(price)) {
+      return createValidationErrorResponse("Invalid price format");
+    }
+    if (!isValidImageUrl(id_url)) {
+      return createValidationErrorResponse("Invalid image URL format");
+    }
+    if (!isValidQuantity(quantity)) {
+      return createValidationErrorResponse("Quantity must be a positive integer");
     }
 
     const supabase = await createClient();
@@ -70,17 +108,8 @@ export async function POST(req) {
       .single();
 
     if (insertError) {
-      console.error("Add to cart error:", insertError);
-      
       if (insertError.message && insertError.message.includes('row-level security')) {
-        return NextResponse.json(
-          { 
-            message: "Permission denied. Please check RLS policies.",
-            error: insertError.message,
-            details: "The cart_items table RLS policy might be blocking the insert."
-          },
-          { status: 403 }
-        );
+        return createForbiddenResponse("Permission denied");
       }
       
       if (insertError.code === '23505') {
@@ -90,15 +119,7 @@ export async function POST(req) {
         );
       }
       
-      return NextResponse.json(
-        { 
-          message: "Failed to add to cart",
-          error: insertError.message,
-          code: insertError.code,
-          details: insertError
-        },
-        { status: 500 }
-      );
+      return createErrorResponse("Failed to add to cart", 500, insertError);
     }
 
     return NextResponse.json({ 
@@ -110,10 +131,6 @@ export async function POST(req) {
       }
     }, { status: 201 });
   } catch (err) {
-    console.error("Add to cart error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'addToCart');
   }
 }

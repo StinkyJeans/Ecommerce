@@ -1,40 +1,61 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireRole, verifySellerOwnership } from "@/lib/auth";
+import { sanitizeString, validateLength, isValidPrice, isValidImageUrl } from "@/lib/validation";
+import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 
 export async function PUT(req) {
   try {
+    // Authentication check - must be seller or admin
+    const authResult = await requireRole(['seller', 'admin']);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+    const { userData } = authResult;
+
     const { productId, productName, description, price, category, idUrl, username } = await req.json();
 
+    // Input validation
     if (!productId || !productName || !description || !price || !category || !username) {
-      return NextResponse.json({ message: "All fields are required." }, { status: 400 });
+      return createValidationErrorResponse("All fields are required");
+    }
+
+    // Sanitize inputs
+    const sanitizedProductId = sanitizeString(productId, 100);
+    const sanitizedProductName = sanitizeString(productName, 200);
+    const sanitizedDescription = sanitizeString(description, 1000);
+    const sanitizedCategory = sanitizeString(category, 50);
+    const sanitizedUsername = sanitizeString(username, 50);
+
+    // Verify ownership for sellers (admins can edit any product)
+    if (userData.role === 'seller') {
+      const ownershipCheck = await verifySellerOwnership(sanitizedUsername);
+      if (ownershipCheck instanceof NextResponse) {
+        return ownershipCheck;
+      }
+    }
+
+    // Validate inputs
+    if (!validateLength(sanitizedProductName, 2, 200)) {
+      return createValidationErrorResponse("Product name must be between 2 and 200 characters");
+    }
+    if (!validateLength(sanitizedDescription, 10, 1000)) {
+      return createValidationErrorResponse("Description must be between 10 and 1000 characters");
+    }
+    if (!isValidPrice(price)) {
+      return createValidationErrorResponse("Invalid price format");
+    }
+    if (idUrl && !isValidImageUrl(idUrl)) {
+      return createValidationErrorResponse("Invalid image URL format");
     }
 
     const supabase = await createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    const { data: userData } = await supabase
-      .from('users')
-      .select('username, role')
-      .eq('email', user.email)
-      .single();
-
-    if (!userData || (userData.role !== 'seller' && userData.role !== 'admin')) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-    }
-
-    if (userData.role === 'seller' && userData.username !== username) {
-      return NextResponse.json({ message: "You can only edit your own products" }, { status: 403 });
-    }
-
     const updateData = {
-      product_name: productName,
-      description: description,
-      price: price,
-      category: category,
+      product_name: sanitizedProductName,
+      description: sanitizedDescription,
+      price: typeof price === 'number' ? price.toString() : price,
+      category: sanitizedCategory,
     };
 
     if (idUrl) {
@@ -44,14 +65,12 @@ export async function PUT(req) {
     const { data: updatedProduct, error } = await supabase
       .from('products')
       .update(updateData)
-      .eq('product_id', productId)
-      .eq('seller_username', username)
+      .eq('product_id', sanitizedProductId)
+      .eq('seller_username', sanitizedUsername)
       .select()
       .single();
 
     if (error) {
-      console.error("product update error:", error);
-      
       if (error.code === '23505') {
         return NextResponse.json(
           { message: "Product name already taken." },
@@ -59,7 +78,7 @@ export async function PUT(req) {
         );
       }
 
-      return NextResponse.json({ message: "Failed to update product" }, { status: 500 });
+      return handleError(error, 'updateProduct');
     }
 
     if (!updatedProduct) {
@@ -71,7 +90,6 @@ export async function PUT(req) {
       product: updatedProduct 
     }, { status: 200 });
   } catch (err) {
-    console.error("product update error:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return handleError(err, 'updateProduct');
   }
 }

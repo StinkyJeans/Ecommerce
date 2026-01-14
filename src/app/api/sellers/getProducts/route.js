@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireRole, verifySellerOwnership } from "@/lib/auth";
+import { sanitizeString } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function GET(request) {
   try {
+    // Authentication check - must be seller
+    const authResult = await requireRole('seller');
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const supabase = await createClient();
     
     const { searchParams } = new URL(request.url);
-    const username = searchParams.get('username');
+    const username = sanitizeString(searchParams.get('username'), 50);
     
+    // Input validation
     if (!username) {
-      return NextResponse.json(
-        { message: "Username is required" },
-        { status: 400 }
-      );
+      return createValidationErrorResponse("Username is required");
+    }
+
+    // Verify ownership - seller can only view their own products
+    const ownershipCheck = await verifySellerOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
     
     const { data: products, error } = await supabase
@@ -22,11 +35,7 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Failed to fetch products:", error);
-      return NextResponse.json(
-        { message: "Server error" },
-        { status: 500 }
-      );
+      return handleError(error, 'getSellerProducts');
     }
     
     const transformedProducts = (products || []).map(product => ({
@@ -41,10 +50,6 @@ export async function GET(request) {
     
     return NextResponse.json({ success: true, products: transformedProducts, count: transformedProducts.length });
   } catch (err) {
-    console.error("Failed to fetch products:", err);
-    return NextResponse.json(
-      { message: "Server error" },
-      { status: 500 }
-    );
+    return handleError(err, 'getSellerProducts');
   }
 }

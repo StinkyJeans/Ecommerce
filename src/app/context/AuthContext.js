@@ -61,7 +61,6 @@ export function AuthProvider({ children }) {
         .single();
 
       if (error) {
-        console.error("Error fetching user data:", error);
         setLoading(false);
         return;
       }
@@ -69,11 +68,9 @@ export function AuthProvider({ children }) {
       if (userData) {
         setUsername(userData.username || null);
         setRole(userData.role || null);
-      } else {
-        console.warn("User data not found for email:", email);
       }
     } catch (err) {
-      console.error("Error fetching user data:", err);
+      // Error fetching user data
     } finally {
       setLoading(false);
     }

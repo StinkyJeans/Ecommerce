@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const username = searchParams.get('username');
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
+    const { searchParams } = new URL(req.url);
+    const username = sanitizeString(searchParams.get('username'), 50);
+
+    // Input validation
     if (!username) {
-      return NextResponse.json({ message: "Username is required." }, { status: 400 });
+      return createValidationErrorResponse("Username is required");
+    }
+
+    // Verify ownership - user can only access their own orders
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
 
     const supabase = await createClient();
@@ -19,11 +35,7 @@ export async function GET(req) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Get orders error:", error);
-      return NextResponse.json({ 
-        message: "Server error", 
-        error: error.message 
-      }, { status: 500 });
+      return handleError(error, 'getOrders');
     }
 
     const ordersWithImages = await Promise.all(
@@ -40,7 +52,7 @@ export async function GET(req) {
             .single();
 
           if (productError) {
-            console.error(`Error fetching product image for order ${order.id}:`, productError);
+            // Error fetching product image - continue without image
             return {
               ...order,
               id_url: null,
@@ -52,7 +64,7 @@ export async function GET(req) {
             id_url: product?.id_url || null,
           };
         } catch (err) {
-          console.error(`Error processing order ${order.id}:`, err);
+          // Error processing order - continue without image
           return {
             ...order,
             id_url: null,
@@ -66,10 +78,6 @@ export async function GET(req) {
       count: ordersWithImages?.length || 0 
     }, { status: 200 });
   } catch (err) {
-    console.error("Get orders error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'getOrders');
   }
 }

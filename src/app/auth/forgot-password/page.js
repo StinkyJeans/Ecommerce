@@ -69,7 +69,6 @@ export default function ForgotPasswordPage() {
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 6000);
     } catch (error) {
-      console.error("Reset password error:", error);
       setPopupMessage("Something went wrong. Please try again later.");
       setPopupType("error");
       setShowPopup(true);

@@ -1,21 +1,30 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString } from "@/lib/validation";
+import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 
 export async function DELETE(req) {
   try {
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-    const username = searchParams.get("username");
+    const id = sanitizeString(searchParams.get("id"), 100);
+    const username = sanitizeString(searchParams.get("username"), 50);
 
-    console.log("=== DELETE REQUEST ===");
-    console.log("ID:", id);
-    console.log("Username:", username);
-
+    // Input validation
     if (!id || !username) {
-      return NextResponse.json({ 
-        success: false,
-        message: "Missing id or username" 
-      }, { status: 400 });
+      return createValidationErrorResponse("Missing id or username");
+    }
+
+    // Verify ownership
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
 
     const supabase = await createClient();
@@ -34,10 +43,7 @@ export async function DELETE(req) {
     }
 
     if (cartItem.username !== username) {
-      return NextResponse.json({ 
-        success: false,
-        message: "Unauthorized" 
-      }, { status: 403 });
+      return createForbiddenResponse("You do not have permission to remove this cart item");
     }
 
     const { error: deleteError } = await supabase
@@ -46,13 +52,7 @@ export async function DELETE(req) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error("=== DELETE ERROR ===");
-      console.error(deleteError);
-      return NextResponse.json({ 
-        success: false,
-        message: "Server error", 
-        error: deleteError.message 
-      }, { status: 500 });
+      return handleError(deleteError, 'removeFromCart');
     }
 
     return NextResponse.json({ 
@@ -61,12 +61,6 @@ export async function DELETE(req) {
     }, { status: 200 });
 
   } catch (error) {
-    console.error("=== DELETE ERROR ===");
-    console.error(error);
-    return NextResponse.json({ 
-      success: false,
-      message: "Server error", 
-      error: error.message 
-    }, { status: 500 });
+    return handleError(error, 'removeFromCart');
   }
 }

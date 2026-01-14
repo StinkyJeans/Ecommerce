@@ -45,7 +45,7 @@ export default function ViewCart() {
         const data = await res.json();
         setCartItems(data.cart || []);
       } catch (err) {
-        console.error("Failed to fetch cart:", err);
+        // Failed to fetch cart
       } finally {
         setLoading(false);
       }

@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeString, validateLength } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
     const { pagePath, visitorId, userAgent, ipAddress } = await req.json();
 
+    // Input validation
     if (!pagePath) {
-      return NextResponse.json({ 
-        message: "pagePath is required" 
-      }, { status: 400 });
+      return createValidationErrorResponse("pagePath is required");
+    }
+
+    // Sanitize inputs
+    const sanitizedPagePath = sanitizeString(pagePath, 500);
+    if (!validateLength(sanitizedPagePath, 1, 500)) {
+      return createValidationErrorResponse("Invalid page path");
     }
 
     if (pagePath.startsWith('/admin')) {
@@ -55,19 +62,14 @@ export async function POST(req) {
     const { error } = await supabase
       .from('website_visits')
       .insert({
-        page_path: pagePath,
-        visitor_id: visitorId || null,
-        user_agent: userAgent || null,
-        ip_address: ipAddress || null
+        page_path: sanitizedPagePath,
+        visitor_id: visitorId ? sanitizeString(visitorId, 100) : null,
+        user_agent: userAgent ? sanitizeString(userAgent, 500) : null,
+        ip_address: ipAddress ? sanitizeString(ipAddress, 50) : null
       });
 
     if (error) {
-      console.error("Error tracking visit:", error);
-      return NextResponse.json({ 
-        success: false,
-        message: "Visit tracking failed",
-        error: error.message 
-      }, { status: 500 });
+      return handleError(error, 'trackVisit');
     }
 
     return NextResponse.json({ 
@@ -75,11 +77,6 @@ export async function POST(req) {
       message: "Visit tracked successfully"
     }, { status: 200 });
   } catch (err) {
-    console.error("Track visit error:", err);
-    return NextResponse.json({ 
-      success: false,
-      message: "Server error",
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'trackVisit');
   }
 }

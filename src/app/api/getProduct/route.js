@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { handleError } from "@/lib/errors";
 
 export async function GET(request) {
   try {
@@ -11,11 +12,7 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Failed to fetch products:", error);
-      return NextResponse.json(
-        { message: "Server error", success: false },
-        { status: 500 }
-      );
+      return handleError(error, 'getProduct');
     }
     
     const transformedProducts = (products || []).map(product => ({
@@ -39,10 +36,6 @@ export async function GET(request) {
     
     return response;
   } catch (err) {
-    console.error("Failed to fetch products:", err);
-    return NextResponse.json(
-      { message: "Server error", success: false },
-      { status: 500 }
-    );
+    return handleError(err, 'getProduct');
   }
 }

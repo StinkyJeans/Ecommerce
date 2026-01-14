@@ -1,13 +1,49 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { isValidEmail, validatePasswordStrength, sanitizeString, validateLength, isValidImageUrl } from "@/lib/validation";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
+import { createErrorResponse, createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
+    // Rate limiting (production only)
+    const rateLimitResult = checkRateLimit(req, 'register');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
+
     const { displayName, password, role, email, contact, idUrl } = await req.json();
 
+    // Input validation
     if (!displayName || !password || !email) {
-      return NextResponse.json({ error: "Display name, email, and password are required" }, { status: 400 });
+      return createValidationErrorResponse("Display name, email, and password are required");
+    }
+
+    // Sanitize and validate inputs
+    const sanitizedDisplayName = sanitizeString(displayName, 50);
+    const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
+    const sanitizedContact = contact ? sanitizeString(contact, 20) : null;
+
+    // Validate display name length
+    if (!validateLength(sanitizedDisplayName, 2, 50)) {
+      return createValidationErrorResponse("Display name must be between 2 and 50 characters");
+    }
+
+    // Validate email format
+    if (!isValidEmail(sanitizedEmail)) {
+      return createValidationErrorResponse("Invalid email format");
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.valid) {
+      return createValidationErrorResponse(passwordValidation.errors);
+    }
+
+    // Validate image URL if provided
+    if (idUrl && !isValidImageUrl(idUrl)) {
+      return createValidationErrorResponse("Invalid image URL format");
     }
 
     const supabase = await createClient();
@@ -16,32 +52,31 @@ export async function POST(req) {
     const { data: existingEmail, error: emailCheckError } = await supabase
       .from('users')
       .select('email')
-      .eq('email', email)
+      .eq('email', sanitizedEmail)
       .maybeSingle();
 
     if (emailCheckError && emailCheckError.code !== 'PGRST116') {
-      console.error("Error checking existing email:", emailCheckError);
-      
       if (emailCheckError.message && emailCheckError.message.includes('schema cache')) {
-        return NextResponse.json({ 
-          error: "Database table not found. Please run the schema setup first.",
-          details: "The 'users' table doesn't exist. Go to Supabase Dashboard → SQL Editor and run supabase/schema.sql"
-        }, { status: 500 });
+        return createErrorResponse(
+          "Database table not found. Please run the schema setup first.",
+          500,
+          emailCheckError
+        );
       }
       
-      return NextResponse.json({ error: "Error checking email availability" }, { status: 500 });
+      return createErrorResponse("Error checking email availability", 500, emailCheckError);
     }
 
     if (existingEmail) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+      return createValidationErrorResponse("Email already exists");
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: email,
+      email: sanitizedEmail,
       password: password,
       options: {
         data: {
-          display_name: displayName,
+          display_name: sanitizedDisplayName,
           role: role || "user"
         },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
@@ -49,15 +84,14 @@ export async function POST(req) {
     });
 
     if (authError) {
-      console.error("Supabase Auth error:", authError);
       if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
-        return NextResponse.json({ error: "Email is already registered" }, { status: 400 });
+        return createValidationErrorResponse("Email is already registered");
       }
-      return NextResponse.json({ error: authError.message }, { status: 400 });
+      return createErrorResponse("Registration failed", 400, authError);
     }
 
     if (!authData.user) {
-      return NextResponse.json({ error: "Failed to create authentication account" }, { status: 500 });
+      return createErrorResponse("Failed to create authentication account", 500);
     }
 
     if (authData.user && !authData.user.email_confirmed_at) {
@@ -68,18 +102,16 @@ export async function POST(req) {
       );
       
       if (confirmError) {
-        console.error("Error auto-confirming user:", confirmError);
-      } else {
-        console.log("User auto-confirmed:", authData.user.id);
+        // Error auto-confirming user - log but don't fail registration
       }
     }
 
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert({
-        username: displayName,
-        email: email,
-        contact: contact || null,
+        username: sanitizedDisplayName,
+        email: sanitizedEmail,
+        contact: sanitizedContact,
         id_url: idUrl || null,
         role: role || "user"
       })
@@ -87,29 +119,24 @@ export async function POST(req) {
       .single();
 
     if (userError) {
-      console.error("Error creating user record:", userError);
-      
       if (userError.message && userError.message.includes('schema cache')) {
-        return NextResponse.json({ 
-          error: "Database table not found. Please run the schema setup first.",
-          details: "The 'users' table doesn't exist. Go to Supabase Dashboard → SQL Editor and run supabase/schema.sql"
-        }, { status: 500 });
+        return createErrorResponse(
+          "Database table not found. Please run the schema setup first.",
+          500,
+          userError
+        );
       }
       
       if (userError.code === '23505') {
         if (userError.message.includes('username')) {
-          return NextResponse.json({ error: "Display name already exists" }, { status: 400 });
+          return createValidationErrorResponse("Display name already exists");
         }
         if (userError.message.includes('email')) {
-          return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+          return createValidationErrorResponse("Email already exists");
         }
       }
       
-      return NextResponse.json({ 
-        error: "Failed to create user", 
-        details: userError.message,
-        code: userError.code 
-      }, { status: 500 });
+      return createErrorResponse("Failed to create user", 500, userError);
     }
 
     return NextResponse.json(
@@ -117,7 +144,6 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Register error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return handleError(error, 'register');
   }
 }

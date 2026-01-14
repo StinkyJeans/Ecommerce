@@ -1,13 +1,28 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function GET(req) {
   try {
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
     const { searchParams } = new URL(req.url);
-    const username = searchParams.get('username');
+    const username = sanitizeString(searchParams.get('username'), 50);
 
     if (!username) {
-      return NextResponse.json({ message: "Username is required." }, { status: 400 });
+      return createValidationErrorResponse("Username is required");
+    }
+
+    // Verify ownership - user can only access their own cart
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
 
     const supabase = await createClient();
@@ -19,11 +34,7 @@ export async function GET(req) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Get cart error:", error);
-      return NextResponse.json({ 
-        message: "Server error", 
-        error: error.message 
-      }, { status: 500 });
+      return handleError(error, 'getCart');
     }
 
     const cartWithSellers = await Promise.all(
@@ -48,10 +59,6 @@ export async function GET(req) {
       count: cartWithSellers.length 
     }, { status: 200 });
   } catch (err) {
-    console.error("Get cart error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'getCart');
   }
 }

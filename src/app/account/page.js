@@ -47,6 +47,9 @@ function AccountPageContent() {
     isDefault: false
   });
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [addressesPage, setAddressesPage] = useState(1);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const itemsPerPage = 10;
 
   useLoadingFavicon(authLoading || loading, "Manage My Account");
 
@@ -59,7 +62,28 @@ function AccountPageContent() {
     } else {
       setActiveTab("addresses");
     }
+    // Reset pagination when tab changes
+    setAddressesPage(1);
+    setOrdersPage(1);
   }, [searchParams]);
+
+  // Calculate paginated addresses
+  const paginatedAddresses = useMemo(() => {
+    const startIndex = (addressesPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return addresses.slice(startIndex, endIndex);
+  }, [addresses, addressesPage, itemsPerPage]);
+
+  const addressesTotalPages = Math.ceil(addresses.length / itemsPerPage);
+
+  // Calculate paginated orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (ordersPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return orders.slice(startIndex, endIndex);
+  }, [orders, ordersPage, itemsPerPage]);
+
+  const ordersTotalPages = Math.ceil(orders.length / itemsPerPage);
 
   useEffect(() => {
     if (!authLoading && !username) {
@@ -79,11 +103,9 @@ function AccountPageContent() {
       if (res.ok && data.success) {
         setAddresses(data.addresses || []);
       } else {
-        console.error("Failed to fetch addresses:", data.message || "Unknown error");
         setAddresses([]);
       }
     } catch (error) {
-      console.error("Failed to fetch addresses:", error);
       setAddresses([]);
     } finally {
       setLoading(false);
@@ -97,11 +119,9 @@ function AccountPageContent() {
       if (res.ok) {
         setOrders(data.orders || []);
       } else {
-        console.error("Failed to fetch orders:", data.message || "Unknown error");
         setOrders([]);
       }
     } catch (error) {
-      console.error("Failed to fetch orders:", error);
       setOrders([]);
     }
   };
@@ -158,7 +178,6 @@ function AccountPageContent() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (error) {
-      console.error("Delete address error:", error);
       setMessage({ text: "Something went wrong", type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
     }
@@ -221,7 +240,6 @@ function AccountPageContent() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (error) {
-      console.error("Save address error:", error);
       setMessage({ text: "Something went wrong", type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
     } finally {
@@ -536,8 +554,9 @@ function AccountPageContent() {
                   </button>
                 </div>
               ) : (
+                <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  {addresses.map((address) => (
+                  {paginatedAddresses.map((address) => (
                     <div
                       key={address.id}
                       className={`bg-white rounded-xl shadow-md p-5 sm:p-6 border-2 transition-all flex flex-col ${
@@ -583,6 +602,16 @@ function AccountPageContent() {
                     </div>
                   ))}
                 </div>
+                {addressesTotalPages > 1 && (
+                  <Pagination
+                    currentPage={addressesPage}
+                    totalPages={addressesTotalPages}
+                    onPageChange={setAddressesPage}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={addresses.length}
+                  />
+                )}
+                </>
               )}
             </div>
           )}
@@ -605,8 +634,9 @@ function AccountPageContent() {
                   </button>
                 </div>
               ) : (
+                <>
                 <div className="space-y-4">
-                  {orders.map((order) => (
+                  {paginatedOrders.map((order) => (
                     <div
                       key={order.id}
                       className="bg-white rounded-xl shadow-md p-5 sm:p-6 border border-gray-200 hover:shadow-lg transition-all"
@@ -669,6 +699,16 @@ function AccountPageContent() {
                     </div>
                   ))}
                 </div>
+                {ordersTotalPages > 1 && (
+                  <Pagination
+                    currentPage={ordersPage}
+                    totalPages={ordersTotalPages}
+                    onPageChange={setOrdersPage}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={orders.length}
+                  />
+                )}
+                </>
               )}
             </div>
           )}

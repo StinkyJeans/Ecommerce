@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { handleError } from "@/lib/errors";
 
 export async function GET(req) {
   try {
@@ -37,7 +38,7 @@ export async function GET(req) {
     }
 
     if (!userData) {
-      console.error("User not found in users table:", { email: user.email, username: user.user_metadata?.username });
+      // User not found in users table
       return NextResponse.json({ 
         message: "User not found in database",
         error: userError?.message || "Unable to identify user"
@@ -147,10 +148,6 @@ export async function GET(req) {
       }
     }, { status: 200 });
   } catch (err) {
-    console.error("Statistics error:", err);
-    return NextResponse.json({ 
-      message: "Server error",
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'getStatistics');
   }
 }

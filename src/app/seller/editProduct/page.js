@@ -98,7 +98,6 @@ function EditProductContent() {
           setTimeout(() => router.push("/seller/viewProduct"), 2000);
         }
       } catch (err) {
-        console.error("Failed to fetch product:", err);
         setPopupMessage("Failed to load product");
         setShowPopup(true);
       } finally {
@@ -161,7 +160,6 @@ function EditProductContent() {
         setShowPopup(true);
       }
     } catch (err) {
-      console.error("Update error:", err);
       setPopupMessage("An error occurred. Please try again.");
       setShowPopup(true);
     } finally {

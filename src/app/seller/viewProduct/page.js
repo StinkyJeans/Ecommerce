@@ -78,7 +78,6 @@ export default function ViewProduct() {
       const data = await res.json();
       setProducts(data.products || []);
     } catch (e) {
-      console.error("Fetch products error:", e);
       setErrorMessage("Failed to load products");
     } finally {
       setLoading(false);
@@ -124,7 +123,6 @@ export default function ViewProduct() {
         setTimeout(() => setErrorMessage(""), 3000);
       }
     } catch (error) {
-      console.error("Delete failed:", error);
       setErrorMessage(`Error: ${error.message}`);
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {

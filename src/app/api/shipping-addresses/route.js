@@ -1,18 +1,34 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { sanitizeString, validateLength, isValidPhone, isValidPostalCode } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const username = searchParams.get('username');
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
+    const { searchParams } = new URL(req.url);
+    const username = sanitizeString(searchParams.get('username'), 50);
+
+    // Input validation
     if (!username) {
-      return NextResponse.json({ message: "Username is required." }, { status: 400 });
+      return createValidationErrorResponse("Username is required");
+    }
+
+    // Verify ownership - user can only access their own addresses
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
 
     const supabase = await createClient();
     if (!supabase) {
-      return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
+      return handleError(new Error("Supabase client not initialized"), 'getShippingAddresses');
     }
 
     const { data: addresses, error } = await supabase
@@ -23,11 +39,7 @@ export async function GET(req) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Get shipping addresses error:", error);
-      return NextResponse.json({ 
-        message: "Server error", 
-        error: error.message 
-      }, { status: 500 });
+      return handleError(error, 'getShippingAddresses');
     }
 
     return NextResponse.json({ 
@@ -35,28 +47,66 @@ export async function GET(req) {
       addresses: addresses || []
     }, { status: 200 });
   } catch (err) {
-    console.error("Get shipping addresses error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'getShippingAddresses');
   }
 }
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const { username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault } = body;
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
+    const body = await req.json();
+    
+    // Sanitize inputs
+    const username = sanitizeString(body.username, 50);
+    const fullName = sanitizeString(body.fullName, 100);
+    const phoneNumber = sanitizeString(body.phoneNumber, 20);
+    const addressLine1 = sanitizeString(body.addressLine1, 200);
+    const addressLine2 = body.addressLine2 ? sanitizeString(body.addressLine2, 200) : null;
+    const city = sanitizeString(body.city, 100);
+    const province = sanitizeString(body.province, 100);
+    const postalCode = sanitizeString(body.postalCode, 20);
+    const country = sanitizeString(body.country || 'Philippines', 100);
+    const isDefault = body.isDefault === true || body.isDefault === 'true';
+
+    // Input validation
     if (!username || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
-      return NextResponse.json({ 
-        message: "Missing required fields." 
-      }, { status: 400 });
+      return createValidationErrorResponse("Missing required fields");
+    }
+
+    // Verify ownership
+    const ownershipCheck = await verifyOwnership(username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
+    }
+
+    // Validate field lengths and formats
+    if (!validateLength(fullName, 2, 100)) {
+      return createValidationErrorResponse("Full name must be between 2 and 100 characters");
+    }
+    if (!isValidPhone(phoneNumber)) {
+      return createValidationErrorResponse("Invalid phone number format");
+    }
+    if (!validateLength(addressLine1, 5, 200)) {
+      return createValidationErrorResponse("Address line 1 must be between 5 and 200 characters");
+    }
+    if (!validateLength(city, 2, 100)) {
+      return createValidationErrorResponse("City must be between 2 and 100 characters");
+    }
+    if (!validateLength(province, 2, 100)) {
+      return createValidationErrorResponse("Province must be between 2 and 100 characters");
+    }
+    if (!isValidPostalCode(postalCode)) {
+      return createValidationErrorResponse("Invalid postal code format");
     }
 
     const supabase = await createClient();
     if (!supabase) {
-      return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
+      return handleError(new Error("Supabase client not initialized"), 'addShippingAddress');
     }
 
     if (isDefault) {
@@ -67,7 +117,7 @@ export async function POST(req) {
         .eq('is_default', true);
 
       if (updateError) {
-        console.error("Error updating default addresses:", updateError);
+        // Error updating default addresses - log but continue
       }
     }
 
@@ -78,22 +128,18 @@ export async function POST(req) {
         full_name: fullName,
         phone_number: phoneNumber,
         address_line1: addressLine1,
-        address_line2: addressLine2 || null,
+        address_line2: addressLine2,
         city,
         province,
         postal_code: postalCode,
-        country: country || 'Philippines',
-        is_default: isDefault || false
+        country,
+        is_default: isDefault
       })
       .select()
       .single();
 
     if (insertError) {
-      console.error("Insert shipping address error:", insertError);
-      return NextResponse.json({ 
-        message: "Failed to add shipping address", 
-        error: insertError.message 
-      }, { status: 500 });
+      return handleError(insertError, 'addShippingAddress');
     }
 
     return NextResponse.json({ 
@@ -102,28 +148,60 @@ export async function POST(req) {
       address: newAddress
     }, { status: 201 });
   } catch (err) {
-    console.error("Add shipping address error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'addShippingAddress');
   }
 }
 
 export async function PUT(req) {
   try {
-    const body = await req.json();
-    const { id, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault } = body;
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
+    const body = await req.json();
+    
+    // Sanitize inputs
+    const id = sanitizeString(body.id, 100);
+    const fullName = sanitizeString(body.fullName, 100);
+    const phoneNumber = sanitizeString(body.phoneNumber, 20);
+    const addressLine1 = sanitizeString(body.addressLine1, 200);
+    const addressLine2 = body.addressLine2 ? sanitizeString(body.addressLine2, 200) : null;
+    const city = sanitizeString(body.city, 100);
+    const province = sanitizeString(body.province, 100);
+    const postalCode = sanitizeString(body.postalCode, 20);
+    const country = sanitizeString(body.country || 'Philippines', 100);
+    const isDefault = body.isDefault === true || body.isDefault === 'true';
+
+    // Input validation
     if (!id || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
-      return NextResponse.json({ 
-        message: "Missing required fields." 
-      }, { status: 400 });
+      return createValidationErrorResponse("Missing required fields");
+    }
+
+    // Validate field lengths and formats
+    if (!validateLength(fullName, 2, 100)) {
+      return createValidationErrorResponse("Full name must be between 2 and 100 characters");
+    }
+    if (!isValidPhone(phoneNumber)) {
+      return createValidationErrorResponse("Invalid phone number format");
+    }
+    if (!validateLength(addressLine1, 5, 200)) {
+      return createValidationErrorResponse("Address line 1 must be between 5 and 200 characters");
+    }
+    if (!validateLength(city, 2, 100)) {
+      return createValidationErrorResponse("City must be between 2 and 100 characters");
+    }
+    if (!validateLength(province, 2, 100)) {
+      return createValidationErrorResponse("Province must be between 2 and 100 characters");
+    }
+    if (!isValidPostalCode(postalCode)) {
+      return createValidationErrorResponse("Invalid postal code format");
     }
 
     const supabase = await createClient();
     if (!supabase) {
-      return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
+      return handleError(new Error("Supabase client not initialized"), 'updateShippingAddress');
     }
 
     const { data: existingAddress } = await supabase
@@ -138,6 +216,12 @@ export async function PUT(req) {
       }, { status: 404 });
     }
 
+    // Verify ownership
+    const ownershipCheck = await verifyOwnership(existingAddress.username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
+    }
+
     if (isDefault) {
       const { error: updateError } = await supabase
         .from('shipping_addresses')
@@ -147,7 +231,7 @@ export async function PUT(req) {
         .neq('id', id);
 
       if (updateError) {
-        console.error("Error updating default addresses:", updateError);
+        // Error updating default addresses - log but continue
       }
     }
 
@@ -157,23 +241,19 @@ export async function PUT(req) {
         full_name: fullName,
         phone_number: phoneNumber,
         address_line1: addressLine1,
-        address_line2: addressLine2 || null,
+        address_line2: addressLine2,
         city,
         province,
         postal_code: postalCode,
-        country: country || 'Philippines',
-        is_default: isDefault || false
+        country,
+        is_default: isDefault
       })
       .eq('id', id)
       .select()
       .single();
 
     if (updateError) {
-      console.error("Update shipping address error:", updateError);
-      return NextResponse.json({ 
-        message: "Failed to update shipping address", 
-        error: updateError.message 
-      }, { status: 500 });
+      return handleError(updateError, 'updateShippingAddress');
     }
 
     return NextResponse.json({ 
@@ -182,28 +262,48 @@ export async function PUT(req) {
       address: updatedAddress
     }, { status: 200 });
   } catch (err) {
-    console.error("Update shipping address error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'updateShippingAddress');
   }
 }
 
 export async function DELETE(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    // Authentication check
+    const authResult = await requireAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
 
+    const { searchParams } = new URL(req.url);
+    const id = sanitizeString(searchParams.get('id'), 100);
+
+    // Input validation
     if (!id) {
-      return NextResponse.json({ 
-        message: "Address ID is required." 
-      }, { status: 400 });
+      return createValidationErrorResponse("Address ID is required");
     }
 
     const supabase = await createClient();
     if (!supabase) {
-      return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
+      return handleError(new Error("Supabase client not initialized"), 'deleteShippingAddress');
+    }
+
+    // Get address to verify ownership
+    const { data: existingAddress } = await supabase
+      .from('shipping_addresses')
+      .select('username')
+      .eq('id', id)
+      .single();
+
+    if (!existingAddress) {
+      return NextResponse.json({ 
+        message: "Address not found" 
+      }, { status: 404 });
+    }
+
+    // Verify ownership
+    const ownershipCheck = await verifyOwnership(existingAddress.username);
+    if (ownershipCheck instanceof NextResponse) {
+      return ownershipCheck;
     }
 
     const { error: deleteError } = await supabase
@@ -212,11 +312,7 @@ export async function DELETE(req) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error("Delete shipping address error:", deleteError);
-      return NextResponse.json({ 
-        message: "Failed to delete shipping address", 
-        error: deleteError.message 
-      }, { status: 500 });
+      return handleError(deleteError, 'deleteShippingAddress');
     }
 
     return NextResponse.json({ 
@@ -224,10 +320,6 @@ export async function DELETE(req) {
       message: "Shipping address deleted successfully"
     }, { status: 200 });
   } catch (err) {
-    console.error("Delete shipping address error:", err);
-    return NextResponse.json({ 
-      message: "Server error", 
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'deleteShippingAddress');
   }
 }

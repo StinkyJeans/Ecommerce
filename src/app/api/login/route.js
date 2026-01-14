@@ -1,13 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isValidEmail, sanitizeString } from "@/lib/validation";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
+import { createErrorResponse, createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
+    // Rate limiting (production only)
+    const rateLimitResult = checkRateLimit(req, 'login');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
+
     const { email, password } = await req.json();
 
+    // Input validation
     if (!email || !password) {
-      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+      return createValidationErrorResponse("Email and password are required");
     }
+
+    // Sanitize and validate email
+    const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
+    if (!isValidEmail(sanitizedEmail)) {
+      return createValidationErrorResponse("Invalid email format");
+    }
+
+    // Sanitize password (don't validate strength on login, only on registration)
+    const sanitizedPassword = sanitizeString(password, 128);
 
     const supabase = await createClient();
 
@@ -15,11 +34,11 @@ export async function POST(req) {
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('role, email, seller_status, password_changed_at')
-      .eq('email', email)
+      .eq('email', sanitizedEmail)
       .single();
 
     if (userError || !userData) {
-      console.error("User lookup error:", userError);
+      // Don't reveal if email exists or not (security best practice)
       return NextResponse.json(
         { message: "Invalid Email or Password" },
         { status: 401 }
@@ -58,21 +77,16 @@ export async function POST(req) {
       }
     }
 
-    console.log("Login attempt - Email:", userData.email);
-
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: userData.email,
-      password: password,
+      password: sanitizedPassword,
     });
 
     if (authError) {
-      console.error("Supabase Auth error:", authError);
-      
       if (authError.message.includes('Email not confirmed')) {
         return NextResponse.json(
           { 
-            message: "Please confirm your email before logging in",
-            error: authError.message 
+            message: "Please confirm your email before logging in"
           },
           { status: 401 }
         );
@@ -81,8 +95,7 @@ export async function POST(req) {
       if (authError.message.includes('Invalid login credentials')) {
         // Check if password was recently changed
         const response = {
-          message: "Invalid Email or Password",
-          error: authError.message 
+          message: "Invalid Email or Password"
         };
         
         // If password was changed recently, include the timestamp
@@ -96,25 +109,12 @@ export async function POST(req) {
         );
       }
       
-      return NextResponse.json(
-        { 
-          message: "Login failed",
-          error: authError.message,
-          details: "Check server logs for more information"
-        },
-        { status: 401 }
-      );
+      return createErrorResponse("Login failed", 401, authError);
     }
 
     if (!authData.user) {
-      console.error("No user returned from auth");
-      return NextResponse.json(
-        { message: "Login failed - no user data" },
-        { status: 401 }
-      );
+      return createErrorResponse("Login failed", 401);
     }
-
-    console.log("Login successful for user:", userData.email);
 
     return NextResponse.json({
       message: "Login successful",
@@ -123,10 +123,6 @@ export async function POST(req) {
     });
 
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json({ 
-      message: "Server error",
-      error: error.message 
-    }, { status: 500 });
+    return handleError(error, 'login');
   }
 }

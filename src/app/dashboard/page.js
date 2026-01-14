@@ -52,7 +52,7 @@ export default function Dashboard() {
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        // Failed to fetch products
       } finally {
         setLoading(false);
       }
@@ -149,7 +149,6 @@ export default function Dashboard() {
         setTimeout(() => setCartMessage(""), 3000);
       }
     } catch (err) {
-      console.error("Add to cart failed:", err);
       setCartMessage("error");
       setTimeout(() => setCartMessage(""), 3000);
     } finally {

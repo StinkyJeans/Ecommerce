@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { handleError } from "@/lib/errors";
 
 export async function GET(req) {
   try {
@@ -37,7 +38,7 @@ export async function GET(req) {
     }
 
     if (!userData) {
-      console.error("User not found in users table:", { email: user.email, username: user.user_metadata?.username });
+      // User not found in users table
       return NextResponse.json({ 
         message: "User not found in database",
         error: userError?.message || "Unable to identify user"
@@ -58,24 +59,15 @@ export async function GET(req) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching sellers:", error);
-      
       if (error.message && error.message.includes('seller_status')) {
         return NextResponse.json({ 
           success: false,
           message: "Database schema needs to be updated",
-          error: "The seller_status column is missing. Please run the migration script.",
-          migrationFile: "supabase/add-seller-status-column.sql",
-          details: error.message,
-          instructions: "Go to Supabase Dashboard → SQL Editor → Run the migration file"
+          error: "The seller_status column is missing. Please run the migration script."
         }, { status: 500 });
       }
       
-      return NextResponse.json({ 
-        success: false,
-        message: "Failed to fetch sellers",
-        error: error.message 
-      }, { status: 500 });
+      return handleError(error, 'getSellers');
     }
 
     const sellersWithStatus = (sellers || []).map(seller => ({
@@ -88,10 +80,6 @@ export async function GET(req) {
       sellers: sellersWithStatus || []
     }, { status: 200 });
   } catch (err) {
-    console.error("Get sellers error:", err);
-    return NextResponse.json({ 
-      message: "Server error",
-      error: err.message 
-    }, { status: 500 });
+    return handleError(err, 'getSellers');
   }
 }

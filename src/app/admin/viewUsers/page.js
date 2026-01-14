@@ -71,7 +71,6 @@ export default function AdminViewUsers() {
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: "Unknown error" }));
-        console.error("Failed to fetch users:", errorData);
         
         if (res.status === 401 || res.status === 403) {
           alert("Access denied. Please make sure you're logged in as an admin.");
@@ -89,11 +88,9 @@ export default function AdminViewUsers() {
         setUsers(data.users || []);
         setFilteredUsers(data.users || []);
       } else {
-        console.error("Failed to fetch users:", data.message);
         alert(`Failed to fetch users: ${data.message || "Unknown error"}`);
       }
     } catch (err) {
-      console.error("Failed to fetch users:", err);
       alert(`Network error: ${err.message}. Please check your connection and try again.`);
     } finally {
       setLoading(false);

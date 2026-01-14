@@ -61,7 +61,6 @@ export default function AdminDashboard() {
 
     const timeout = setTimeout(() => {
       if (loading) {
-        console.warn("Loading timeout - setting loading to false");
         setLoading(false);
         setMessage({ text: "Loading took too long. Please refresh the page.", type: "error" });
       }
@@ -74,12 +73,10 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const [statsRes, sellersRes] = await Promise.all([
-        fetch("/api/admin/statistics").catch(err => {
-          console.error("Statistics fetch error:", err);
+        fetch("/api/admin/statistics").catch(() => {
           return { ok: false, json: async () => ({ success: false, message: "Failed to fetch statistics" }) };
         }),
-        fetch("/api/admin/pendingSellers").catch(err => {
-          console.error("Pending sellers fetch error:", err);
+        fetch("/api/admin/pendingSellers").catch(() => {
           return { ok: false, json: async () => ({ success: false, message: "Failed to fetch pending sellers" }) };
         })
       ]);
@@ -90,7 +87,6 @@ export default function AdminDashboard() {
       if (statsData.success) {
         setStatistics(statsData.statistics);
       } else {
-        console.error("Statistics API error:", statsData.message);
         setStatistics({
           users: { total: 0, sellers: { total: 0, approved: 0, pending: 0 } },
           products: { total: 0 },
@@ -101,11 +97,9 @@ export default function AdminDashboard() {
       if (sellersData.success) {
         setPendingSellers(sellersData.pendingSellers || []);
       } else {
-        console.error("Pending sellers API error:", sellersData.message);
         setPendingSellers([]);
       }
     } catch (err) {
-      console.error("Failed to fetch data:", err);
       setMessage({ text: "Failed to load dashboard data", type: "error" });
       setStatistics({
         users: { total: 0, sellers: { total: 0, approved: 0, pending: 0 } },
@@ -142,7 +136,6 @@ export default function AdminDashboard() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (err) {
-      console.error("Error processing seller:", err);
       setMessage({ text: "Failed to process request", type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
     } finally {

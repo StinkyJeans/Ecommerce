@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeString } from "@/lib/validation";
+import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function GET(request) {
   try {
     const supabase = await createClient();
     
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
+    const category = sanitizeString(searchParams.get('category'), 50);
     
     if (!category) {
-      return NextResponse.json(
-        { message: "Category parameter is required" }, 
-        { status: 400 }
-      );
+      return createValidationErrorResponse("Category parameter is required");
     }
 
     const { data: products, error } = await supabase
@@ -22,8 +21,7 @@ export async function GET(request) {
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Failed to fetch products by category:", error);
-      return NextResponse.json({ message: "Server error" }, { status: 500 });
+      return handleError(error, 'getProductByCategory');
     }
     
     const transformedProducts = (products || []).map(product => ({
@@ -43,7 +41,6 @@ export async function GET(request) {
     
     return response;
   } catch (err) {
-    console.error("Failed to fetch products by category:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return handleError(err, 'getProductByCategory');
   }
 }

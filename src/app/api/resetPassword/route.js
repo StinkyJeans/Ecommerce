@@ -1,14 +1,28 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isValidEmail, sanitizeString } from "@/lib/validation";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
+import { createErrorResponse, createValidationErrorResponse, handleError } from "@/lib/errors";
 
 export async function POST(req) {
   try {
     const { email } = await req.json();
 
+    // Input validation
     if (!email) {
-      return NextResponse.json({ 
-        message: "Email is required" 
-      }, { status: 400 });
+      return createValidationErrorResponse("Email is required");
+    }
+
+    // Sanitize and validate email
+    const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
+    if (!isValidEmail(sanitizedEmail)) {
+      return createValidationErrorResponse("Invalid email format");
+    }
+
+    // Rate limiting (production only) - per email to prevent abuse
+    const rateLimitResult = checkRateLimit(req, 'resetPassword', sanitizedEmail);
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
     }
 
     const supabase = await createClient();
@@ -22,7 +36,7 @@ export async function POST(req) {
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('email')
-      .ilike('email', email)
+      .ilike('email', sanitizedEmail)
       .maybeSingle();
 
     // Always return success to prevent email enumeration
@@ -33,25 +47,20 @@ export async function POST(req) {
     }
 
     if (!userData.email) {
-      return NextResponse.json({ 
-        message: "This account does not have an email address. Please contact support." 
-      }, { status: 400 });
+      return createErrorResponse("This account does not have an email address. Please contact support.", 400);
     }
 
     const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`;
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email,
+      sanitizedEmail,
       {
         redirectTo: resetUrl,
       }
     );
 
     if (resetError) {
-      console.error("Password reset error:", resetError);
-      return NextResponse.json({ 
-        message: "Failed to send reset email. Please try again later." 
-      }, { status: 500 });
+      return createErrorResponse("Failed to send reset email. Please try again later.", 500, resetError);
     }
 
     return NextResponse.json({ 
@@ -60,9 +69,6 @@ export async function POST(req) {
     }, { status: 200 });
 
   } catch (error) {
-    console.error("Reset password error:", error);
-    return NextResponse.json({ 
-      message: "Server error. Please try again later." 
-    }, { status: 500 });
+    return handleError(error, 'resetPassword');
   }
 }
