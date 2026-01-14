@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import ProductImage from "@/app/components/ProductImage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -361,10 +362,9 @@ export default function ViewProduct() {
             >
               <div className="relative">
                 <div className="relative w-full h-40 sm:h-56 md:h-64">
-                  <Image
+                  <ProductImage
                     src={selectedProduct.id_url}
                     alt={selectedProduct.product_name}
-                    fill
                     className="object-cover rounded-t-xl sm:rounded-t-2xl"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 512px"
                     priority

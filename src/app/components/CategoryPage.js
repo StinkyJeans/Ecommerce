@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import Image from "next/image";
+import ProductImage from "./ProductImage";
 import Navbar from "./navbar";
 import SearchBar from "./searchbar";
 import { useRouter } from "next/navigation";
@@ -130,13 +131,11 @@ export default function CategoryPage({
         className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
       >
         <div className="relative h-56 overflow-hidden flex-shrink-0">
-          <Image
+          <ProductImage
             src={product.idUrl}
             alt={product.productName}
-            fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
-            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -305,13 +304,11 @@ export default function CategoryPage({
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
                       <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
-                        <Image
+                        <ProductImage
                           src={product.idUrl}
                           alt={product.productName}
-                          fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                           sizes="(max-width: 640px) 100vw, 192px"
-                          loading="lazy"
                         />
                       </div>
 
@@ -361,10 +358,9 @@ export default function CategoryPage({
             >
               <div className="relative">
                 <div className="relative w-full h-48 sm:h-72 md:h-96">
-                  <Image
+                  <ProductImage
                     src={selectedProduct.idUrl}
                     alt={selectedProduct.productName}
-                    fill
                     className="object-cover rounded-t-xl sm:rounded-t-2xl"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
                     priority

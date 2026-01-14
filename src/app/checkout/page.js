@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
+import ProductImage from "@/app/components/ProductImage";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -298,13 +299,11 @@ function CheckoutContent() {
                           <div key={item.id} className="p-4">
                             <div className="flex gap-4">
                               <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                <Image
+                                <ProductImage
                                   src={item.id_url || item.idUrl}
                                   alt={item.product_name || item.productName}
-                                  fill
                                   className="object-cover"
                                   sizes="(max-width: 640px) 96px, 128px"
-                                  loading="lazy"
                                 />
                               </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import ProductImage from "@/app/components/ProductImage";
 
 import SearchBar from "@/app/components/searchbar";
 import { useRouter } from "next/navigation";
@@ -310,13 +311,11 @@ export default function Dashboard() {
                       className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
                     >
                       <div className="relative h-56 overflow-hidden flex-shrink-0">
-                        <Image
+                        <ProductImage
                           src={product.id_url}
                           alt={product.product_name}
-                          fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
-                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -409,10 +408,9 @@ export default function Dashboard() {
             >
               <div className="relative">
                 <div className="relative w-full h-72 sm:h-96">
-                  <Image
+                  <ProductImage
                     src={selectedProduct.id_url}
                     alt={selectedProduct.product_name}
-                    fill
                     className="object-cover rounded-t-3xl"
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
                     priority

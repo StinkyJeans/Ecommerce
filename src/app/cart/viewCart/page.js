@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import ProductImage from "@/app/components/ProductImage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -361,13 +362,11 @@ export default function ViewCart() {
                                   />
 
                                   <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                    <Image
+                                    <ProductImage
                                       src={item.id_url || item.idUrl}
                                       alt={item.product_name || item.productName}
-                                      fill
                                       className="object-cover"
                                       sizes="(max-width: 640px) 96px, 128px"
-                                      loading="lazy"
                                     />
                                   </div>
 

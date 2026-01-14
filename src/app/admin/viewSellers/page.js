@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
+import Pagination from "@/app/components/Pagination";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -30,6 +31,8 @@ export default function AdminViewSellers() {
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [showIdModal, setShowIdModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useLoadingFavicon(authLoading || loading, "View Sellers");
 
@@ -60,7 +63,18 @@ export default function AdminViewSellers() {
     }
 
     setFilteredSellers(filtered);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   }, [searchTerm, statusFilter, sellers]);
+
+  // Calculate pagination
+  const paginatedSellers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredSellers.slice(startIndex, endIndex);
+  }, [filteredSellers, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredSellers.length / itemsPerPage);
 
   const fetchSellers = async () => {
     try {
@@ -236,8 +250,9 @@ export default function AdminViewSellers() {
               </p>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSellers.map((seller) => (
+              {paginatedSellers.map((seller) => (
                 <div key={seller.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -299,6 +314,16 @@ export default function AdminViewSellers() {
                 </div>
               ))}
             </div>
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredSellers.length}
+              />
+            )}
+            </>
           )}
         </div>
           </>

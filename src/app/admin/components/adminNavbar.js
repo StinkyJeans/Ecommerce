@@ -204,7 +204,7 @@ export default function AdminNavbar() {
                 </div>
                 <FontAwesomeIcon
                   icon={faBars}
-                  className={`text-sm transition-colors duration-200 ${showDropdown ? 'text-red-600' : 'text-gray-400'}`}
+                  className={`cursor-pointer text-sm transition-colors duration-200 ${showDropdown ? 'text-red-600' : 'text-gray-400'}`}
                 />
               </button>
 
@@ -212,21 +212,21 @@ export default function AdminNavbar() {
                 <div className="absolute bottom-0 left-full ml-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-left-2 duration-200 w-64">
                   <button
                     onClick={() => handleMenuClick(() => router.push("/admin/dashboard"))}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                    className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                   >
                     <FontAwesomeIcon icon={faChartLine} className="text-base text-gray-500 group-hover:text-red-600" />
                     <span className="font-medium text-sm">Dashboard</span>
                   </button>
                   <button
                     onClick={() => handleMenuClick(() => router.push("/admin/viewUsers"))}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                    className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                   >
                     <FontAwesomeIcon icon={faUsers} className="text-base text-gray-500 group-hover:text-red-600" />
                     <span className="font-medium text-sm">View Users</span>
                   </button>
                   <button
                     onClick={() => handleMenuClick(() => router.push("/admin/viewSellers"))}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
+                    className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors group"
                   >
                     <FontAwesomeIcon icon={faStore} className="text-base text-gray-500 group-hover:text-red-600" />
                     <span className="font-medium text-sm">View Sellers</span>
@@ -234,7 +234,7 @@ export default function AdminNavbar() {
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
+                    className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
                   >
                     <FontAwesomeIcon icon={faSignOutAlt} className="text-base text-gray-500 group-hover:text-red-600" />
                     <span className="font-medium text-sm">Logout</span>
