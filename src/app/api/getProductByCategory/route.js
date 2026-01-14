@@ -36,7 +36,12 @@ export async function GET(request) {
       updatedAt: product.updated_at,
     }));
     
-    return NextResponse.json({ products: transformedProducts, category });
+    const response = NextResponse.json({ products: transformedProducts, category });
+    
+    // Add cache headers for better performance
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    
+    return response;
   } catch (err) {
     console.error("Failed to fetch products by category:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });

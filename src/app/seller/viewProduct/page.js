@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -270,11 +271,13 @@ export default function ViewProduct() {
                   }`}
                 >
                   <div className="relative h-56 overflow-hidden flex-shrink-0">
-                    <img
+                    <Image
                       src={product.id_url}
                       alt={product.product_name}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      style={{ minHeight: '100%', minWidth: '100%' }}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -357,12 +360,16 @@ export default function ViewProduct() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                <img
-                  src={selectedProduct.id_url}
-                  alt={selectedProduct.product_name}
-                  className="w-full h-40 sm:h-56 md:h-64 object-cover rounded-t-xl sm:rounded-t-2xl"
-                  style={{ objectPosition: 'center', minHeight: '100%', minWidth: '100%' }}
-                />
+                <div className="relative w-full h-40 sm:h-56 md:h-64">
+                  <Image
+                    src={selectedProduct.id_url}
+                    alt={selectedProduct.product_name}
+                    fill
+                    className="object-cover rounded-t-xl sm:rounded-t-2xl"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 512px"
+                    priority
+                  />
+                </div>
                 <button
                   onClick={closeModal}
                   className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"

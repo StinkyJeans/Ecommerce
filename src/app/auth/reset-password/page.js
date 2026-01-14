@@ -87,6 +87,17 @@ function ResetPasswordContent() {
         return;
       }
 
+      // Update password_changed_at timestamp
+      try {
+        await fetch("/api/updatePasswordChangedAt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        console.error("Failed to update password changed timestamp:", err);
+        // Don't block the success flow if this fails
+      }
+
       setPopupMessage("Password reset successfully! Redirecting to login...");
       setPopupType("success");
       setShowPopup(true);

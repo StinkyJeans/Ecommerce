@@ -32,20 +32,13 @@ body {
   background-image: url("/Overlord.jpg");
   background-repeat: no-repeat;
   background-position: center center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   background-size: cover;
   color: #171717;
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   position: relative;
-}
-
-@media (max-width: 768px) {
-  body {
-    background-attachment: scroll;
-    background-size: cover;
-  }
 }
 
 img {

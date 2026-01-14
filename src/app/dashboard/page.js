@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
+import Image from "next/image";
 import Navbar from "../components/navbar";
 import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
@@ -76,7 +77,7 @@ export default function Dashboard() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = (searchTerm) => {
+  const handleSearch = useCallback((searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredProducts(products);
       return;
@@ -88,21 +89,21 @@ export default function Dashboard() {
         product.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
-  };
+  }, [products]);
 
-  const handleView = (product) => {
+  const handleView = useCallback((product) => {
     setSelectedProduct(product);
     setPopupVisible(true);
     setQuantity(1);
-  };
+  }, []);
 
-  const increaseQuantity = () => {
+  const increaseQuantity = useCallback(() => {
     setQuantity((prev) => prev + 1);
-  };
+  }, []);
 
-  const decreaseQuantity = () => {
+  const decreaseQuantity = useCallback(() => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-  };
+  }, []);
 
   const handleAddToCart = async () => {
     if (!selectedProduct) return;
@@ -162,10 +163,59 @@ export default function Dashboard() {
     setQuantity(1);
   };
 
-  const calculateTotalPrice = () => {
+  const calculateTotalPrice = useMemo(() => {
     if (!selectedProduct) return "0.00";
     return (parseFloat(selectedProduct.price) * quantity).toFixed(2);
-  };
+  }, [selectedProduct, quantity]);
+
+  // Memoize product card component
+  const ProductCard = memo(({ product, onView }) => (
+    <div
+      key={product.id || product._id || product.product_id}
+      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
+    >
+      <div className="relative h-56 overflow-hidden flex-shrink-0">
+        <Image
+          src={product.id_url}
+          alt={product.product_name}
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+            <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
+          </div>
+        </div>
+      </div>
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex-1">
+          <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+            {product.product_name}
+          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Price</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                ₱{formatPrice(product.price)}
+              </p>
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => onView(product)}
+          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
+        >
+          <FontAwesomeIcon icon={faEye} className="text-base" />
+          View Details
+        </button>
+      </div>
+    </div>
+  ));
+  
+  ProductCard.displayName = 'ProductCard';
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
@@ -287,47 +337,11 @@ export default function Dashboard() {
               {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                   {filteredProducts.map((product) => (
-                    <div
+                    <ProductCard
                       key={product.id || product._id || product.product_id}
-                      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
-                    >
-                      <div className="relative h-56 overflow-hidden flex-shrink-0">
-                        <img
-                          src={product.id_url}
-                          alt={product.product_name}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          style={{ minHeight: '100%', minWidth: '100%' }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-5 flex flex-col flex-1">
-                        <div className="flex-1">
-                          <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                            {product.product_name}
-                          </h2>
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Price</p>
-                              <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                                ₱{formatPrice(product.price)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleView(product)}
-                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
-                        >
-                          <FontAwesomeIcon icon={faEye} className="text-base" />
-                          View Details
-                        </button>
-                      </div>
-                    </div>
+                      product={product}
+                      onView={handleView}
+                    />
                   ))}
                 </div>
               ) : (
@@ -338,11 +352,13 @@ export default function Dashboard() {
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
                       <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={product.id_url}
                           alt={product.product_name}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          style={{ minHeight: '100%', minWidth: '100%' }}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, 192px"
+                          loading="lazy"
                         />
                       </div>
                       <div className="flex-1 p-6 flex flex-col justify-between">
@@ -389,11 +405,16 @@ export default function Dashboard() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                <img
-                  src={selectedProduct.id_url}
-                  alt={selectedProduct.product_name}
-                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
-                />
+                <div className="relative w-full h-48 sm:h-72 md:h-96">
+                  <Image
+                    src={selectedProduct.id_url}
+                    alt={selectedProduct.product_name}
+                    fill
+                    className="object-cover rounded-t-xl sm:rounded-t-2xl"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
+                    priority
+                  />
+                </div>
                 <button
                   onClick={closePopup}
                   className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
@@ -478,7 +499,7 @@ export default function Dashboard() {
                         <span className="whitespace-nowrap">Total</span>
                       </p>
                       <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
-                        ₱{calculateTotalPrice()}
+                        ₱{calculateTotalPrice}
                       </p>
                     </div>
                   </div>

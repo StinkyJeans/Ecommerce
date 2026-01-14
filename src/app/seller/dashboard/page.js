@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import SearchBar from "@/app/components/searchbar";
 import { useRouter } from "next/navigation";
@@ -309,11 +310,13 @@ export default function Dashboard() {
                       className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
                     >
                       <div className="relative h-56 overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={product.id_url}
                           alt={product.product_name}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          style={{ minHeight: '100%', minWidth: '100%' }}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -405,11 +408,16 @@ export default function Dashboard() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                <img
-                  src={selectedProduct.id_url}
-                  alt={selectedProduct.product_name}
-                  className="w-full h-72 sm:h-96 object-cover rounded-t-3xl"
-                />
+                <div className="relative w-full h-72 sm:h-96">
+                  <Image
+                    src={selectedProduct.id_url}
+                    alt={selectedProduct.product_name}
+                    fill
+                    className="object-cover rounded-t-3xl"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
+                    priority
+                  />
+                </div>
                 <button
                   onClick={closePopup}
                   className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"

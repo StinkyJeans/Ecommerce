@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
+import Image from "next/image";
 import Navbar from "./navbar";
 import SearchBar from "./searchbar";
 import { useRouter } from "next/navigation";
@@ -60,7 +61,7 @@ export default function CategoryPage({
     fetchProducts();
   }, [categoryValue]);
 
-  const handleSearch = (searchTerm) => {
+  const handleSearch = useCallback((searchTerm) => {
     if (!searchTerm.trim()) {
       setFilteredProducts(products);
       return;
@@ -72,14 +73,14 @@ export default function CategoryPage({
         product.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
-  };
+  }, [products]);
 
-  const handleView = (product) => {
+  const handleView = useCallback((product) => {
     setSelectedProduct(product);
     setPopupVisible(true);
-  };
+  }, []);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     if (!selectedProduct) return;
 
     if (!username) {
@@ -113,13 +114,67 @@ export default function CategoryPage({
       setCartMessage("error");
       setTimeout(() => setCartMessage(""), 3000);
     }
-  };
+  }, [selectedProduct, username]);
 
-  const closePopup = () => {
+  const closePopup = useCallback(() => {
     setPopupVisible(false);
     setSelectedProduct(null);
     setCartMessage("");
-  };
+  }, []);
+
+  // Memoize product grid items
+  const productGridItems = useMemo(() => 
+    filteredProducts.map((product) => (
+      <div
+        key={product.id || product._id || product.product_id}
+        className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
+      >
+        <div className="relative h-56 overflow-hidden flex-shrink-0">
+          <Image
+            src={product.idUrl}
+            alt={product.productName}
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+              <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
+            </div>
+          </div>
+
+          <button className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white">
+            <FontAwesomeIcon icon={faHeart} className="text-red-600" />
+          </button>
+        </div>
+
+        <div className="p-5 flex flex-col flex-1">
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+              {product.productName}
+            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Price</p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                  ₱{formatPrice(product.price)}
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => handleView(product)}
+            className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
+          >
+            <FontAwesomeIcon icon={faEye} className="text-base" />
+            View Details
+          </button>
+        </div>
+      </div>
+    )), [filteredProducts, handleView]);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
@@ -240,55 +295,7 @@ export default function CategoryPage({
 
               {viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id || product._id || product.product_id}
-                      className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
-                    >
-                      <div className="relative h-56 overflow-hidden flex-shrink-0">
-                        <img
-                          src={product.idUrl}
-                          alt={product.productName}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          style={{ minHeight: '100%', minWidth: '100%' }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
-                          </div>
-                        </div>
-
-                        <button className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white">
-                          <FontAwesomeIcon icon={faHeart} className="text-red-600" />
-                        </button>
-                      </div>
-
-                      <div className="p-5 flex flex-col flex-1">
-                        <div className="flex-1">
-                          <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
-                            {product.productName}
-                          </h2>
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Price</p>
-                              <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                                ₱{formatPrice(product.price)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleView(product)}
-                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
-                        >
-                          <FontAwesomeIcon icon={faEye} className="text-base" />
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  {productGridItems}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -298,11 +305,13 @@ export default function CategoryPage({
                       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
                     >
                       <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
-                        <img
+                        <Image
                           src={product.idUrl}
                           alt={product.productName}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          style={{ minHeight: '100%', minWidth: '100%' }}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, 192px"
+                          loading="lazy"
                         />
                       </div>
 
@@ -351,11 +360,16 @@ export default function CategoryPage({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative">
-                <img
-                  src={selectedProduct.idUrl}
-                  alt={selectedProduct.productName}
-                  className="w-full h-48 sm:h-72 md:h-96 object-cover rounded-t-xl sm:rounded-t-2xl"
-                />
+                <div className="relative w-full h-48 sm:h-72 md:h-96">
+                  <Image
+                    src={selectedProduct.idUrl}
+                    alt={selectedProduct.productName}
+                    fill
+                    className="object-cover rounded-t-xl sm:rounded-t-2xl"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
+                    priority
+                  />
+                </div>
                 <button
                   onClick={closePopup}
                   className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"

@@ -14,7 +14,7 @@ export async function POST(req) {
     // Find user by email only
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('role, email, seller_status')
+      .select('role, email, seller_status, password_changed_at')
       .eq('email', email)
       .single();
 
@@ -79,11 +79,19 @@ export async function POST(req) {
       }
       
       if (authError.message.includes('Invalid login credentials')) {
+        // Check if password was recently changed
+        const response = {
+          message: "Invalid Email or Password",
+          error: authError.message 
+        };
+        
+        // If password was changed recently, include the timestamp
+        if (userData?.password_changed_at) {
+          response.passwordChangedAt = userData.password_changed_at;
+        }
+        
         return NextResponse.json(
-          { 
-            message: "Invalid Email or Password",
-            error: authError.message 
-          },
+          response,
           { status: 401 }
         );
       }

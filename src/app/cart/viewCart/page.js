@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -360,11 +361,13 @@ export default function ViewCart() {
                                   />
 
                                   <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                    <img
+                                    <Image
                                       src={item.id_url || item.idUrl}
                                       alt={item.product_name || item.productName}
-                                      className="absolute inset-0 w-full h-full object-cover"
-                                      style={{ minHeight: '100%', minWidth: '100%' }}
+                                      fill
+                                      className="object-cover"
+                                      sizes="(max-width: 640px) 96px, 128px"
+                                      loading="lazy"
                                     />
                                   </div>
 

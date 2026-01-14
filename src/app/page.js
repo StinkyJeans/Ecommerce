@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { createClient } from "@/lib/supabase/client";
+import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -29,6 +30,7 @@ export default function LoginPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("error");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [passwordChangedMessage, setPasswordChangedMessage] = useState("");
   const { setRole } = useAuth();
   const router = useRouter();
   const supabase = createClient();
@@ -106,6 +108,9 @@ export default function LoginPage() {
       console.log("Login response:", data);
 
       if (!res.ok) {
+        // Clear password changed message on new login attempt
+        setPasswordChangedMessage("");
+        
         if (res.status === 403 && data.sellerStatus === 'pending') {
           setPopupMessage(data.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
           setPopupType("warning");
@@ -121,9 +126,18 @@ export default function LoginPage() {
           setPopupType("error");
           setShowPopup(true);
           setTimeout(() => setShowPopup(false), 4000);
+          
+          // Check if password was recently changed
+          if (data.passwordChangedAt) {
+            const relativeTime = formatRelativeTime(data.passwordChangedAt);
+            setPasswordChangedMessage(`You have changed your password ${relativeTime}`);
+          }
         }
         return;
       }
+      
+      // Clear password changed message on successful login
+      setPasswordChangedMessage("");
 
       setRole(data.role);
 
@@ -233,7 +247,12 @@ export default function LoginPage() {
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (passwordChangedMessage) {
+                  setPasswordChangedMessage("");
+                }
+              }}
               className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
               required
             />
@@ -248,6 +267,12 @@ export default function LoginPage() {
               />
             </button>
           </div>
+          {passwordChangedMessage && (
+            <div className="mt-2 flex items-start gap-2 text-sm text-amber-600">
+              <FontAwesomeIcon icon={faExclamationTriangle} className="mt-0.5 flex-shrink-0" />
+              <p className="flex-1">{passwordChangedMessage}</p>
+            </div>
+          )}
           <div className="flex justify-end mt-2">
             <button
               type="button"
@@ -280,7 +305,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading || googleLoading}
-          className="w-full mt-4 py-3 sm:py-3.5 px-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base flex items-center justify-center gap-3"
+          className="cursor-pointer w-full mt-4 py-3 sm:py-3.5 px-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base flex items-center justify-center gap-3"
         >
           <FontAwesomeIcon icon={faGoogle} className="text-xl text-red-600" />
           <span>Continue with Google</span>

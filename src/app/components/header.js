@@ -24,6 +24,11 @@ export default function Header() {
         return;
       }
 
+      // Don't fetch if tab is not visible
+      if (document.hidden) {
+        return;
+      }
+
       try {
         const res = await fetch(`/api/getCartCount?username=${username}`);
         if (res.ok) {
@@ -37,14 +42,24 @@ export default function Header() {
 
     fetchCartCount();
 
-    const interval = setInterval(fetchCartCount, 5000);
+    // Increase interval from 5s to 30s
+    const interval = setInterval(fetchCartCount, 30000);
 
     const handleCartUpdate = () => fetchCartCount();
     window.addEventListener("cartUpdated", handleCartUpdate);
 
+    // Fetch when tab becomes visible again
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchCartCount();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       clearInterval(interval);
       window.removeEventListener("cartUpdated", handleCartUpdate);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [username]);
 

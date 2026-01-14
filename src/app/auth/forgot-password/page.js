@@ -171,7 +171,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
+          className="cursor-pointer w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
         >
           Send Reset Link
         </button>
@@ -180,7 +180,7 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="text-gray-600 text-sm hover:text-red-600 transition-colors"
+            className="cursor-pointer text-gray-600 text-sm hover:text-red-600 transition-colors"
           >
             Back to Login
           </button>
