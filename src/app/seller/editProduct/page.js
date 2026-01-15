@@ -141,14 +141,51 @@ function EditProductContent() {
         username,
       });
 
-      setPopupMessage(data.message || "Product updated successfully!");
-      setShowPopup(true);
-      setTimeout(() => {
-        router.push("/seller/viewProduct");
-      }, 1500);
+      // Check if update was actually successful
+      const isSuccess = data && 
+        data.message && 
+        data.success !== false && 
+        !data.message.toLowerCase().includes('fail') && 
+        !data.message.toLowerCase().includes('error') &&
+        !data.error &&
+        !data.errors;
+      
+      if (isSuccess) {
+        setPopupMessage(data.message || "Product updated successfully!");
+        setShowPopup(true);
+        setTimeout(() => {
+          router.push("/seller/viewProduct");
+        }, 1500);
+      } else {
+        // Update failed
+        let errorMessage = "Failed to update product. Please try again.";
+        
+        if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          errorMessage = data.errors.join(". ");
+        } else if (data?.error) {
+          errorMessage = data.error;
+        } else if (data?.message) {
+          errorMessage = data.message;
+        }
+        
+        setPopupMessage("Product update failed. " + errorMessage);
+        setShowPopup(true);
+      }
     } catch (err) {
-      const errorMessage = err.response?.message || err.message || "Failed to update product. Please try again.";
-      setPopupMessage(errorMessage);
+      // Extract error message properly
+      let errorMessage = "Failed to update product. Please try again.";
+      
+      if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
+        errorMessage = err.response.errors.join(". ");
+      } else if (err.response?.error) {
+        errorMessage = err.response.error;
+      } else if (err.response?.message) {
+        errorMessage = err.response.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setPopupMessage("Product update failed. " + errorMessage);
       setShowPopup(true);
     } finally {
       setLoading(false);

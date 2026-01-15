@@ -111,9 +111,17 @@ export default function AddProduct() {
       });
 
       // Check if response indicates success (has productId or success message without "fail")
+      // Must have productId OR (message without fail/error AND no error fields)
       const isSuccess = data && (
         data.productId || 
-        (data.message && !data.message.toLowerCase().includes('fail') && !data.message.toLowerCase().includes('error') && data.success !== false)
+        (
+          data.message && 
+          !data.message.toLowerCase().includes('fail') && 
+          !data.message.toLowerCase().includes('error') && 
+          data.success !== false &&
+          !data.error &&
+          !data.errors
+        )
       );
 
       if (isSuccess) {
@@ -137,6 +145,8 @@ export default function AddProduct() {
         
         if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
           errorMessage = data.errors.join(". ");
+        } else if (data?.error) {
+          errorMessage = data.error;
         } else if (data?.message) {
           errorMessage = data.message;
         }

@@ -34,14 +34,46 @@ export default function RegisterPage() {
 
     try {
       const data = await authFunctions.register({ displayName, email, password, role: "user" });
-      setPopupMessage(data.message || "User registered successfully");
-      setShowPopup(true);
-      setTimeout(() => {
-        setShowPopup(false);
-        router.push("/");
-      }, 2000);
+      
+      // Check if registration was actually successful
+      const isSuccess = data && 
+        data.message && 
+        data.success !== false && 
+        !data.message.toLowerCase().includes('fail') && 
+        !data.message.toLowerCase().includes('error') &&
+        !data.error &&
+        !data.errors;
+      
+      if (isSuccess) {
+        setPopupMessage(data.message || "User registered successfully");
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/");
+        }, 2000);
+      } else {
+        // Registration failed
+        const errorMessage = data?.error || data?.message || data?.errors || "Registration failed";
+        setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+      }
     } catch (error) {
-      const errorMessage = error.message || "Registration failed";
+      // Extract error message properly
+      let errorMessage = "Registration failed. Please try again.";
+      
+      if (error.response?.errors && Array.isArray(error.response.errors) && error.response.errors.length > 0) {
+        errorMessage = error.response.errors.join(". ");
+      } else if (error.response?.error) {
+        errorMessage = error.response.error;
+      } else if (error.response?.message) {
+        errorMessage = error.response.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => {

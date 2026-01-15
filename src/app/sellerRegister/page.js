@@ -67,12 +67,14 @@ export default function SellerRegisterPage() {
           body: formData,
         });
         
+        const uploadData = await uploadResponse.json();
+        
         if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.error || 'Failed to upload ID document');
+          // Upload failed - throw error with specific message
+          const errorMsg = uploadData.error || uploadData.message || 'Failed to upload ID document';
+          throw new Error(errorMsg);
         }
         
-        const uploadData = await uploadResponse.json();
         if (!uploadData.url) {
           throw new Error('Upload succeeded but no URL was returned');
         }
@@ -92,7 +94,17 @@ export default function SellerRegisterPage() {
       });
       
       // Check if registration was actually successful
-      if (data && data.message && !data.message.toLowerCase().includes('fail') && !data.message.toLowerCase().includes('error')) {
+      // Success criteria: has message, no error/success=false flag, message doesn't contain fail/error
+      // Also check HTTP status - if callApi didn't throw, response was ok, but still check data
+      const isSuccess = data && 
+        data.message && 
+        data.success !== false && 
+        !data.message.toLowerCase().includes('fail') && 
+        !data.message.toLowerCase().includes('error') &&
+        !data.error &&
+        !data.errors;
+      
+      if (isSuccess) {
         const successMessage = data.details 
           ? `${data.message}\n\n${data.details}`
           : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
@@ -103,8 +115,8 @@ export default function SellerRegisterPage() {
           router.push("/");
         }, 6000);
       } else {
-        // Registration failed
-        const errorMessage = data?.message || data?.errors || "Registration failed. Please try again.";
+        // Registration failed - show error
+        const errorMessage = data?.error || data?.message || data?.errors || "Registration failed. Please try again.";
         setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
         setShowPopup(true);
       }
