@@ -139,13 +139,45 @@ export async function getSignedUrl(bucket, path, expiresIn = 3600) {
 export function getImageUrl(url, bucket = null) {
   if (!url) return null;
   
-  // If it's not a Supabase URL, return as-is
+  // Handle old EdgeStore URLs - return placeholder since EdgeStore is no longer used
+  if (url.includes('edgestore.dev') || url.includes('files.edgestore.dev')) {
+    return '/placeholder-image.jpg';
+  }
+  
+  // If it's not a Supabase URL, return as-is (but not EdgeStore)
   if (!url.includes('supabase.co') && !url.includes('supabase.in')) {
     return url;
   }
 
   // Check if it's a public bucket URL
   const isPublicUrl = url.includes('storage/v1/object/public/');
+  
+  // product-images is a public bucket - ALWAYS return the URL directly (no API route)
+  // This check must happen FIRST before any other routing logic
+  // For product-images, if it's a public URL, return it directly without any processing
+  if (bucket === 'product-images') {
+    // If it's already a public URL, return as-is immediately (most common case)
+    if (isPublicUrl) {
+      return url;
+    }
+    // If it's a signed URL for product-images, try to extract the public URL
+    const pathMatch = url.match(/product-images\/(.+?)(\?|$)/);
+    if (pathMatch) {
+      const filePath = decodeURIComponent(pathMatch[1]);
+      // Extract the base URL (everything before /storage/)
+      const baseUrlMatch = url.match(/(https?:\/\/[^\/]+)/);
+      if (baseUrlMatch) {
+        return `${baseUrlMatch[1]}/storage/v1/object/public/product-images/${filePath}`;
+      }
+    }
+    // Fallback: return as-is
+    return url;
+  }
+  
+  // Also check if URL contains product-images path and is public (even if bucket not specified)
+  if (url.includes('/product-images/') && isPublicUrl) {
+    return url;
+  }
   
   // If bucket is specified as private, always use API route
   if (bucket && (bucket === 'seller-ids' || bucket === 'user-avatars')) {
@@ -154,12 +186,12 @@ export function getImageUrl(url, bucket = null) {
   }
   
   // If it's a public URL and no private bucket specified, return as-is
-  if (isPublicUrl && !bucket) {
+  if (isPublicUrl) {
     return url;
   }
 
-  // For signed URLs or when bucket is specified, use API route
-  if (url.includes('storage/v1/object/sign/') || bucket) {
+  // For signed URLs from private buckets, use API route
+  if (url.includes('storage/v1/object/sign/')) {
     const params = new URLSearchParams({ url });
     if (bucket) {
       params.append('bucket', bucket);

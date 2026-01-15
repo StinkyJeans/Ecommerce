@@ -235,17 +235,17 @@ export default function AdminViewSellers() {
             </div>
           ) : (
             <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
               {paginatedSellers.map((seller) => (
-                <div key={seller.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
+                <div key={seller.id} className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg">
                           {seller.username.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <h3 className="font-bold text-lg text-gray-800">{seller.username}</h3>
+                          <h3 className="font-bold text-sm sm:text-base md:text-lg text-gray-800">{seller.username}</h3>
                           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${getStatusBadge(seller.seller_status)}`}>
                             <FontAwesomeIcon icon={getStatusIcon(seller.seller_status)} className="text-xs" />
                             <span className="capitalize">{seller.seller_status || "pending"}</span>
@@ -277,7 +277,7 @@ export default function AdminViewSellers() {
                         onClick={() => viewIdPicture(seller)}
                         className="w-full relative group"
                       >
-                        <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
+                        <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
                           <img
                             src={getImageUrl(seller.id_url, 'seller-ids')}
                             alt="ID Preview"

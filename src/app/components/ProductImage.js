@@ -21,8 +21,12 @@ export default function ProductImage({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // Get the processed image URL (handles private buckets)
+  // Get the processed image URL (handles private buckets and old EdgeStore URLs)
   const imageSrc = src ? getImageUrl(src, bucket) : null;
+  
+  // Check if it's an EdgeStore URL (should be replaced by getImageUrl, but double-check)
+  const isEdgeStoreUrl = src && (src.includes('edgestore.dev') || src.includes('files.edgestore.dev'));
+  const finalSrc = isEdgeStoreUrl ? '/placeholder-image.jpg' : (hasError ? "/placeholder-image.jpg" : imageSrc);
 
   return (
     <>
@@ -34,9 +38,9 @@ export default function ProductImage({
       )}
       
       {/* Actual image */}
-      {imageSrc && (
+      {finalSrc && (
         <Image
-          src={hasError ? "/placeholder-image.jpg" : imageSrc}
+          src={finalSrc}
           alt={alt}
           fill
           className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}

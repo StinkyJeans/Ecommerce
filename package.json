@@ -2,12 +2,14 @@
   "name": "ecomerce",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "reset:db": "node scripts/reset-database.js",
     "create:admin": "node scripts/create-admin.js",
+    "create:admin:simple": "node scripts/create-admin-simple.js",
     "clear:data": "node scripts/clear-database.js"
   },
   "dependencies": {

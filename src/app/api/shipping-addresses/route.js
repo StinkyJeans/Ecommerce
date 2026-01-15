@@ -85,23 +85,29 @@ export async function POST(req) {
     }
 
     // Validate field lengths and formats
+    const validationErrors = [];
+    
     if (!validateLength(fullName, 2, 100)) {
-      return createValidationErrorResponse("Full name must be between 2 and 100 characters");
+      validationErrors.push("Full name must be between 2 and 100 characters");
     }
     if (!isValidPhone(phoneNumber)) {
-      return createValidationErrorResponse("Invalid phone number format");
+      validationErrors.push("Invalid phone number format. Please use 7-15 digits (e.g., 09123456789)");
     }
     if (!validateLength(addressLine1, 5, 200)) {
-      return createValidationErrorResponse("Address line 1 must be between 5 and 200 characters");
+      validationErrors.push("Address line 1 must be between 5 and 200 characters");
     }
     if (!validateLength(city, 2, 100)) {
-      return createValidationErrorResponse("City must be between 2 and 100 characters");
+      validationErrors.push("City must be between 2 and 100 characters");
     }
     if (!validateLength(province, 2, 100)) {
-      return createValidationErrorResponse("Province must be between 2 and 100 characters");
+      validationErrors.push("Province must be between 2 and 100 characters");
     }
     if (!isValidPostalCode(postalCode)) {
-      return createValidationErrorResponse("Invalid postal code format");
+      validationErrors.push("Invalid postal code format. Please use 3-10 alphanumeric characters");
+    }
+    
+    if (validationErrors.length > 0) {
+      return createValidationErrorResponse(validationErrors);
     }
 
     const supabase = await createClient();
@@ -180,23 +186,29 @@ export async function PUT(req) {
     }
 
     // Validate field lengths and formats
+    const validationErrors = [];
+    
     if (!validateLength(fullName, 2, 100)) {
-      return createValidationErrorResponse("Full name must be between 2 and 100 characters");
+      validationErrors.push("Full name must be between 2 and 100 characters");
     }
     if (!isValidPhone(phoneNumber)) {
-      return createValidationErrorResponse("Invalid phone number format");
+      validationErrors.push("Invalid phone number format. Please use 7-15 digits (e.g., 09123456789)");
     }
     if (!validateLength(addressLine1, 5, 200)) {
-      return createValidationErrorResponse("Address line 1 must be between 5 and 200 characters");
+      validationErrors.push("Address line 1 must be between 5 and 200 characters");
     }
     if (!validateLength(city, 2, 100)) {
-      return createValidationErrorResponse("City must be between 2 and 100 characters");
+      validationErrors.push("City must be between 2 and 100 characters");
     }
     if (!validateLength(province, 2, 100)) {
-      return createValidationErrorResponse("Province must be between 2 and 100 characters");
+      validationErrors.push("Province must be between 2 and 100 characters");
     }
     if (!isValidPostalCode(postalCode)) {
-      return createValidationErrorResponse("Invalid postal code format");
+      validationErrors.push("Invalid postal code format. Please use 3-10 alphanumeric characters");
+    }
+    
+    if (validationErrors.length > 0) {
+      return createValidationErrorResponse(validationErrors);
     }
 
     const supabase = await createClient();

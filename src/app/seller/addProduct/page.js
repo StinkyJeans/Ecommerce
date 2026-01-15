@@ -82,7 +82,23 @@ export default function AddProduct() {
 
     try {
       if (image) {
-        idUrl = await uploadProductImage(image, username);
+        // Upload via server-side API route to avoid RLS issues
+        const formData = new FormData();
+        formData.append('file', image);
+        formData.append('sellerUsername', username);
+
+        const uploadResponse = await fetch('/api/upload-product-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok || !uploadData.success) {
+          throw new Error(uploadData.error || 'Failed to upload image');
+        }
+
+        idUrl = uploadData.url;
       }
 
       const data = await productFunctions.addProduct({
@@ -94,30 +110,60 @@ export default function AddProduct() {
         username,
       });
 
-      setPopupMessage(
-        data.productId
-          ? `${data.message}`
-          : data.message
+      // Check if response indicates success (has productId or success message without "fail")
+      const isSuccess = data && (
+        data.productId || 
+        (data.message && !data.message.toLowerCase().includes('fail') && !data.message.toLowerCase().includes('error') && data.success !== false)
       );
-      setShowPopup(true);
 
-      setProductName("");
-      setDescription("");
-      setPrice("");
-      setCategory("");
-      setImage(null);
-      setIdPreview(null);
+      if (isSuccess) {
+        setPopupMessage(data.message || "Product added successfully!");
+        setShowPopup(true);
+        
+        // Clear form only on success
+        setProductName("");
+        setDescription("");
+        setPrice("");
+        setCategory("");
+        setImage(null);
+        setIdPreview(null);
 
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 3000);
+      } else {
+        // Handle error response - prioritize errors array over message
+        let errorMessage = "Failed to add product. Please try again.";
+        
+        if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          errorMessage = data.errors.join(". ");
+        } else if (data?.message) {
+          errorMessage = data.message;
+        }
+        
+        setPopupMessage("Adding of product failed. " + errorMessage);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+        }, 5000);
+      }
     } catch (err) {
-      const errorMessage = err.response?.message || err.message || "Failed to add product. Please try again.";
+      // Extract error message - prioritize errors array
+      let errorMessage = "Failed to add product. Please try again.";
+      
+      if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
+        errorMessage = err.response.errors.join(". ");
+      } else if (err.response?.message) {
+        errorMessage = err.response.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setPopupMessage("Adding of product failed. " + errorMessage);
       setShowPopup(true);
       setTimeout(() => {
         setShowPopup(false);
-      }, 3000);
+      }, 5000);
     } finally {
       setLoading(false);
     }
@@ -377,13 +423,22 @@ export default function AddProduct() {
       </div>
 
       {showPopup && (
-        <div className="fixed top-5 right-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-2xl" />
-          <div>
-            <p className="font-semibold">{popupMessage}</p>
-            <p className="text-xs text-green-100 mt-1">
-              Your product has been added successfully
-            </p>
+        <div className={`fixed top-5 right-5 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3 ${
+          popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error')
+            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+            : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
+        }`}>
+          <FontAwesomeIcon 
+            icon={popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error') ? faInfoCircle : faCheckCircle} 
+            className="text-2xl flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold break-words">{popupMessage}</p>
+            {!popupMessage.toLowerCase().includes('fail') && !popupMessage.toLowerCase().includes('error') && (
+              <p className="text-xs opacity-90 mt-1">
+                Your product has been added successfully
+              </p>
+            )}
           </div>
         </div>
       )}

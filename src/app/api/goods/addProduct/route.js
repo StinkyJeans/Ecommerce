@@ -21,9 +21,31 @@ export async function POST(req) {
 
     const { productName, description, price, category, idUrl, username } = await req.json();
 
+    // Collect all validation errors
+    const validationErrors = [];
+
     // Input validation
-    if (!productName || !description || !price || !category || !idUrl || !username) {
-      return createValidationErrorResponse("All fields are required");
+    if (!productName || !productName.trim()) {
+      validationErrors.push("Product name is required");
+    }
+    if (!description || !description.trim()) {
+      validationErrors.push("Description is required");
+    }
+    if (!price || price === '') {
+      validationErrors.push("Price is required");
+    }
+    if (!category || !category.trim()) {
+      validationErrors.push("Category is required");
+    }
+    if (!idUrl || !idUrl.trim()) {
+      validationErrors.push("Product image is required");
+    }
+    if (!username || !username.trim()) {
+      validationErrors.push("Username is required");
+    }
+
+    if (validationErrors.length > 0) {
+      return createValidationErrorResponse(validationErrors);
     }
 
     // Sanitize inputs
@@ -38,18 +60,28 @@ export async function POST(req) {
       return ownershipCheck;
     }
 
-    // Validate inputs
+    // Validate inputs with specific error messages
     if (!validateLength(sanitizedProductName, 2, 200)) {
-      return createValidationErrorResponse("Product name must be between 2 and 200 characters");
+      validationErrors.push("Product name must be between 2 and 200 characters");
     }
     if (!validateLength(sanitizedDescription, 10, 1000)) {
-      return createValidationErrorResponse("Description must be between 10 and 1000 characters");
+      validationErrors.push("Description must be between 10 and 1000 characters");
     }
     if (!isValidPrice(price)) {
-      return createValidationErrorResponse("Invalid price format");
+      validationErrors.push("Invalid price format. Please enter a valid number");
     }
     if (!isValidImageUrl(idUrl)) {
-      return createValidationErrorResponse("Invalid image URL format");
+      validationErrors.push("Invalid image URL format. Please upload a valid image");
+    }
+
+    // Validate category - must be one of the allowed values
+    const allowedCategories = ['Pc', 'Mobile', 'Watch'];
+    if (!allowedCategories.includes(sanitizedCategory)) {
+      validationErrors.push(`Invalid category. Must be one of: ${allowedCategories.join(', ')}`);
+    }
+
+    if (validationErrors.length > 0) {
+      return createValidationErrorResponse(validationErrors);
     }
 
     const supabase = await createClient();

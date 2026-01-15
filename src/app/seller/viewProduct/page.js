@@ -215,7 +215,7 @@ export default function ViewProduct() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96">
               <div className="relative mb-6">
@@ -250,22 +250,25 @@ export default function ViewProduct() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
               {products.map((product) => (
                 <div
                   key={product._id}
-                  className={`group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden flex flex-col ${
+                  className={`group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 overflow-hidden flex flex-col ${
                     removingId === product._id ? "opacity-50 scale-95" : ""
                   }`}
                 >
-                  <div className="relative h-56 overflow-hidden flex-shrink-0">
+                  <div className="relative h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden flex-shrink-0">
                     <Image
-                      src={getImageUrl(product.id_url, 'product-images') || '/placeholder-image.jpg'}
+                      src={product.id_url || '/placeholder-image.jpg'}
                       alt={product.product_name}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       loading="lazy"
+                      onError={(e) => {
+                        e.target.src = '/placeholder-image.jpg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -298,25 +301,25 @@ export default function ViewProduct() {
                     </button>
                   </div>
 
-                  <div className="p-5 flex flex-col flex-1">
+                  <div className="p-3 sm:p-4 md:p-4 flex flex-col flex-1">
                     <div className="flex-1">
-                      <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+                      <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 truncate mb-1 sm:mb-2 group-hover:text-red-600 transition-colors">
                         {product.product_name}
                       </h2>
 
-                      <p className="text-sm text-gray-600 line-clamp-2 mb-3 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-2 sm:mb-3 leading-relaxed">
                         {product.description}
                       </p>
 
-                      <div className="flex items-center justify-between mb-4 gap-2">
+                      <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
                         <div className="flex-1 min-w-0 overflow-hidden">
-                          <p className="text-xs text-gray-500 mb-1">Price</p>
-                            <p className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
+                          <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Price</p>
+                            <p className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
                               ₱{formatPrice(product.price)}
                             </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500">Added</p>
+                          <p className="text-[10px] sm:text-xs text-gray-500">Added</p>
                           <p className="text-xs font-semibold text-gray-700">
                             {new Date(product.createdAt).toLocaleDateString()}
                           </p>
@@ -326,9 +329,9 @@ export default function ViewProduct() {
 
                     <button
                       onClick={() => handleViewDetails(product)}
-                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
+                      className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 touch-manipulation text-xs sm:text-sm mt-auto min-h-[40px]"
                     >
-                      <FontAwesomeIcon icon={faEye} />
+                      <FontAwesomeIcon icon={faEye} className="text-xs sm:text-sm" />
                       View Details
                     </button>
                   </div>

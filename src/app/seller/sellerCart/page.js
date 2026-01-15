@@ -77,7 +77,7 @@ export default function ViewCart() {
             <p className="text-lg">Your cart is empty.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {cartItems.map((item) => (
               <div
                 key={item._id}
@@ -85,7 +85,7 @@ export default function ViewCart() {
               >
                 <div className="relative h-48 w-full rounded-lg overflow-hidden mb-4">
                   <img
-                    src={getImageUrl(item.idUrl, 'product-images')}
+                    src={item.idUrl || '/placeholder-image.jpg'}
                     alt={item.productName}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ minHeight: '100%', minWidth: '100%' }}

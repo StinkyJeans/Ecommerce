@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { createSupabaseAdminClient } from '../src/lib/supabase.js';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -12,10 +11,19 @@ dotenv.config({ path: join(__dirname, '..', '.env.local') });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Error: Missing Supabase environment variables');
+  console.error('❌ Error: Missing Supabase environment variables');
   console.error('Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file');
+  process.exit(1);
+}
+
+if (!supabaseServiceRoleKey) {
+  console.error('❌ Error: Missing SUPABASE_SERVICE_ROLE_KEY');
+  console.error('This is required to auto-confirm the admin account.');
+  console.error('Please set SUPABASE_SERVICE_ROLE_KEY in your .env.local file');
+  console.error('You can find it in Supabase Dashboard > Settings > API > service_role key');
   process.exit(1);
 }
 
@@ -71,7 +79,14 @@ async function createAdmin() {
     console.log('✅ Auth account created');
     
     console.log('🔐 Confirming email...');
-    const adminClient = createSupabaseAdminClient();
+    // Create admin client using service role key directly
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    
     const { error: confirmError } = await adminClient.auth.admin.updateUserById(
       authData.user.id,
       { email_confirm: true }
@@ -79,12 +94,15 @@ async function createAdmin() {
     
     if (confirmError) {
       console.error('⚠️  Warning: Error auto-confirming user:', confirmError.message);
+      console.error('   You may need to confirm the email manually via Supabase Dashboard');
+      console.error('   Or check that SUPABASE_SERVICE_ROLE_KEY is correct');
     } else {
       console.log('✅ Email confirmed');
     }
     
     console.log('📋 Creating user record...');
-    const { data: newUser, error: userError } = await supabase
+    // Use admin client to bypass RLS when inserting user record
+    const { data: newUser, error: userError } = await adminClient
       .from('users')
       .insert({
         username: username,
@@ -96,6 +114,12 @@ async function createAdmin() {
     
     if (userError) {
       console.error('❌ Error creating user record:', userError.message);
+      console.error('   Error code:', userError.code);
+      console.error('   Error details:', userError.details);
+      console.error('\n   Troubleshooting:');
+      console.error('   1. Check if the "users" table exists');
+      console.error('   2. Check if RLS policies allow inserts');
+      console.error('   3. Try running the database migrations first');
       process.exit(1);
     }
     

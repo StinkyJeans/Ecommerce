@@ -20,11 +20,16 @@ export async function GET(req) {
       );
     }
 
+    // Handle old EdgeStore URLs - return placeholder
+    if (imageUrl.includes('edgestore.dev') || imageUrl.includes('files.edgestore.dev')) {
+      return NextResponse.redirect('/placeholder-image.jpg');
+    }
+    
     // Check if it's a Supabase Storage URL
     const isSupabaseStorage = imageUrl.includes('supabase.co') || imageUrl.includes('supabase.in');
     
     if (!isSupabaseStorage) {
-      // For non-Supabase URLs, redirect to the URL
+      // For non-Supabase URLs (and not EdgeStore), redirect to the URL
       return NextResponse.redirect(imageUrl);
     }
 

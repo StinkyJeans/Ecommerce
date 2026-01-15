@@ -256,9 +256,9 @@ export default function AdminDashboard() {
                 <p className="text-gray-500 text-sm mt-2">All sellers have been reviewed</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                 {pendingSellers.map((seller) => (
-                  <div key={seller.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow flex flex-col">
+                  <div key={seller.id} className="border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 hover:shadow-lg transition-shadow flex flex-col">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg text-gray-800 mb-1 truncate">{seller.username}</h3>
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                           onClick={() => viewIdPicture(seller)}
                           className="w-full relative group"
                         >
-                          <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
+                          <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
                             <img
                               src={getImageUrl(seller.id_url, 'seller-ids')}
                               alt="ID Preview"

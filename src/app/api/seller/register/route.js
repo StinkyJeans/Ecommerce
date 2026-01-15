@@ -77,6 +77,7 @@ export async function POST(req) {
       options: {
         data: {
           display_name: sanitizedDisplayName,
+          username: sanitizedDisplayName, // Also store as username for compatibility
           role: "seller"
         }
       }

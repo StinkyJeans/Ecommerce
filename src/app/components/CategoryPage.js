@@ -125,9 +125,9 @@ export default function CategoryPage({
     filteredProducts.map((product) => (
       <div
         key={product.id || product._id || product.product_id}
-        className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
+        className="group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
       >
-        <div className="relative h-56 overflow-hidden flex-shrink-0">
+        <div className="relative h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden flex-shrink-0">
           <ProductImage
             src={product.idUrl}
             alt={product.productName}
@@ -147,15 +147,15 @@ export default function CategoryPage({
           </button>
         </div>
 
-        <div className="p-5 flex flex-col flex-1">
+        <div className="p-3 sm:p-4 md:p-4 flex flex-col flex-1">
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-gray-900 truncate mb-2 group-hover:text-red-600 transition-colors">
+            <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 truncate mb-1 sm:mb-2 group-hover:text-red-600 transition-colors">
               {product.productName}
             </h2>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
               <div>
-                <p className="text-xs text-gray-500 mb-1">Price</p>
-                <p className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Price</p>
+                <p className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                   ₱{formatPrice(product.price)}
                 </p>
               </div>
@@ -163,9 +163,9 @@ export default function CategoryPage({
           </div>
           <button
             onClick={() => handleView(product)}
-            className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 touch-manipulation text-sm sm:text-base mt-auto"
+            className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2 sm:py-2.5 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 touch-manipulation text-xs sm:text-sm mt-auto min-h-[40px]"
           >
-            <FontAwesomeIcon icon={faEye} className="text-base" />
+            <FontAwesomeIcon icon={faEye} className="text-xs sm:text-sm" />
             View Details
           </button>
         </div>
@@ -290,7 +290,7 @@ export default function CategoryPage({
               </div>
 
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
                   {productGridItems}
                 </div>
               ) : (
