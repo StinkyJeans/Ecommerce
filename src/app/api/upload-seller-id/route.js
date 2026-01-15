@@ -33,7 +33,15 @@ export async function POST(req) {
     }
 
     // Use admin client to bypass RLS for uploads during registration
-    const adminClient = createSupabaseAdminClient();
+    let adminClient;
+    try {
+      adminClient = createSupabaseAdminClient();
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Missing Supabase service role key. Please configure SUPABASE_SERVICE_ROLE_KEY in your environment variables.' },
+        { status: 500 }
+      );
+    }
     
     const fileExtension = file.name.split('.').pop();
     const fileName = `${email}/id-document.${fileExtension}`;

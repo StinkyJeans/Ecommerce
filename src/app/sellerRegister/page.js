@@ -91,23 +91,37 @@ export default function SellerRegisterPage() {
         idUrl,
       });
       
-      const successMessage = data.details 
-        ? `${data.message}\n\n${data.details}`
-        : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
-      setPopupMessage(successMessage);
-      setShowPopup(true);
-      setTimeout(() => {
-        setShowPopup(false);
-        router.push("/");
-      }, 6000);
+      // Check if registration was actually successful
+      if (data && data.message && !data.message.toLowerCase().includes('fail') && !data.message.toLowerCase().includes('error')) {
+        const successMessage = data.details 
+          ? `${data.message}\n\n${data.details}`
+          : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
+        setPopupMessage(successMessage);
+        setShowPopup(true);
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/");
+        }, 6000);
+      } else {
+        // Registration failed
+        const errorMessage = data?.message || data?.errors || "Registration failed. Please try again.";
+        setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
+        setShowPopup(true);
+      }
     } catch (err) {
-      let errorMessage = err.response?.message || err.message || "Registration failed. Please try again.";
+      // Extract error message - prioritize errors array, then message, then error field
+      let errorMessage = "Registration failed. Please try again.";
       
-      // If there are validation errors, show them
-      if (err.response?.errors && Array.isArray(err.response.errors)) {
-        errorMessage = "Validation failed:\n" + err.response.errors.join("\n");
+      if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
+        errorMessage = err.response.errors.join(". ");
       } else if (err.response?.errors && typeof err.response.errors === 'string') {
         errorMessage = err.response.errors;
+      } else if (err.response?.error) {
+        errorMessage = err.response.error;
+      } else if (err.response?.message) {
+        errorMessage = err.response.message;
+      } else if (err.message) {
+        errorMessage = err.message;
       }
       
       setPopupMessage("Upload or registration failed. " + errorMessage);
@@ -126,11 +140,23 @@ export default function SellerRegisterPage() {
       </div>
 
       {showPopup && (
-        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0">
+        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 ${
+          popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing')
+            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+            : 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+        }`}>
           <div className="flex items-start gap-3">
-            <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0 mt-0.5" />
+            <FontAwesomeIcon 
+              icon={popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing') ? faInfoCircle : faCheckCircle} 
+              className="text-lg sm:text-xl flex-shrink-0 mt-0.5" 
+            />
             <div className="flex-1">
-              <p className="font-semibold text-sm sm:text-base mb-1">Registration Successful!</p>
+              <p className="font-semibold text-sm sm:text-base mb-1">
+                {popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing')
+                  ? 'Registration Failed!'
+                  : 'Registration Successful!'
+                }
+              </p>
               <p className="text-sm break-words whitespace-pre-line">{popupMessage}</p>
             </div>
             <button

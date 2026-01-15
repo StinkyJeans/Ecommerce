@@ -87,15 +87,23 @@ export async function POST(req) {
       return createErrorResponse("Registration failed", 400, authError);
     }
 
+    // Try to auto-confirm email if service role key is available
     if (authData.user && !authData.user.email_confirmed_at) {
-      const adminClient = createSupabaseAdminClient();
-      const { error: confirmError } = await adminClient.auth.admin.updateUserById(
-        authData.user.id,
-        { email_confirm: true }
-      );
-      
-      if (confirmError) {
-        // Error auto-confirming seller - log but continue
+      try {
+        const adminClient = createSupabaseAdminClient();
+        const { error: confirmError } = await adminClient.auth.admin.updateUserById(
+          authData.user.id,
+          { email_confirm: true }
+        );
+        
+        if (confirmError) {
+          // Error auto-confirming seller - log but continue (not critical)
+          console.warn('Could not auto-confirm email:', confirmError.message);
+        }
+      } catch (adminError) {
+        // Service role key missing or other admin client error - not critical
+        // Seller will need to confirm email manually
+        console.warn('Admin client unavailable, email confirmation skipped:', adminError.message);
       }
     }
 
