@@ -8,6 +8,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
+import { productFunctions } from "@/lib/supabase/api";
+import { getImageUrl } from "@/lib/supabase/storage";
 import {
   faTrash,
   faEdit,
@@ -74,8 +76,7 @@ export default function ViewProduct() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`/api/sellers/getProducts?username=${username}`);
-      const data = await res.json();
+      const data = await productFunctions.getSellerProducts(username);
       setProducts(data.products || []);
     } catch (e) {
       setErrorMessage("Failed to load products");
@@ -94,28 +95,16 @@ export default function ViewProduct() {
     setSuccessMessage("");
 
     try {
-      const res = await fetch(
-        `/api/sellers/deleteProduct?id=${productId}&username=${encodeURIComponent(
-          username
-        )}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const data = await productFunctions.deleteProduct(productId, username);
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setProducts((prevProducts) =>
-          prevProducts.filter((product) => product._id !== productId)
+          prevProducts.filter((product) => (product.product_id || product.productId || product.id || product._id) !== productId)
         );
         setSuccessMessage("Product deleted successfully!");
         setTimeout(() => setSuccessMessage(""), 3000);
 
-        if (selectedProduct && selectedProduct._id === productId) {
+        if (selectedProduct && (selectedProduct.product_id || selectedProduct.productId || selectedProduct.id || selectedProduct._id) === productId) {
           closeModal();
         }
       } else {
@@ -271,7 +260,7 @@ export default function ViewProduct() {
                 >
                   <div className="relative h-56 overflow-hidden flex-shrink-0">
                     <Image
-                      src={product.id_url}
+                      src={getImageUrl(product.id_url, 'product-images') || '/placeholder-image.jpg'}
                       alt={product.product_name}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"

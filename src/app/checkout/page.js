@@ -7,6 +7,7 @@ import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
+import { cartFunctions, orderFunctions, shippingFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import Navbar from "@/app/components/navbar";
@@ -74,8 +75,7 @@ function CheckoutContent() {
       }
 
       const itemIds = JSON.parse(decodeURIComponent(itemsParam));
-      const res = await fetch(`/api/getCart?username=${username}`);
-      const data = await res.json();
+      const data = await cartFunctions.getCart(username);
       
       const selectedItems = (data.cart || []).filter(item => itemIds.includes(item.id));
       setCartItems(selectedItems);
@@ -89,9 +89,8 @@ function CheckoutContent() {
 
   const fetchAddresses = async () => {
     try {
-      const res = await fetch(`/api/shipping-addresses?username=${username}`);
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await shippingFunctions.getAddresses(username);
+      if (data.success) {
         setAddresses(data.addresses || []);
       }
     } catch (error) {
@@ -132,36 +131,31 @@ function CheckoutContent() {
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          items: cartItems.map(item => ({
-            id: item.id,
-            product_id: item.product_id,
-            product_name: item.product_name || item.productName,
-            price: item.price,
-            quantity: item.quantity,
-            seller_username: item.seller_username || 'Unknown',
-            id_url: item.id_url || item.idUrl
-          })),
-          shipping_address_id: selectedAddress.id,
-          payment_method: paymentMethod,
-          delivery_option: deliveryOption
-        }),
+      const data = await orderFunctions.checkout({
+        username,
+        items: cartItems.map(item => ({
+          id: item.id,
+          product_id: item.product_id,
+          product_name: item.product_name || item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          seller_username: item.seller_username || 'Unknown',
+          id_url: item.id_url || item.idUrl
+        })),
+        shipping_address_id: selectedAddress.id,
+        payment_method: paymentMethod,
+        delivery_option: deliveryOption
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         router.push("/account?tab=orders");
       } else {
         setErrorMessage(data.message || "Failed to place order");
         setTimeout(() => setErrorMessage(""), 3000);
       }
     } catch (error) {
-      setErrorMessage("Something went wrong. Please try again.");
+      const errorMessage = error.response?.message || error.message || "Something went wrong. Please try again.";
+      setErrorMessage(errorMessage);
       setTimeout(() => setErrorMessage(""), 3000);
     } finally {
       setPlacingOrder(false);

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../components/sellerNavbar";
-import { useEdgeStore } from "@/lib/edgestore";
+import { uploadProductImage } from "@/lib/supabase/storage";
+import { productFunctions } from "@/lib/supabase/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -38,7 +39,6 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const { edgestore } = useEdgeStore();
   const router = useRouter();
   const { username, role, loading: authLoading } = useAuth();
 
@@ -82,49 +82,38 @@ export default function AddProduct() {
 
     try {
       if (image) {
-        const res = await edgestore.publicFiles.upload({ file: image });
-        idUrl = res.url;
+        idUrl = await uploadProductImage(image, username);
       }
 
-      const response = await fetch("/api/goods/addProduct", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productName,
-          description,
-          price,
-          category,
-          idUrl,
-          username,
-        }),
+      const data = await productFunctions.addProduct({
+        productName,
+        description,
+        price,
+        category,
+        idUrl,
+        username,
       });
 
-      const data = await response.json();
+      setPopupMessage(
+        data.productId
+          ? `${data.message}`
+          : data.message
+      );
+      setShowPopup(true);
 
-      if (response.ok) {
-        setPopupMessage(
-          data.productId
-            ? `${data.message}`
-            : data.message
-        );
-        setShowPopup(true);
+      setProductName("");
+      setDescription("");
+      setPrice("");
+      setCategory("");
+      setImage(null);
+      setIdPreview(null);
 
-        setProductName("");
-        setDescription("");
-        setPrice("");
-        setCategory("");
-        setImage(null);
-        setIdPreview(null);
-
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 3000);
-      } else {
-        setPopupMessage(data.message);
-        setShowPopup(true);
-      }
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
     } catch (err) {
-      setPopupMessage("Adding of product failed. " + err.message);
+      const errorMessage = err.response?.message || err.message || "Failed to add product. Please try again.";
+      setPopupMessage("Adding of product failed. " + errorMessage);
       setShowPopup(true);
       setTimeout(() => {
         setShowPopup(false);

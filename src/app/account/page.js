@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
+import { orderFunctions, shippingFunctions } from "@/lib/supabase/api";
+import { getImageUrl } from "@/lib/supabase/storage";
 import Header from "@/app/components/header";
 import Navbar from "@/app/components/navbar";
 import SellerNavbar from "@/app/seller/components/sellerNavbar";
@@ -98,9 +100,8 @@ function AccountPageContent() {
 
   const fetchAddresses = async () => {
     try {
-      const res = await fetch(`/api/shipping-addresses?username=${username}`);
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await shippingFunctions.getAddresses(username);
+      if (data.success) {
         setAddresses(data.addresses || []);
       } else {
         setAddresses([]);
@@ -114,13 +115,8 @@ function AccountPageContent() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`/api/getOrders?username=${username}`);
-      const data = await res.json();
-      if (res.ok) {
-        setOrders(data.orders || []);
-      } else {
-        setOrders([]);
-      }
+      const data = await orderFunctions.getOrders(username);
+      setOrders(data.orders || []);
     } catch (error) {
       setOrders([]);
     }
@@ -164,10 +160,7 @@ function AccountPageContent() {
     }
 
     try {
-      const res = await fetch(`/api/shipping-addresses?id=${id}`, {
-        method: "DELETE"
-      });
-      const data = await res.json();
+      const data = await shippingFunctions.deleteAddress(id, username);
 
       if (data.success) {
         setMessage({ text: "Address deleted successfully", type: "success" });
@@ -178,7 +171,8 @@ function AccountPageContent() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (error) {
-      setMessage({ text: "Something went wrong", type: "error" });
+      const errorMessage = error.response?.message || error.message || "Something went wrong";
+      setMessage({ text: errorMessage, type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
     }
   };
@@ -188,11 +182,6 @@ function AccountPageContent() {
     setLoading(true);
 
     try {
-      const url = editingAddress 
-        ? "/api/shipping-addresses"
-        : "/api/shipping-addresses";
-      const method = editingAddress ? "PUT" : "POST";
-
       const body = {
         ...(editingAddress && { id: editingAddress.id }),
         username,
@@ -207,15 +196,11 @@ function AccountPageContent() {
         isDefault: formData.isDefault
       };
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
+      const data = editingAddress
+        ? await shippingFunctions.updateAddress(body)
+        : await shippingFunctions.addAddress(body);
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setMessage({ 
           text: editingAddress ? "Address updated successfully" : "Address added successfully", 
           type: "success" 
@@ -240,7 +225,8 @@ function AccountPageContent() {
         setTimeout(() => setMessage({ text: "", type: "" }), 3000);
       }
     } catch (error) {
-      setMessage({ text: "Something went wrong", type: "error" });
+      const errorMessage = error.response?.message || error.message || "Something went wrong";
+      setMessage({ text: errorMessage, type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
     } finally {
       setLoading(false);
@@ -647,10 +633,13 @@ function AccountPageContent() {
                             <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
                               {order.id_url ? (
                                 <img
-                                  src={order.id_url}
+                                  src={getImageUrl(order.id_url, 'product-images')}
                                   alt={order.product_name}
                                   className="absolute inset-0 w-full h-full object-cover"
                                   style={{ minHeight: '100%', minWidth: '100%' }}
+                                  onError={(e) => {
+                                    e.target.src = '/placeholder-image.jpg';
+                                  }}
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gray-200">

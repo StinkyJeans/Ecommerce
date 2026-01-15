@@ -16,8 +16,15 @@ export async function POST(req) {
     const { displayName, password, email, contact, idUrl } = await req.json();
 
     // Input validation
-    if (!displayName || !password || !email || !contact || !idUrl) {
-      return createValidationErrorResponse("All fields are required");
+    const missingFields = [];
+    if (!displayName) missingFields.push("Display name");
+    if (!password) missingFields.push("Password");
+    if (!email) missingFields.push("Email");
+    if (!contact) missingFields.push("Contact/Phone");
+    if (!idUrl) missingFields.push("ID document");
+    
+    if (missingFields.length > 0) {
+      return createValidationErrorResponse(`Missing required fields: ${missingFields.join(", ")}`);
     }
 
     // Sanitize inputs
@@ -26,17 +33,23 @@ export async function POST(req) {
     const sanitizedContact = sanitizeString(contact, 20);
 
     // Validate inputs
+    const validationErrors = [];
+    
     if (!validateLength(sanitizedDisplayName, 2, 50)) {
-      return createValidationErrorResponse("Display name must be between 2 and 50 characters");
+      validationErrors.push("Display name must be between 2 and 50 characters");
     }
     if (!isValidEmail(sanitizedEmail)) {
-      return createValidationErrorResponse("Invalid email format");
+      validationErrors.push("Invalid email format");
     }
     if (!isValidPhone(sanitizedContact)) {
-      return createValidationErrorResponse("Invalid phone number format");
+      validationErrors.push("Invalid phone number format");
     }
     if (!isValidImageUrl(idUrl)) {
-      return createValidationErrorResponse("Invalid image URL format");
+      validationErrors.push(`Invalid image URL format. Received: ${idUrl ? idUrl.substring(0, 100) : 'empty'}`);
+    }
+    
+    if (validationErrors.length > 0) {
+      return createValidationErrorResponse(validationErrors);
     }
 
     // Validate password strength

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { adminFunctions } from "@/lib/supabase/api";
+import { getImageUrl } from "@/lib/supabase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUsers,
@@ -72,19 +74,12 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, sellersRes] = await Promise.all([
-        fetch("/api/admin/statistics").catch(() => {
-          return { ok: false, json: async () => ({ success: false, message: "Failed to fetch statistics" }) };
-        }),
-        fetch("/api/admin/pendingSellers").catch(() => {
-          return { ok: false, json: async () => ({ success: false, message: "Failed to fetch pending sellers" }) };
-        })
+      const [statsData, sellersData] = await Promise.all([
+        adminFunctions.getStatistics().catch(() => ({ success: false, statistics: null })),
+        adminFunctions.getPendingSellers().catch(() => ({ success: false, pendingSellers: [] }))
       ]);
 
-      const statsData = await statsRes.json();
-      const sellersData = await sellersRes.json();
-
-      if (statsData.success) {
+      if (statsData.success && statsData.statistics) {
         setStatistics(statsData.statistics);
       } else {
         setStatistics({
@@ -115,15 +110,9 @@ export default function AdminDashboard() {
   const handleApproveReject = async (sellerId, action) => {
     setProcessingSeller(sellerId);
     try {
-      const res = await fetch("/api/admin/approveSeller", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sellerId, action }),
-      });
+      const data = await adminFunctions.approveSeller({ sellerId, action });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setMessage({ 
           text: `Seller ${action === 'approve' ? 'approved' : 'rejected'} successfully`, 
           type: "success" 
@@ -300,9 +289,12 @@ export default function AdminDashboard() {
                         >
                           <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
                             <img
-                              src={seller.id_url}
+                              src={getImageUrl(seller.id_url, 'seller-ids')}
                               alt="ID Preview"
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => {
+                                e.target.src = '/placeholder-image.jpg';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -442,9 +434,12 @@ export default function AdminDashboard() {
               {selectedSeller.id_url && (
                 <div className="border-2 border-gray-200 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={selectedSeller.id_url}
+                    src={getImageUrl(selectedSeller.id_url, 'seller-ids')}
                     alt="ID Document"
                     className="w-full h-auto max-h-[50vh] object-contain"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-image.jpg';
+                    }}
                   />
                 </div>
               )}

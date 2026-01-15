@@ -3,7 +3,6 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
-import { EdgeStoreProvider } from "@/lib/edgestore";
 
 config.autoAddCss = false;
 
@@ -38,10 +37,8 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <EdgeStoreProvider>
-            <VisitTracker />
-            {children}
-          </EdgeStoreProvider>
+          <VisitTracker />
+          {children}
         </AuthProvider>
       </body>
     </html>

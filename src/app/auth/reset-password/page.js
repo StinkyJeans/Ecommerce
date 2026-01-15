@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { validatePasswordStrength } from "@/lib/validation";
+import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -91,10 +92,7 @@ function ResetPasswordContent() {
 
       // Update password_changed_at timestamp
       try {
-        await fetch("/api/updatePasswordChangedAt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
+        await authFunctions.updatePasswordChangedAt();
       } catch (err) {
         // Failed to update password changed timestamp - don't block the success flow
       }

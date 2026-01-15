@@ -6,6 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
 import Pagination from "@/app/components/Pagination";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { adminFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUsers,
@@ -67,22 +68,7 @@ export default function AdminViewUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/users");
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: "Unknown error" }));
-        
-        if (res.status === 401 || res.status === 403) {
-          alert("Access denied. Please make sure you're logged in as an admin.");
-          router.push("/");
-          return;
-        }
-        
-        alert(`Failed to fetch users: ${errorData.message || errorData.error || "Unknown error"}`);
-        return;
-      }
-      
-      const data = await res.json();
+      const data = await adminFunctions.getUsers();
 
       if (data.success) {
         setUsers(data.users || []);

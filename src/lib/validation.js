@@ -121,16 +121,29 @@ export function isValidUrl(url) {
  * @returns {boolean} - True if URL is a valid image URL
  */
 export function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return false;
+  }
+  
   if (!isValidUrl(url)) {
     return false;
   }
   
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif'];
   const lowerUrl = url.toLowerCase();
   
-  return imageExtensions.some(ext => lowerUrl.includes(ext)) || 
-         lowerUrl.includes('edgestore.dev') || 
-         lowerUrl.includes('supabase.co');
+  // Check for image file extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.pdf'];
+  const hasImageExtension = imageExtensions.some(ext => lowerUrl.includes(ext));
+  
+  // Check for Supabase Storage URLs (public or signed)
+  const isSupabaseStorage = 
+    lowerUrl.includes('supabase.co') ||
+    lowerUrl.includes('supabase.in') ||
+    lowerUrl.includes('storage/v1/object/public/') ||
+    lowerUrl.includes('storage/v1/object/sign/') ||
+    lowerUrl.includes('/storage/v1/object/');
+  
+  return hasImageExtension || isSupabaseStorage;
 }
 
 /**

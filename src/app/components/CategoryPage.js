@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import Header from "./header";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
+import { productFunctions, cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
@@ -91,27 +92,24 @@ export default function CategoryPage({
     }
 
     try {
-      const res = await fetch("/api/addToCart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          productId: selectedProduct.product_id || selectedProduct.productId,
-          productName: selectedProduct.product_name || selectedProduct.productName,
-          description: selectedProduct.description,
-          price: selectedProduct.price,
-          idUrl: selectedProduct.id_url || selectedProduct.idUrl,
-          quantity: 1,
-        }),
+      await cartFunctions.addToCart({
+        username,
+        productId: selectedProduct.product_id || selectedProduct.productId,
+        productName: selectedProduct.product_name || selectedProduct.productName,
+        description: selectedProduct.description,
+        price: selectedProduct.price,
+        idUrl: selectedProduct.id_url || selectedProduct.idUrl,
+        quantity: 1,
       });
-      if (res.ok) {
-        setCartMessage("success");
-      } else {
-        setCartMessage("exists");
-      }
+      setCartMessage("success");
+      window.dispatchEvent(new Event("cartUpdated"));
       setTimeout(() => setCartMessage(""), 3000);
     } catch (err) {
-      setCartMessage("error");
+      if (err.response && err.response.message && err.response.message.includes('already in cart')) {
+        setCartMessage("exists");
+      } else {
+        setCartMessage("error");
+      }
       setTimeout(() => setCartMessage(""), 3000);
     }
   }, [selectedProduct, username]);

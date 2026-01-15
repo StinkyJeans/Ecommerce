@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { authFunctions } from "@/lib/supabase/api";
 
 const AuthContext = createContext();
 
@@ -80,7 +81,11 @@ export function AuthProvider({ children }) {
     if (supabase) {
       await supabase.auth.signOut();
     }
-    await fetch("/api/logout", { method: "POST" });
+    try {
+      await authFunctions.logout();
+    } catch (err) {
+      // Logout error - continue anyway
+    }
     setRole(null);
     setUsername(null);
   };

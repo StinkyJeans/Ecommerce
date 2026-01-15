@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
+import { cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../components/sellerNavbar";
@@ -41,8 +42,7 @@ export default function ViewCart() {
 
     const fetchCart = async () => {
       try {
-        const res = await fetch(`/api/getCart?username=${username}`);
-        const data = await res.json();
+        const data = await cartFunctions.getCart(username);
         setCartItems(data.cart || []);
       } catch (err) {
         // Failed to fetch cart
@@ -85,10 +85,13 @@ export default function ViewCart() {
               >
                 <div className="relative h-48 w-full rounded-lg overflow-hidden mb-4">
                   <img
-                    src={item.idUrl}
+                    src={getImageUrl(item.idUrl, 'product-images')}
                     alt={item.productName}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ minHeight: '100%', minWidth: '100%' }}
+                    onError={(e) => {
+                      e.target.src = '/placeholder-image.jpg';
+                    }}
                   />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">

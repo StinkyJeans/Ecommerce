@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { authFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faBars, 
@@ -34,7 +35,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setShowDropdown(false);
-    await fetch("/api/logout", { method: "POST" });
+    await authFunctions.logout();
     logout();
     router.replace("/");
   };

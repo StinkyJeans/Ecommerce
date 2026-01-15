@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEdgeStore } from "@/lib/edgestore";
+import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -24,7 +24,6 @@ import {
 
 export default function SellerRegisterPage() {
   const router = useRouter();
-  const { edgestore } = useEdgeStore();
 
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
@@ -58,41 +57,60 @@ export default function SellerRegisterPage() {
 
     try {
       if (idFile) {
-        const res = await edgestore.publicFiles.upload({ file: idFile });
-        idUrl = res.url;
+        // Upload seller ID via API route (handles unauthenticated uploads)
+        const formData = new FormData();
+        formData.append('file', idFile);
+        formData.append('email', email);
+        
+        const uploadResponse = await fetch('/api/upload-seller-id', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Failed to upload ID document');
+        }
+        
+        const uploadData = await uploadResponse.json();
+        if (!uploadData.url) {
+          throw new Error('Upload succeeded but no URL was returned');
+        }
+        idUrl = uploadData.url;
       }
 
-      const response = await fetch("/api/seller/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName,
-          password,
-          email,
-          contact,
-          idUrl,
-          role: "seller",
-        }),
+      if (!idUrl) {
+        throw new Error('ID document is required. Please upload a valid ID image.');
+      }
+
+      const data = await authFunctions.sellerRegister({
+        displayName,
+        password,
+        email,
+        contact,
+        idUrl,
       });
-
-      const data = await response.json();
       
-      if (response.ok) {
-        const successMessage = data.details 
-          ? `${data.message}\n\n${data.details}`
-          : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
-        setPopupMessage(successMessage);
-        setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-          router.push("/");
-        }, 6000);
-      } else {
-        setPopupMessage(data.message || data.error || "Registration failed.");
-        setShowPopup(true);
-      }
+      const successMessage = data.details 
+        ? `${data.message}\n\n${data.details}`
+        : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
+      setPopupMessage(successMessage);
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+        router.push("/");
+      }, 6000);
     } catch (err) {
-      setPopupMessage("Upload or registration failed. " + err.message);
+      let errorMessage = err.response?.message || err.message || "Registration failed. Please try again.";
+      
+      // If there are validation errors, show them
+      if (err.response?.errors && Array.isArray(err.response.errors)) {
+        errorMessage = "Validation failed:\n" + err.response.errors.join("\n");
+      } else if (err.response?.errors && typeof err.response.errors === 'string') {
+        errorMessage = err.response.errors;
+      }
+      
+      setPopupMessage("Upload or registration failed. " + errorMessage);
       setShowPopup(true);
     } finally {
       setLoading(false);

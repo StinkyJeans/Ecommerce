@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { authFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserPlus,
@@ -32,21 +33,20 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, email, password }),
-      });
-
-      const data = await res.json();
-
-      setPopupMessage(data.message || data.error);
+      const data = await authFunctions.register({ displayName, email, password, role: "user" });
+      setPopupMessage(data.message || "User registered successfully");
       setShowPopup(true);
-
       setTimeout(() => {
         setShowPopup(false);
-        if (res.ok) router.push("/");
+        router.push("/");
       }, 2000);
+    } catch (error) {
+      const errorMessage = error.message || "Registration failed";
+      setPopupMessage(errorMessage);
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
     } finally {
       setLoading(false);
     }

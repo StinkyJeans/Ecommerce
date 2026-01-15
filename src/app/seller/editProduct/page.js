@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Navbar from "../components/sellerNavbar";
-import { useEdgeStore } from "@/lib/edgestore";
+import { uploadProductImage } from "@/lib/supabase/storage";
+import { productFunctions } from "@/lib/supabase/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -36,7 +37,6 @@ function EditProductContent() {
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [productId, setProductId] = useState(null);
-  const { edgestore } = useEdgeStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { username, role, loading: authLoading } = useAuth();
@@ -72,8 +72,7 @@ function EditProductContent() {
 
       try {
         setFetching(true);
-        const res = await fetch(`/api/sellers/getProducts?username=${username}`);
-        const data = await res.json();
+        const data = await productFunctions.getSellerProducts(username);
 
         if (data.products) {
           const product = data.products.find(p => 
@@ -129,38 +128,27 @@ function EditProductContent() {
 
     try {
       if (image) {
-        const res = await edgestore.publicFiles.upload({ file: image });
-        idUrl = res.url;
+        idUrl = await uploadProductImage(image, username);
       }
 
-      const response = await fetch("/api/sellers/updateProduct", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId,
-          productName,
-          description,
-          price,
-          category,
-          idUrl,
-          username,
-        }),
+      const data = await productFunctions.updateProduct({
+        productId,
+        productName,
+        description,
+        price,
+        category,
+        idUrl,
+        username,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setPopupMessage(data.message || "Product updated successfully!");
-        setShowPopup(true);
-        setTimeout(() => {
-          router.push("/seller/viewProduct");
-        }, 1500);
-      } else {
-        setPopupMessage(data.message || "Failed to update product");
-        setShowPopup(true);
-      }
+      setPopupMessage(data.message || "Product updated successfully!");
+      setShowPopup(true);
+      setTimeout(() => {
+        router.push("/seller/viewProduct");
+      }, 1500);
     } catch (err) {
-      setPopupMessage("An error occurred. Please try again.");
+      const errorMessage = err.response?.message || err.message || "Failed to update product. Please try again.";
+      setPopupMessage(errorMessage);
       setShowPopup(true);
     } finally {
       setLoading(false);

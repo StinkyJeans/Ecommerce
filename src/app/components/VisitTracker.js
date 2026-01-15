@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { utilityFunctions } from "@/lib/supabase/api";
 
 export default function VisitTracker() {
   const pathname = usePathname();
@@ -21,16 +22,10 @@ export default function VisitTracker() {
 
     const trackVisit = async () => {
       try {
-        await fetch('/api/trackVisit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            pagePath: pathname,
-            visitorId: visitorId,
-            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-          }),
+        await utilityFunctions.trackVisit({
+          pagePath: pathname,
+          visitorId: visitorId,
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
         });
       } catch (error) {
         // Failed to track visit

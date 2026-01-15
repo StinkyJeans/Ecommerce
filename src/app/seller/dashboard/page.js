@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
+import { productFunctions, cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faPlus, 
@@ -74,8 +75,7 @@ export default function Dashboard() {
     }
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/getProduct");
-        const data = await res.json();
+        const data = await productFunctions.getProducts();
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
@@ -145,29 +145,24 @@ export default function Dashboard() {
     setAddingToCart(true);
 
     try {
-      const res = await fetch("/api/addToCart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: selectedProduct.product_id || selectedProduct.productId,
-          productName: selectedProduct.product_name || selectedProduct.productName,
-          description: selectedProduct.description,
-          price: selectedProduct.price,
-          idUrl: selectedProduct.id_url || selectedProduct.idUrl,
-          quantity: quantity,
-        }),
+      const data = await cartFunctions.addToCart({
+        username,
+        productId: selectedProduct.product_id || selectedProduct.productId,
+        productName: selectedProduct.product_name || selectedProduct.productName,
+        description: selectedProduct.description,
+        price: selectedProduct.price,
+        idUrl: selectedProduct.id_url || selectedProduct.idUrl,
+        quantity: quantity,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (data.success) {
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
         setTimeout(() => {
           setCartMessage("");
           closePopup();
         }, 2000);
-      } else if (res.status === 409) {
+      } else if (data.message && data.message.includes('already in cart')) {
         setCartMessage("exists");
         setTimeout(() => setCartMessage(""), 3000);
       } else {

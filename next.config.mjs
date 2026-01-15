@@ -4,16 +4,6 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'files.edgestore.dev',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.edgestore.dev',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: '**.supabase.co',
         pathname: '/**',
       },

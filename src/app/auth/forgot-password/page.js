@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -44,28 +45,13 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/resetPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setPopupMessage(
-          data.message ||
-            "Password reset email sent! Please check your email."
-        );
-        setPopupType("success");
-      } else {
-        // Always show success message to prevent email enumeration
-        setPopupMessage(
-          data.message ||
-            "If an account with that email exists, a password reset email has been sent."
-        );
-        setPopupType("success");
-      }
+      const data = await authFunctions.resetPassword({ email });
+      // Always show success message to prevent email enumeration
+      setPopupMessage(
+        data.message ||
+          "If an account with that email exists, a password reset email has been sent."
+      );
+      setPopupType("success");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 6000);
     } catch (error) {

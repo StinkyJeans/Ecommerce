@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faUser, faSignOutAlt, faChevronDown, faUserCircle, faBox } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
+import { cartFunctions, authFunctions } from "@/lib/supabase/api";
 import { useEffect, useState, useRef } from "react";
 
 export default function Header() {
@@ -30,11 +31,8 @@ export default function Header() {
       }
 
       try {
-        const res = await fetch(`/api/getCartCount?username=${username}`);
-        if (res.ok) {
-          const data = await res.json();
-          setCartCount(data.count || 0);
-        }
+        const data = await cartFunctions.getCartCount(username);
+        setCartCount(data.count || 0);
       } catch (err) {
         // Failed to fetch cart count
       }
@@ -99,7 +97,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     setShowDropdown(false);
-    await fetch("/api/logout", { method: "POST" });
+    await authFunctions.logout();
     logout();
     router.replace("/");
   };

@@ -7,6 +7,7 @@ import Pagination from "@/app/components/Pagination";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
+import { cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import Navbar from "@/app/components/navbar";
@@ -48,8 +49,7 @@ export default function ViewCart() {
 
   const fetchCart = async () => {
     try {
-      const res = await fetch(`/api/getCart?username=${username}`);
-      const data = await res.json();
+      const data = await cartFunctions.getCart(username);
       setCartItems(data.cart || []);
       const allItemIds = new Set((data.cart || []).map(item => item.id));
       setSelectedItems(allItemIds);
@@ -113,20 +113,9 @@ export default function ViewCart() {
     setErrorMessage("");
 
     try {
-      const url = `/api/removeFromCart?id=${itemId}&username=${encodeURIComponent(
-        username
-      )}`;
+      const data = await cartFunctions.removeFromCart(itemId, username);
 
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setCartItems((prevItems) =>
           prevItems.filter((item) => item.id !== itemId)
         );
@@ -135,11 +124,12 @@ export default function ViewCart() {
           newSet.delete(itemId);
           return newSet;
         });
+        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         setErrorMessage(data.message || "Failed to remove item");
       }
     } catch (error) {
-      setErrorMessage(`Error: ${error.message}`);
+      setErrorMessage(`Error: ${error.message || "Failed to remove item"}`);
     } finally {
       setRemovingId(null);
     }

@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { createClient } from "@/lib/supabase/client";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
+import { authFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -98,42 +99,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Clear password changed message on new login attempt
-        setPasswordChangedMessage("");
-        
-        if (res.status === 403 && data.sellerStatus === 'pending') {
-          setPopupMessage(data.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
-          setPopupType("warning");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 5000);
-        } else if (res.status === 403 && data.sellerStatus === 'rejected') {
-          setPopupMessage(data.details || "Your seller account has been rejected. Please contact support.");
-          setPopupType("error");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 5000);
-        } else {
-          setPopupMessage(data.message || "Invalid Email or Password");
-          setPopupType("error");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 4000);
-          
-          // Check if password was recently changed
-          if (data.passwordChangedAt) {
-            const relativeTime = formatRelativeTime(data.passwordChangedAt);
-            setPasswordChangedMessage(`You have changed your password ${relativeTime}`);
-          }
-        }
-        return;
-      }
+      const data = await authFunctions.login({ email, password });
       
       // Clear password changed message on successful login
       setPasswordChangedMessage("");
@@ -148,10 +114,36 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (error) {
-      setPopupMessage("Something went wrong. Please try again.");
-      setPopupType("error");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 4000);
+      // Clear password changed message on new login attempt
+      setPasswordChangedMessage("");
+      
+      const errorData = error.response || {};
+      const status = error.status || 500;
+      
+      if (status === 403 && errorData.sellerStatus === 'pending') {
+        setPopupMessage(errorData.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
+        setPopupType("warning");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 5000);
+      } else if (status === 403 && errorData.sellerStatus === 'rejected') {
+        setPopupMessage(errorData.details || "Your seller account has been rejected. Please contact support.");
+        setPopupType("error");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 5000);
+      } else {
+        const errorMessage = errorData.message || error.message || "Invalid Email or Password";
+        
+        setPopupMessage(errorMessage);
+        setPopupType("error");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 4000);
+        
+        // Check if password was recently changed
+        if (errorData.passwordChangedAt) {
+          const relativeTime = formatRelativeTime(errorData.passwordChangedAt);
+          setPasswordChangedMessage(`You have changed your password ${relativeTime}`);
+        }
+      }
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
 import Pagination from "@/app/components/Pagination";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { adminFunctions } from "@/lib/supabase/api";
+import { getImageUrl } from "@/lib/supabase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -79,22 +81,7 @@ export default function AdminViewSellers() {
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/sellers");
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: "Unknown error" }));
-        
-        if (res.status === 401 || res.status === 403) {
-          alert("Access denied. Please make sure you're logged in as an admin.");
-          router.push("/");
-          return;
-        }
-        
-        alert(`Failed to fetch sellers: ${errorData.message || errorData.error || "Unknown error"}`);
-        return;
-      }
-      
-      const data = await res.json();
+      const data = await adminFunctions.getSellers();
 
       if (data.success) {
         setSellers(data.sellers || []);
@@ -292,9 +279,12 @@ export default function AdminViewSellers() {
                       >
                         <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
                           <img
-                            src={seller.id_url}
+                            src={getImageUrl(seller.id_url, 'seller-ids')}
                             alt="ID Preview"
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              e.target.src = '/placeholder-image.jpg';
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -350,9 +340,12 @@ export default function AdminViewSellers() {
               {selectedSeller.id_url && (
                 <div className="border-2 border-gray-200 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={selectedSeller.id_url}
+                    src={getImageUrl(selectedSeller.id_url, 'seller-ids')}
                     alt="ID Document"
                     className="w-full h-auto max-h-[50vh] object-contain"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-image.jpg';
+                    }}
                   />
                 </div>
               )}
