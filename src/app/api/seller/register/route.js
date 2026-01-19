@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 import { isValidEmail, validatePasswordStrength, sanitizeString, validateLength, isValidImageUrl, isValidPhone } from "@/lib/validation";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 import { createErrorResponse, createValidationErrorResponse, handleError } from "@/lib/errors";
+import { sendSellerWelcomeEmail } from "@/lib/email/service";
 
 export async function POST(req) {
   try {
@@ -120,6 +121,32 @@ export async function POST(req) {
 
     if (userError) {
       return handleError(userError, 'sellerRegister');
+    }
+
+    // Send welcome email (non-blocking - don't fail registration if email fails)
+    try {
+      console.log('=== SELLER WELCOME EMAIL DEBUG ===');
+      console.log('Attempting to send welcome email to:', sanitizedEmail);
+      console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      
+      const emailResult = await sendSellerWelcomeEmail({
+        email: sanitizedEmail,
+        userName: sanitizedDisplayName
+      });
+      
+      console.log('Welcome email sent successfully!');
+      console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      
+      if (!emailResult || !emailResult.id) {
+        console.error('Email send returned no ID - email may not have been sent');
+      }
+    } catch (emailError) {
+      // Log detailed error but don't fail registration
+      console.error('=== FAILED TO SEND WELCOME EMAIL ===');
+      console.error('Error message:', emailError.message);
+      console.error('Error stack:', emailError.stack);
+      console.error('Full error:', JSON.stringify(emailError, null, 2));
+      console.warn('Registration succeeded but welcome email failed');
     }
 
     return NextResponse.json({ 

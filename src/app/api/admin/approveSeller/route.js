@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { handleError } from "@/lib/errors";
+import { sendSellerApprovalEmail } from "@/lib/email/service";
 
 export async function POST(req) {
   try {
@@ -84,6 +85,34 @@ export async function POST(req) {
       return NextResponse.json({ 
         message: "Seller not found" 
       }, { status: 404 });
+    }
+
+    // Send approval/rejection email (non-blocking - don't fail if email fails)
+    try {
+      console.log('=== SELLER APPROVAL EMAIL DEBUG ===');
+      console.log('Attempting to send approval email to:', updatedSeller.email);
+      console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      
+      const userName = updatedSeller.display_name || updatedSeller.username || 'there';
+      const emailResult = await sendSellerApprovalEmail({
+        email: updatedSeller.email,
+        userName,
+        approved: action === 'approve'
+      });
+      
+      console.log('Approval email sent successfully!');
+      console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      
+      if (!emailResult || !emailResult.id) {
+        console.error('Email send returned no ID - email may not have been sent');
+      }
+    } catch (emailError) {
+      // Log detailed error but don't fail the approval/rejection
+      console.error('=== FAILED TO SEND APPROVAL EMAIL ===');
+      console.error('Error message:', emailError.message);
+      console.error('Error stack:', emailError.stack);
+      console.error('Full error:', JSON.stringify(emailError, null, 2));
+      console.warn('Approval/rejection succeeded but email failed');
     }
 
     return NextResponse.json({ 
