@@ -3,5 +3,9 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "exclude": [
+    "supabase/functions/**/*",
+    "node_modules"
+  ]
 }
