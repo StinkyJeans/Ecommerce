@@ -3,28 +3,19 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { handleCors, createCorsResponse } from '../../_shared/cors.ts';
 import { requireRole } from '../../_shared/auth.ts';
 import { handleAsyncError } from '../../_shared/errors.ts';
-
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
 serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
-
   return handleAsyncError(async () => {
-    // Require admin role
     const authResult = await requireRole(req, 'admin');
     if (!authResult.authenticated) {
       return authResult.response;
     }
-
     const { supabase } = authResult;
-
-    // Try to use database function first
     const { data: statsData, error: functionError } = await supabase.rpc('get_admin_statistics');
-
     if (!functionError && statsData) {
-      // Function returns TABLE, so it's an array - get first row
       const stats = Array.isArray(statsData) ? statsData[0] : statsData;
       if (stats) {
       return createCorsResponse({
@@ -40,8 +31,6 @@ serve(async (req) => {
       });
       }
     }
-
-    // Fallback to manual queries
     const [
       { count: totalUsers },
       { count: totalSellers },
@@ -70,10 +59,8 @@ serve(async (req) => {
         .select('total_amount')
         .eq('status', 'completed'),
     ]);
-
     const totalRevenue =
       revenueData?.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0;
-
     return createCorsResponse({
       success: true,
       statistics: {
@@ -86,4 +73,4 @@ serve(async (req) => {
       },
     });
   });
-});
+});

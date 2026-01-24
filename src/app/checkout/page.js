@@ -76,7 +76,7 @@ function CheckoutContent() {
 
       const itemIds = JSON.parse(decodeURIComponent(itemsParam));
       const data = await cartFunctions.getCart(username);
-      
+
       const selectedItems = (data.cart || []).filter(item => itemIds.includes(item.id));
       setCartItems(selectedItems);
     } catch (error) {
@@ -94,7 +94,7 @@ function CheckoutContent() {
         setAddresses(data.addresses || []);
       }
     } catch (error) {
-      // Failed to fetch addresses
+
     }
   };
 
@@ -166,7 +166,6 @@ function CheckoutContent() {
   const subtotal = calculateSubtotal();
   const total = calculateTotal();
 
-  // Calculate pagination for seller groups (packages)
   const sellerGroups = Object.entries(groupedItems);
   const paginatedSellerGroups = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -176,7 +175,6 @@ function CheckoutContent() {
 
   const totalPages = Math.ceil(sellerGroups.length / itemsPerPage);
 
-  // Reset to page 1 when cart items change
   useEffect(() => {
     setCurrentPage(1);
   }, [cartItems.length]);
@@ -233,7 +231,7 @@ function CheckoutContent() {
                       Edit
                     </button>
                   </div>
-                  
+
                   {selectedAddress ? (
                     <div className="space-y-2">
                       <p className="font-semibold text-gray-900">{selectedAddress.full_name}</p>
@@ -578,7 +576,7 @@ function CheckoutContent() {
                       </div>
                     </div>
                   ))}
-                  
+
                   <button
                     onClick={() => {
                       setShowAddressModal(false);

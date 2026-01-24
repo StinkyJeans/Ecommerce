@@ -9,48 +9,34 @@ import {
 } from '../../_shared/validation.ts';
 import { requireRole } from '../../_shared/auth.ts';
 import { handleAsyncError } from '../../_shared/errors.ts';
-
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
 serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
-
   return handleAsyncError(async () => {
-    // Require seller role
     const authResult = await requireRole(req, 'seller');
     if (!authResult.authenticated) {
       return authResult.response;
     }
-
     const { supabase, userData } = authResult;
-
     const { productName, description, price, category, idUrl, username } = await req.json();
-
-    // Input validation
     if (!productName || !description || !price || !category || !idUrl || !username) {
       return createCorsResponse(
         { message: 'All fields are required', success: false },
         400
       );
     }
-
-    // Verify ownership - seller can only add products to their own account
     if (userData.username !== username && userData.role !== 'admin') {
       return createCorsResponse(
         { message: 'Forbidden: You can only add products to your own account', success: false },
         403
       );
     }
-
-    // Sanitize inputs
     const sanitizedProductName = sanitizeString(productName, 200);
     const sanitizedDescription = sanitizeString(description, 1000);
     const sanitizedCategory = sanitizeString(category, 50);
     const sanitizedUsername = sanitizeString(username, 50);
-
-    // Validate inputs
     if (!validateLength(sanitizedProductName, 2, 200)) {
       return createCorsResponse(
         { message: 'Product name must be between 2 and 200 characters', success: false },
@@ -75,22 +61,17 @@ serve(async (req) => {
         400
       );
     }
-
-    // Generate product ID using database function
     let productId: string;
     const { data: productIdData, error: productIdError } = await supabase.rpc(
       'generate_product_id'
     );
-
     if (productIdError || !productIdData) {
-      // Fallback to manual generation if function doesn't exist
       const timestamp = Date.now();
       const random = Math.random().toString(36).substr(2, 9).toUpperCase();
       productId = `PROD-${timestamp}-${random}`;
     } else {
       productId = productIdData;
     }
-
     const { data: newProduct, error } = await supabase
       .from('products')
       .insert({
@@ -104,7 +85,6 @@ serve(async (req) => {
       })
       .select()
       .single();
-
     if (error) {
       if (error.code === '23505') {
         return createCorsResponse(
@@ -112,13 +92,11 @@ serve(async (req) => {
           409
         );
       }
-
       return createCorsResponse(
         { message: 'Failed to add product', success: false },
         500
       );
     }
-
     return createCorsResponse(
       {
         success: true,
@@ -128,4 +106,4 @@ serve(async (req) => {
       201
     );
   });
-});
+});

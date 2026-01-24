@@ -9,48 +9,35 @@ import {
   isValidImageUrl,
 } from '../../_shared/validation.ts';
 import { createErrorResponse, handleAsyncError } from '../../_shared/errors.ts';
-
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const SITE_URL = Deno.env.get('SITE_URL') ?? 'http://localhost:3000';
-
 serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
-
   return handleAsyncError(async () => {
     const { displayName, password, role, email, contact, idUrl } = await req.json();
-
-    // Input validation
     if (!displayName || !password || !email) {
       return createCorsResponse(
         { message: 'Display name, email, and password are required', success: false },
         400
       );
     }
-
-    // Sanitize and validate inputs
     const sanitizedDisplayName = sanitizeString(displayName, 50);
     const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
     const sanitizedContact = contact ? sanitizeString(contact, 20) : null;
-
-    // Validate display name length
     if (!validateLength(sanitizedDisplayName, 2, 50)) {
       return createCorsResponse(
         { message: 'Display name must be between 2 and 50 characters', success: false },
         400
       );
     }
-
-    // Validate email format
     if (!isValidEmail(sanitizedEmail)) {
       return createCorsResponse(
         { message: 'Invalid email format', success: false },
         400
       );
     }
-
-    // Validate password strength
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.valid) {
       return createCorsResponse(
@@ -62,39 +49,30 @@ serve(async (req) => {
         400
       );
     }
-
-    // Validate image URL if provided
     if (idUrl && !isValidImageUrl(idUrl)) {
       return createCorsResponse(
         { message: 'Invalid image URL format', success: false },
         400
       );
     }
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Check if email already exists
     const { data: existingEmail, error: emailCheckError } = await supabase
       .from('users')
       .select('email')
       .eq('email', sanitizedEmail)
       .maybeSingle();
-
     if (emailCheckError && emailCheckError.code !== 'PGRST116') {
       return createCorsResponse(
         { message: 'Error checking email availability', success: false },
         500
       );
     }
-
     if (existingEmail) {
       return createCorsResponse(
         { message: 'Email already exists', success: false },
         400
       );
     }
-
-    // Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: sanitizedEmail,
       password: password,
@@ -106,7 +84,6 @@ serve(async (req) => {
         emailRedirectTo: `${SITE_URL}/auth/callback`,
       },
     });
-
     if (authError) {
       if (
         authError.message.includes('already registered') ||
@@ -122,28 +99,21 @@ serve(async (req) => {
         400
       );
     }
-
     if (!authData.user) {
       return createCorsResponse(
         { message: 'Failed to create authentication account', success: false },
         500
       );
     }
-
-    // Auto-confirm email (for development)
     if (authData.user && !authData.user.email_confirmed_at) {
       const { error: confirmError } = await supabase.auth.admin.updateUserById(
         authData.user.id,
         { email_confirm: true }
       );
-
       if (confirmError) {
-        // Log but don't fail registration
         console.error('Failed to auto-confirm email:', confirmError);
       }
     }
-
-    // Create user record
     const { data: newUser, error: userError } = await supabase
       .from('users')
       .insert({
@@ -155,7 +125,6 @@ serve(async (req) => {
       })
       .select()
       .single();
-
     if (userError) {
       if (userError.code === '23505') {
         if (userError.message.includes('username')) {
@@ -171,13 +140,11 @@ serve(async (req) => {
           );
         }
       }
-
       return createCorsResponse(
         { message: 'Failed to create user', success: false },
         500
       );
     }
-
     return createCorsResponse(
       {
         success: true,
@@ -186,4 +153,4 @@ serve(async (req) => {
       201
     );
   });
-});
+});

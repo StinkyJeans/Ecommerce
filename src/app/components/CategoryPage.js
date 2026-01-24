@@ -55,7 +55,7 @@ export default function CategoryPage({
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
-        // Failed to fetch products
+
       } finally {
         setLoading(false);
       }
@@ -120,7 +120,6 @@ export default function CategoryPage({
     setCartMessage("");
   }, []);
 
-  // Memoize product grid items
   const productGridItems = useMemo(() => 
     filteredProducts.map((product) => (
       <div

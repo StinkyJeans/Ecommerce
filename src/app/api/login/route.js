@@ -6,7 +6,7 @@ import { createErrorResponse, createValidationErrorResponse, handleError } from 
 
 export async function POST(req) {
   try {
-    // Rate limiting (production only)
+
     const rateLimitResult = checkRateLimit(req, 'login');
     if (rateLimitResult && !rateLimitResult.allowed) {
       return createRateLimitResponse(rateLimitResult.resetTime);
@@ -14,23 +14,19 @@ export async function POST(req) {
 
     const { email, password } = await req.json();
 
-    // Input validation
     if (!email || !password) {
       return createValidationErrorResponse("Email and password are required");
     }
 
-    // Sanitize and validate email
     const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
     if (!isValidEmail(sanitizedEmail)) {
       return createValidationErrorResponse("Invalid email format");
     }
 
-    // Sanitize password (don't validate strength on login, only on registration)
     const sanitizedPassword = sanitizeString(password, 128);
 
     const supabase = await createClient();
 
-    // Find user by email only
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('role, email, seller_status, password_changed_at')
@@ -38,14 +34,13 @@ export async function POST(req) {
       .single();
 
     if (userError || !userData) {
-      // Don't reveal if email exists or not (security best practice)
+
       return NextResponse.json(
         { message: "Invalid Email or Password" },
         { status: 401 }
       );
     }
 
-    // Ensure we have an email for Supabase Auth
     if (!userData.email) {
       return NextResponse.json(
         { message: "User account does not have an email. Please contact support." },
@@ -64,7 +59,7 @@ export async function POST(req) {
           { status: 403 }
         );
       }
-      
+
       if (userData.seller_status === 'rejected') {
         return NextResponse.json(
           { 
@@ -91,24 +86,23 @@ export async function POST(req) {
           { status: 401 }
         );
       }
-      
+
       if (authError.message.includes('Invalid login credentials')) {
-        // Check if password was recently changed
+
         const response = {
           message: "Invalid Email or Password"
         };
-        
-        // If password was changed recently, include the timestamp
+
         if (userData?.password_changed_at) {
           response.passwordChangedAt = userData.password_changed_at;
         }
-        
+
         return NextResponse.json(
           response,
           { status: 401 }
         );
       }
-      
+
       return createErrorResponse("Login failed", 401, authError);
     }
 

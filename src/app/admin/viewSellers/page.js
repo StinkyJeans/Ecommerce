@@ -65,11 +65,9 @@ export default function AdminViewSellers() {
     }
 
     setFilteredSellers(filtered);
-    // Reset to first page when filters change
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sellers]);
 
-  // Calculate pagination
   const paginatedSellers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

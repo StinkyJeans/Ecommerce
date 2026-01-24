@@ -49,18 +49,16 @@ export default function ViewProduct() {
   };
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking
+
     if (authLoading) {
       return;
     }
-    
-    // Only redirect if role is explicitly not seller/admin
+
     if (role && role !== "seller" && role !== "admin") {
       router.push("/");
       return;
     }
-    
-    // If no role at all after loading, redirect
+
     if (!role) {
       router.push("/");
       return;

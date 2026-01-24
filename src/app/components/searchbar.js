@@ -1,9 +1,7 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
-
 export default function SearchBar({ 
   placeholder = "Search products...", 
   onSearch, 
@@ -11,39 +9,29 @@ export default function SearchBar({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const debounceTimerRef = useRef(null);
-
   useEffect(() => {
-    // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
-    // Set new timer for 300ms debounce
     debounceTimerRef.current = setTimeout(() => {
       onSearch(searchTerm);
     }, 300);
-
-    // Cleanup on unmount or when searchTerm changes
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
   }, [searchTerm, onSearch]);
-
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
-
   const clearSearch = () => {
     setSearchTerm("");
-    // Immediately clear search when user clicks clear
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     onSearch("");
   };
-
   return (
     <div className={`relative w-full max-w-md ${className}`}>
       <div className="relative flex items-center">

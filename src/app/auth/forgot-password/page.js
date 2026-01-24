@@ -33,7 +33,6 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setPopupMessage("Please enter a valid email address");
@@ -46,7 +45,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const data = await authFunctions.resetPassword({ email });
-      // Always show success message to prevent email enumeration
+
       setPopupMessage(
         data.message ||
           "If an account with that email exists, a password reset email has been sent."

@@ -1,16 +1,7 @@
-/**
- * Error handling utilities for Supabase Edge Functions
- */
 
-/**
- * Sanitize error message to prevent information leakage
- */
 export function sanitizeError(error: unknown): string {
   if (error instanceof Error) {
-    // Don't expose internal error details
     const message = error.message.toLowerCase();
-    
-    // Whitelist safe error messages
     if (message.includes('validation') || 
         message.includes('required') ||
         message.includes('invalid') ||
@@ -19,21 +10,13 @@ export function sanitizeError(error: unknown): string {
         message.includes('forbidden')) {
       return error.message;
     }
-    
-    // Generic error for unknown errors
     return 'An error occurred. Please try again.';
   }
-  
   if (typeof error === 'string') {
     return error;
   }
-  
   return 'An error occurred. Please try again.';
 }
-
-/**
- * Create a standardized error response
- */
 export function createErrorResponse(
   message: string,
   status: number = 400,
@@ -44,16 +27,11 @@ export function createErrorResponse(
     message: sanitizeError(message),
     ...additionalData,
   };
-
   return new Response(JSON.stringify(response), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
-/**
- * Create a standardized success response
- */
 export function createSuccessResponse(
   data: any,
   message?: string,
@@ -64,16 +42,11 @@ export function createSuccessResponse(
     ...(message && { message }),
     ...(typeof data === 'object' && !Array.isArray(data) ? data : { data }),
   };
-
   return new Response(JSON.stringify(response), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
 }
-
-/**
- * Handle async function errors
- */
 export async function handleAsyncError(
   fn: () => Promise<Response>
 ): Promise<Response> {
@@ -86,4 +59,4 @@ export async function handleAsyncError(
       500
     );
   }
-}
+}

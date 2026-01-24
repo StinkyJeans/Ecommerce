@@ -10,26 +10,18 @@ import {
 } from '../../_shared/validation.ts';
 import { requireAuth } from '../../_shared/auth.ts';
 import { handleAsyncError } from '../../_shared/errors.ts';
-
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-
 serve(async (req) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
-
   return handleAsyncError(async () => {
-    // Require authentication
     const authResult = await requireAuth(req);
     if (!authResult.authenticated) {
       return authResult.response;
     }
-
     const { supabase, userData } = authResult;
-
     const body = await req.json();
-
-    // Sanitize inputs
     const username = sanitizeString(body.username || userData.username, 50);
     const product_id = sanitizeString(body.productId || body.product_id, 100);
     const product_name = sanitizeString(body.productName || body.product_name, 200);
@@ -37,24 +29,18 @@ serve(async (req) => {
     const price = body.price;
     const id_url = sanitizeString(body.idUrl || body.id_url, 500);
     const quantity = body.quantity || 1;
-
-    // Verify ownership - user can only add to their own cart
     if (userData.username !== username && userData.role !== 'admin') {
       return createCorsResponse(
         { message: 'Forbidden: You can only add items to your own cart', success: false },
         403
       );
     }
-
-    // Input validation
     if (!username || !product_id || !product_name || !description || price === null || price === undefined || !id_url) {
       return createCorsResponse(
         { message: 'All fields are required', success: false },
         400
       );
     }
-
-    // Validate inputs
     if (!validateLength(product_id, 1, 100)) {
       return createCorsResponse(
         { message: 'Product ID must be between 1 and 100 characters', success: false },
@@ -91,17 +77,13 @@ serve(async (req) => {
         400
       );
     }
-
-    // Check if item already exists in cart
     const { data: existing, error: fetchError } = await supabase
       .from('cart_items')
       .select('*')
       .eq('username', username)
       .eq('product_id', product_id)
       .single();
-
     if (existing && !fetchError) {
-      // Update quantity
       const newQuantity = existing.quantity + (quantity || 1);
       const { data: updated, error: updateError } = await supabase
         .from('cart_items')
@@ -109,14 +91,12 @@ serve(async (req) => {
         .eq('id', existing.id)
         .select()
         .single();
-
       if (updateError) {
         return createCorsResponse(
           { message: 'Failed to update cart', success: false },
           500
         );
       }
-
       return createCorsResponse({
         success: true,
         message: 'Product quantity updated in cart!',
@@ -124,10 +104,7 @@ serve(async (req) => {
         quantity: updated.quantity,
       });
     }
-
-    // Insert new cart item
     const priceString = typeof price === 'number' ? price.toString() : price;
-
     const { data: cartItem, error: insertError } = await supabase
       .from('cart_items')
       .insert({
@@ -141,7 +118,6 @@ serve(async (req) => {
       })
       .select()
       .single();
-
     if (insertError) {
       if (insertError.code === '23505') {
         return createCorsResponse(
@@ -149,17 +125,15 @@ serve(async (req) => {
           409
         );
       }
-
       return createCorsResponse(
         { message: 'Failed to add item to cart', success: false },
         500
       );
     }
-
     return createCorsResponse({
       success: true,
       message: 'Product added to cart successfully!',
       cartItem,
     });
   });
-});
+});

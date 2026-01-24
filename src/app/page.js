@@ -52,7 +52,7 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/auth/callback?next=/dashboard`;
-      
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -61,16 +61,15 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // Google OAuth error
-        
+
         let errorMessage = "Failed to sign in with Google. Please try again.";
-        
+
         if (error.message && error.message.includes("provider is not enabled")) {
           errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
         } else if (error.message) {
           errorMessage = `Google login error: ${error.message}`;
         }
-        
+
         setPopupMessage(errorMessage);
         setPopupType("error");
         setShowPopup(true);
@@ -78,14 +77,13 @@ export default function LoginPage() {
         setGoogleLoading(false);
       }
     } catch (error) {
-      // Google login error
-      
+
       let errorMessage = "Something went wrong. Please try again.";
-      
+
       if (error.message && error.message.includes("provider is not enabled")) {
         errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
       }
-      
+
       setPopupMessage(errorMessage);
       setPopupType("error");
       setShowPopup(true);
@@ -94,14 +92,12 @@ export default function LoginPage() {
     }
   };
 
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = await authFunctions.login({ email, password });
-      
-      // Clear password changed message on successful login
+
       setPasswordChangedMessage("");
 
       setRole(data.role);
@@ -114,12 +110,12 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (error) {
-      // Clear password changed message on new login attempt
+
       setPasswordChangedMessage("");
-      
+
       const errorData = error.response || {};
       const status = error.status || 500;
-      
+
       if (status === 403 && errorData.sellerStatus === 'pending') {
         setPopupMessage(errorData.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
         setPopupType("warning");
@@ -132,13 +128,12 @@ export default function LoginPage() {
         setTimeout(() => setShowPopup(false), 5000);
       } else {
         const errorMessage = errorData.message || error.message || "Invalid Email or Password";
-        
+
         setPopupMessage(errorMessage);
         setPopupType("error");
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 4000);
-        
-        // Check if password was recently changed
+
         if (errorData.passwordChangedAt) {
           const relativeTime = formatRelativeTime(errorData.passwordChangedAt);
           setPasswordChangedMessage(`You have changed your password ${relativeTime}`);

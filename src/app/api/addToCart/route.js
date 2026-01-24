@@ -4,25 +4,18 @@ import { requireAuth, verifyOwnership } from "@/lib/auth";
 import { sanitizeString, validateLength, isValidPrice, isValidQuantity, isValidImageUrl } from "@/lib/validation";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 import { createErrorResponse, createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
-
 export async function POST(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
     const { userData } = authResult;
-
-    // Rate limiting (production only)
     const rateLimitResult = checkRateLimit(req, 'addToCart', userData.username);
     if (rateLimitResult && !rateLimitResult.allowed) {
       return createRateLimitResponse(rateLimitResult.resetTime);
     }
-
     const body = await req.json();
-    
-    // Sanitize inputs
     const username = sanitizeString(body.username, 50);
     const product_id = sanitizeString(body.productId || body.product_id, 100);
     const product_name = sanitizeString(body.productName || body.product_name, 200);
@@ -30,19 +23,13 @@ export async function POST(req) {
     const price = body.price;
     const id_url = sanitizeString(body.idUrl || body.id_url, 500);
     const quantity = body.quantity || 1;
-
-    // Input validation
     if (!username || !product_id || !product_name || !description || price === null || price === undefined || !id_url) {
       return createValidationErrorResponse("All fields are required");
     }
-
-    // Verify ownership - user can only add to their own cart
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
-    // Validate inputs
     if (!validateLength(product_id, 1, 100)) {
       return createValidationErrorResponse("Product ID must be between 1 and 100 characters");
     }
@@ -61,16 +48,13 @@ export async function POST(req) {
     if (!isValidQuantity(quantity)) {
       return createValidationErrorResponse("Quantity must be a positive integer");
     }
-
     const supabase = await createClient();
-
     const { data: existing, error: fetchError } = await supabase
       .from('cart_items')
       .select('*')
       .eq('username', username)
       .eq('product_id', product_id)
       .single();
-
     if (existing && !fetchError) {
       const newQuantity = existing.quantity + (quantity || 1);
       const { data: updated, error: updateError } = await supabase
@@ -79,20 +63,16 @@ export async function POST(req) {
         .eq('id', existing.id)
         .select()
         .single();
-
       if (updateError) {
         throw updateError;
       }
-
       return NextResponse.json({ 
         message: "Product quantity updated in cart!", 
         updated: true,
         quantity: updated.quantity
       }, { status: 200 });
     }
-
     const priceString = typeof price === 'number' ? price.toString() : price;
-
     const { data: cartItem, error: insertError } = await supabase
       .from('cart_items')
       .insert({
@@ -106,22 +86,18 @@ export async function POST(req) {
       })
       .select()
       .single();
-
     if (insertError) {
       if (insertError.message && insertError.message.includes('row-level security')) {
         return createForbiddenResponse("Permission denied");
       }
-      
       if (insertError.code === '23505') {
         return NextResponse.json(
           { message: "Product already in cart." },
           { status: 409 }
         );
       }
-      
       return createErrorResponse("Failed to add to cart", 500, insertError);
     }
-
     return NextResponse.json({ 
       message: "Product added to cart successfully!",
       cartItem: {

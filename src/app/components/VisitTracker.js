@@ -28,7 +28,7 @@ export default function VisitTracker() {
           userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
         });
       } catch (error) {
-        // Failed to track visit
+
       }
     };
 

@@ -44,18 +44,16 @@ function EditProductContent() {
   useLoadingFavicon(authLoading || fetching || loading, "Edit Product");
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking
+
     if (authLoading) {
       return;
     }
-    
-    // Only redirect if role is explicitly not seller/admin
+
     if (role && role !== "seller" && role !== "admin") {
       router.push("/");
       return;
     }
-    
-    // If no role at all after loading, redirect
+
     if (!role) {
       router.push("/");
       return;
@@ -141,7 +139,6 @@ function EditProductContent() {
         username,
       });
 
-      // Check if update was actually successful
       const isSuccess = data && 
         data.message && 
         data.success !== false && 
@@ -149,7 +146,7 @@ function EditProductContent() {
         !data.message.toLowerCase().includes('error') &&
         !data.error &&
         !data.errors;
-      
+
       if (isSuccess) {
         setPopupMessage(data.message || "Product updated successfully!");
         setShowPopup(true);
@@ -157,9 +154,9 @@ function EditProductContent() {
           router.push("/seller/viewProduct");
         }, 1500);
       } else {
-        // Update failed
+
         let errorMessage = "Failed to update product. Please try again.";
-        
+
         if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
           errorMessage = data.errors.join(". ");
         } else if (data?.error) {
@@ -167,14 +164,14 @@ function EditProductContent() {
         } else if (data?.message) {
           errorMessage = data.message;
         }
-        
+
         setPopupMessage("Product update failed. " + errorMessage);
         setShowPopup(true);
       }
     } catch (err) {
-      // Extract error message properly
+
       let errorMessage = "Failed to update product. Please try again.";
-      
+
       if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
         errorMessage = err.response.errors.join(". ");
       } else if (err.response?.error) {
@@ -184,7 +181,7 @@ function EditProductContent() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setPopupMessage("Product update failed. " + errorMessage);
       setShowPopup(true);
     } finally {

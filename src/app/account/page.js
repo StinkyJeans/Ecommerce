@@ -65,12 +65,11 @@ function AccountPageContent() {
     } else {
       setActiveTab("addresses");
     }
-    // Reset pagination when tab changes
+
     setAddressesPage(1);
     setOrdersPage(1);
   }, [searchParams]);
 
-  // Calculate paginated addresses
   const paginatedAddresses = useMemo(() => {
     const startIndex = (addressesPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -79,7 +78,6 @@ function AccountPageContent() {
 
   const addressesTotalPages = Math.ceil(addresses.length / itemsPerPage);
 
-  // Calculate paginated orders
   const paginatedOrders = useMemo(() => {
     const startIndex = (ordersPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -222,7 +220,7 @@ function AccountPageContent() {
         });
         fetchAddresses();
       } else {
-        // Show detailed error message
+
         const errorMsg = data.errors 
           ? (Array.isArray(data.errors) ? data.errors.join(", ") : data.errors)
           : (data.message || "Failed to save address");
@@ -230,7 +228,7 @@ function AccountPageContent() {
         setTimeout(() => setMessage({ text: "", type: "" }), 5000);
       }
     } catch (error) {
-      // Show detailed error message
+
       const errorMessage = error.response?.data?.errors 
         ? (Array.isArray(error.response.data.errors) ? error.response.data.errors.join(", ") : error.response.data.errors)
         : (error.response?.data?.message || error.response?.message || error.message || "Something went wrong");
@@ -269,7 +267,7 @@ function AccountPageContent() {
               </div>
             </div>
           )}
-          
+
           {!authLoading && !loading && (
             <>
               {message.text && (

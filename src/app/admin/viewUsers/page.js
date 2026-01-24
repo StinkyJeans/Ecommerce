@@ -52,11 +52,9 @@ export default function AdminViewUsers() {
       );
       setFilteredUsers(filtered);
     }
-    // Reset to first page when search term changes
     setCurrentPage(1);
   }, [searchTerm, users]);
 
-  // Calculate pagination
   const paginatedUsers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

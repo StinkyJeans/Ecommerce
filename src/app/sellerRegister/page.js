@@ -57,24 +57,24 @@ export default function SellerRegisterPage() {
 
     try {
       if (idFile) {
-        // Upload seller ID via API route (handles unauthenticated uploads)
+
         const formData = new FormData();
         formData.append('file', idFile);
         formData.append('email', email);
-        
+
         const uploadResponse = await fetch('/api/upload-seller-id', {
           method: 'POST',
           body: formData,
         });
-        
+
         const uploadData = await uploadResponse.json();
-        
+
         if (!uploadResponse.ok) {
-          // Upload failed - throw error with specific message
+
           const errorMsg = uploadData.error || uploadData.message || 'Failed to upload ID document';
           throw new Error(errorMsg);
         }
-        
+
         if (!uploadData.url) {
           throw new Error('Upload succeeded but no URL was returned');
         }
@@ -92,10 +92,7 @@ export default function SellerRegisterPage() {
         contact,
         idUrl,
       });
-      
-      // Check if registration was actually successful
-      // Success criteria: has message, no error/success=false flag, message doesn't contain fail/error
-      // Also check HTTP status - if callApi didn't throw, response was ok, but still check data
+
       const isSuccess = data && 
         data.message && 
         data.success !== false && 
@@ -103,7 +100,7 @@ export default function SellerRegisterPage() {
         !data.message.toLowerCase().includes('error') &&
         !data.error &&
         !data.errors;
-      
+
       if (isSuccess) {
         const successMessage = data.details 
           ? `${data.message}\n\n${data.details}`
@@ -115,15 +112,15 @@ export default function SellerRegisterPage() {
           router.push("/");
         }, 6000);
       } else {
-        // Registration failed - show error
+
         const errorMessage = data?.error || data?.message || data?.errors || "Registration failed. Please try again.";
         setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
         setShowPopup(true);
       }
     } catch (err) {
-      // Extract error message - prioritize errors array, then message, then error field
+
       let errorMessage = "Registration failed. Please try again.";
-      
+
       if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
         errorMessage = err.response.errors.join(". ");
       } else if (err.response?.errors && typeof err.response.errors === 'string') {
@@ -135,7 +132,7 @@ export default function SellerRegisterPage() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setPopupMessage("Upload or registration failed. " + errorMessage);
       setShowPopup(true);
     } finally {

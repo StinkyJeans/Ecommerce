@@ -2,34 +2,26 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeString, validateLength } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
-
 export async function POST(req) {
   try {
     const { pagePath, visitorId, userAgent, ipAddress } = await req.json();
-
-    // Input validation
     if (!pagePath) {
       return createValidationErrorResponse("pagePath is required");
     }
-
-    // Sanitize inputs
     const sanitizedPagePath = sanitizeString(pagePath, 500);
     if (!validateLength(sanitizedPagePath, 1, 500)) {
       return createValidationErrorResponse("Invalid page path");
     }
-
     if (pagePath.startsWith('/admin')) {
       return NextResponse.json({ 
         success: true,
         message: "Admin pages are not tracked"
       }, { status: 200 });
     }
-
     const supabase = await createClient();
     if (!supabase) {
       return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
     }
-
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       let userData = null;
@@ -41,7 +33,6 @@ export async function POST(req) {
           .maybeSingle();
         userData = data;
       }
-      
       if (!userData && user.user_metadata?.username) {
         const { data } = await supabase
           .from('users')
@@ -50,7 +41,6 @@ export async function POST(req) {
           .maybeSingle();
         userData = data;
       }
-
       if (userData && userData.role === 'admin') {
         return NextResponse.json({ 
           success: true,
@@ -58,7 +48,6 @@ export async function POST(req) {
         }, { status: 200 });
       }
     }
-
     const { error } = await supabase
       .from('website_visits')
       .insert({
@@ -67,11 +56,9 @@ export async function POST(req) {
         user_agent: userAgent ? sanitizeString(userAgent, 500) : null,
         ip_address: ipAddress ? sanitizeString(ipAddress, 50) : null
       });
-
     if (error) {
       return handleError(error, 'trackVisit');
     }
-
     return NextResponse.json({ 
       success: true,
       message: "Visit tracked successfully"
@@ -79,4 +66,4 @@ export async function POST(req) {
   } catch (err) {
     return handleError(err, 'trackVisit');
   }
-}
+}

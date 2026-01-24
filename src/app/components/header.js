@@ -25,7 +25,6 @@ export default function Header() {
         return;
       }
 
-      // Don't fetch if tab is not visible
       if (document.hidden) {
         return;
       }
@@ -34,19 +33,17 @@ export default function Header() {
         const data = await cartFunctions.getCartCount(username);
         setCartCount(data.count || 0);
       } catch (err) {
-        // Failed to fetch cart count
+
       }
     };
 
     fetchCartCount();
 
-    // Increase interval from 5s to 30s
     const interval = setInterval(fetchCartCount, 30000);
 
     const handleCartUpdate = () => fetchCartCount();
     window.addEventListener("cartUpdated", handleCartUpdate);
 
-    // Fetch when tab becomes visible again
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         fetchCartCount();
@@ -63,7 +60,7 @@ export default function Header() {
 
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {

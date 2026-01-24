@@ -34,8 +34,7 @@ export default function RegisterPage() {
 
     try {
       const data = await authFunctions.register({ displayName, email, password, role: "user" });
-      
-      // Check if registration was actually successful
+
       const isSuccess = data && 
         data.message && 
         data.success !== false && 
@@ -43,7 +42,7 @@ export default function RegisterPage() {
         !data.message.toLowerCase().includes('error') &&
         !data.error &&
         !data.errors;
-      
+
       if (isSuccess) {
         setPopupMessage(data.message || "User registered successfully");
         setShowPopup(true);
@@ -52,7 +51,7 @@ export default function RegisterPage() {
           router.push("/");
         }, 2000);
       } else {
-        // Registration failed
+
         const errorMessage = data?.error || data?.message || data?.errors || "Registration failed";
         setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
         setShowPopup(true);
@@ -61,9 +60,9 @@ export default function RegisterPage() {
         }, 3000);
       }
     } catch (error) {
-      // Extract error message properly
+
       let errorMessage = "Registration failed. Please try again.";
-      
+
       if (error.response?.errors && Array.isArray(error.response.errors) && error.response.errors.length > 0) {
         errorMessage = error.response.errors.join(". ");
       } else if (error.response?.error) {
@@ -73,7 +72,7 @@ export default function RegisterPage() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setPopupMessage(errorMessage);
       setShowPopup(true);
       setTimeout(() => {

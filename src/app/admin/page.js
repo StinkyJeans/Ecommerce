@@ -1,16 +1,12 @@
 "use client";
-
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const { role, loading: authLoading } = useAuth();
-
   useLoadingFavicon(authLoading, "Admin");
-
   useEffect(() => {
     if (!authLoading) {
       if (role !== "admin") {
@@ -21,7 +17,6 @@ export default function AdminLoginPage() {
       }
     }
   }, [role, authLoading, router]);
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="text-center">

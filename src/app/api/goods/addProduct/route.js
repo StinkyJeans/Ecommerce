@@ -3,28 +3,20 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, verifyOwnership } from "@/lib/auth";
 import { sanitizeString, validateLength, isValidPrice, isValidImageUrl } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
-
 function generateProductId() {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9).toUpperCase();
   return `PROD-${timestamp}-${random}`;
 }
-
 export async function POST(req) {
   try {
-    // Authentication check - must be seller
     const authResult = await requireRole('seller');
     if (authResult instanceof NextResponse) {
       return authResult;
     }
     const { userData } = authResult;
-
     const { productName, description, price, category, idUrl, username } = await req.json();
-
-    // Collect all validation errors
     const validationErrors = [];
-
-    // Input validation
     if (!productName || !productName.trim()) {
       validationErrors.push("Product name is required");
     }
@@ -43,24 +35,17 @@ export async function POST(req) {
     if (!username || !username.trim()) {
       validationErrors.push("Username is required");
     }
-
     if (validationErrors.length > 0) {
       return createValidationErrorResponse(validationErrors);
     }
-
-    // Sanitize inputs
     const sanitizedProductName = sanitizeString(productName, 200);
     const sanitizedDescription = sanitizeString(description, 1000);
     const sanitizedCategory = sanitizeString(category, 50);
     const sanitizedUsername = sanitizeString(username, 50);
-
-    // Verify ownership - seller can only add products to their own account
     const ownershipCheck = await verifyOwnership(sanitizedUsername);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
-    // Validate inputs with specific error messages
     if (!validateLength(sanitizedProductName, 2, 200)) {
       validationErrors.push("Product name must be between 2 and 200 characters");
     }
@@ -73,21 +58,15 @@ export async function POST(req) {
     if (!isValidImageUrl(idUrl)) {
       validationErrors.push("Invalid image URL format. Please upload a valid image");
     }
-
-    // Validate category - must be one of the allowed values
     const allowedCategories = ['Pc', 'Mobile', 'Watch'];
     if (!allowedCategories.includes(sanitizedCategory)) {
       validationErrors.push(`Invalid category. Must be one of: ${allowedCategories.join(', ')}`);
     }
-
     if (validationErrors.length > 0) {
       return createValidationErrorResponse(validationErrors);
     }
-
     const supabase = await createClient();
-
     const productId = generateProductId();
-
     const { data: newProduct, error } = await supabase
       .from('products')
       .insert({
@@ -101,7 +80,6 @@ export async function POST(req) {
       })
       .select()
       .single();
-
     if (error) {
       if (error.code === '23505') {
         return NextResponse.json(
@@ -109,10 +87,8 @@ export async function POST(req) {
           { status: 409 }
         );
       }
-
       return handleError(error, 'addProduct');
     }
-
     return NextResponse.json({ 
       message: "Product added successfully!", 
       productId: newProduct.product_id 

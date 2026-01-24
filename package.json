@@ -31,8 +31,10 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
+    "@types/react": "19.2.8",
     "critters": "^0.0.23",
     "dotenv": "^16.4.5",
+    "glob": "^13.0.0",
     "tailwindcss": "^4.1.14"
   }
 }

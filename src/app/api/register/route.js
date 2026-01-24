@@ -7,7 +7,7 @@ import { createErrorResponse, createValidationErrorResponse, handleError } from 
 
 export async function POST(req) {
   try {
-    // Rate limiting (production only)
+
     const rateLimitResult = checkRateLimit(req, 'register');
     if (rateLimitResult && !rateLimitResult.allowed) {
       return createRateLimitResponse(rateLimitResult.resetTime);
@@ -15,40 +15,33 @@ export async function POST(req) {
 
     const { displayName, password, role, email, contact, idUrl } = await req.json();
 
-    // Input validation
     if (!displayName || !password || !email) {
       return createValidationErrorResponse("Display name, email, and password are required");
     }
 
-    // Sanitize and validate inputs
     const sanitizedDisplayName = sanitizeString(displayName, 50);
     const sanitizedEmail = sanitizeString(email.toLowerCase(), 255);
     const sanitizedContact = contact ? sanitizeString(contact, 20) : null;
 
-    // Validate display name length
     if (!validateLength(sanitizedDisplayName, 2, 50)) {
       return createValidationErrorResponse("Display name must be between 2 and 50 characters");
     }
 
-    // Validate email format
     if (!isValidEmail(sanitizedEmail)) {
       return createValidationErrorResponse("Invalid email format");
     }
 
-    // Validate password strength
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.valid) {
       return createValidationErrorResponse(passwordValidation.errors);
     }
 
-    // Validate image URL if provided
     if (idUrl && !isValidImageUrl(idUrl)) {
       return createValidationErrorResponse("Invalid image URL format");
     }
 
     const supabase = await createClient();
 
-    // Check if email already exists
     const { data: existingEmail, error: emailCheckError } = await supabase
       .from('users')
       .select('email')
@@ -63,7 +56,7 @@ export async function POST(req) {
           emailCheckError
         );
       }
-      
+
       return createErrorResponse("Error checking email availability", 500, emailCheckError);
     }
 
@@ -77,7 +70,7 @@ export async function POST(req) {
       options: {
         data: {
           display_name: sanitizedDisplayName,
-          username: sanitizedDisplayName, // Also store as username for compatibility
+          username: sanitizedDisplayName, 
           role: role || "user"
         },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
@@ -101,9 +94,9 @@ export async function POST(req) {
         authData.user.id,
         { email_confirm: true }
       );
-      
+
       if (confirmError) {
-        // Error auto-confirming user - log but don't fail registration
+
       }
     }
 
@@ -127,7 +120,7 @@ export async function POST(req) {
           userError
         );
       }
-      
+
       if (userError.code === '23505') {
         if (userError.message.includes('username')) {
           return createValidationErrorResponse("Display name already exists");
@@ -136,7 +129,7 @@ export async function POST(req) {
           return createValidationErrorResponse("Email already exists");
         }
       }
-      
+
       return createErrorResponse("Failed to create user", 500, userError);
     }
 

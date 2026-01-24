@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import nodemailer from 'nodemailer';
-
 export async function GET(req) {
-  // For easier testing, allow GET with email query parameter
   const { searchParams } = new URL(req.url);
   const email = searchParams.get('email');
-  
   if (!email) {
     return NextResponse.json({ 
       message: 'Email parameter required',
@@ -14,23 +11,18 @@ export async function GET(req) {
       example: '/api/test-email?email=test@example.com'
     });
   }
-
-  // Reuse POST logic
   return POST(new Request(req.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email })
   }));
 }
-
 export async function POST(req) {
   try {
     const { email } = await req.json();
-    
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
-
     console.log('=== TEST EMAIL DEBUG ===');
     console.log('Email to send to:', email);
     console.log('Environment:', process.env.NODE_ENV);
@@ -38,19 +30,13 @@ export async function POST(req) {
     console.log('SMTP_PASS present:', !!process.env.SMTP_PASS);
     console.log('EMAIL_FROM:', process.env.EMAIL_FROM || 'noreply@example.com');
     console.log('EMAIL_FROM_NAME:', process.env.EMAIL_FROM_NAME || 'Your Store');
-
     const fromEmail = process.env.EMAIL_FROM || 'noreply@example.com';
     const fromName = process.env.EMAIL_FROM_NAME || 'Your Store';
-
-    // Determine which transporter to use
     let transporter;
     let isEthereal = false;
-
     const isDevelopment = process.env.NODE_ENV === 'development';
     const hasSmtpConfig = process.env.SMTP_USER && process.env.SMTP_PASS;
-
     if (isDevelopment && !hasSmtpConfig) {
-      // Use Ethereal
       console.log('Using Ethereal test account (development mode)');
       isEthereal = true;
       const testAccount = await nodemailer.createTestAccount();
@@ -66,7 +52,6 @@ export async function POST(req) {
       console.log('Ethereal test account created');
       console.log('Preview emails at: https://ethereal.email');
     } else {
-      // Use SMTP
       if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
         return NextResponse.json({ 
           error: 'SMTP configuration missing',
@@ -77,12 +62,10 @@ export async function POST(req) {
           ]
         }, { status: 500 });
       }
-
       console.log('Using SMTP configuration');
       console.log('SMTP Host:', process.env.SMTP_HOST || 'smtp.gmail.com');
       console.log('SMTP Port:', process.env.SMTP_PORT || '587');
       console.log('SMTP User:', process.env.SMTP_USER);
-
       transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.SMTP_PORT || '587'),
@@ -92,8 +75,6 @@ export async function POST(req) {
           pass: process.env.SMTP_PASS
         }
       });
-
-      // Verify connection
       try {
         await transporter.verify();
         console.log('SMTP connection verified successfully');
@@ -110,11 +91,9 @@ export async function POST(req) {
         }, { status: 500 });
       }
     }
-
     console.log('Sending email with Nodemailer...');
     console.log('From:', `${fromName} <${fromEmail}>`);
     console.log('To:', email);
-
     const info = await transporter.sendMail({
       from: `"${fromName}" <${fromEmail}>`,
       to: email,
@@ -122,20 +101,16 @@ export async function POST(req) {
       html: '<h1>Test Email</h1><p>If you received this, Nodemailer is working correctly!</p><p>Time: ' + new Date().toISOString() + '</p>',
       text: 'Test Email\n\nIf you received this, Nodemailer is working correctly!\n\nTime: ' + new Date().toISOString()
     });
-
     const messageId = info.messageId;
     let previewUrl = null;
-
     if (isEthereal) {
       previewUrl = nodemailer.getTestMessageUrl(info);
       if (previewUrl) {
         console.log('Preview URL:', previewUrl);
       }
     }
-
     console.log('Email sent successfully! Message ID:', messageId);
     console.log('=== END TEST EMAIL DEBUG ===');
-
     const response = {
       success: true,
       messageId: messageId,
@@ -144,7 +119,6 @@ export async function POST(req) {
         : 'Test email sent successfully! Check your inbox (and spam folder).',
       mode: isEthereal ? 'Ethereal (Development)' : 'SMTP (Production)'
     };
-
     if (previewUrl) {
       response.previewUrl = previewUrl;
       response.instructions = [
@@ -159,7 +133,6 @@ export async function POST(req) {
         '3. Monitor email delivery in your SMTP provider dashboard'
       ];
     }
-
     return NextResponse.json(response);
   } catch (error) {
     console.error('Test email error:', error);
@@ -168,4 +141,4 @@ export async function POST(req) {
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }
-}
+}

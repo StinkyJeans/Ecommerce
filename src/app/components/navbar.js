@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,18 +16,15 @@ import {
   faEllipsisV,
   faChartLine
 } from "@fortawesome/free-solid-svg-icons";
-
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-
   const categoryPC = () => router.push("/product/category/computers");
   const categoryMobile = () => router.push("/product/category/mobilephones");
   const categoryWatch = () => router.push("/product/category/watches");
   const dashboard = () => router.push("/dashboard");
   const FeaturedProducts = () => router.push("/dashboard");
-
   const menuItems = [
     {
       id: "dashboard",
@@ -59,7 +55,6 @@ export default function Navbar() {
       action: categoryWatch,
     },
   ];
-
   return (
     <>
       <div className="md:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm z-30">
@@ -89,7 +84,6 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-
       <aside
         className={`fixed md:sticky top-0 left-0 md:left-auto h-screen bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out z-50 shadow-xl md:shadow-none
         ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 w-72 md:w-72`}
@@ -109,17 +103,14 @@ export default function Navbar() {
               <p className="text-sm text-gray-500 -mt-0.5">User Portal</p>
             </div>
           </div>
-
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
-
               <div className="flex items-center gap-2 px-3 mb-3">
                 <FontAwesomeIcon icon={faGripHorizontal} className="text-gray-400 text-sm" />
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Navigation
                 </p>
               </div>
-
               <nav className="space-y-1">
                 {menuItems.map((item) => {
                   const isActive = pathname === item.path;
@@ -164,7 +155,6 @@ export default function Navbar() {
               </nav>
             </div>
           </div>
-
           <div className="p-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center gap-3 px-2 py-3">
               <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md">
@@ -181,7 +171,6 @@ export default function Navbar() {
           </div>
         </div>
       </aside>
-
       {open && (
         <div
           onClick={() => setOpen(false)}

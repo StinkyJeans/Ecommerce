@@ -3,40 +3,30 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
-
 export async function GET(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const { searchParams } = new URL(req.url);
     const username = sanitizeString(searchParams.get('username'), 50);
-
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
-
-    // Verify ownership - user can only access their own cart
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
     const supabase = await createClient();
-
     const { data: cart, error } = await supabase
       .from('cart_items')
       .select('*')
       .eq('username', username)
       .order('created_at', { ascending: false });
-
     if (error) {
       return handleError(error, 'getCart');
     }
-
     const cartWithSellers = await Promise.all(
       (cart || []).map(async (item) => {
         const { data: product } = await supabase
@@ -44,7 +34,6 @@ export async function GET(req) {
           .select('seller_username')
           .eq('product_id', item.product_id)
           .single();
-
         return {
           ...item,
           idUrl: item.id_url,
@@ -53,7 +42,6 @@ export async function GET(req) {
         };
       })
     );
-
     return NextResponse.json({ 
       cart: cartWithSellers,
       count: cartWithSellers.length 

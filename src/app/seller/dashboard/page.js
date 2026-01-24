@@ -47,19 +47,16 @@ export default function Dashboard() {
   useLoadingFavicon(authLoading || loading, "Seller Dashboard");
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking
+
     if (authLoading) {
       return;
     }
-    
-    // Only redirect if role is explicitly not seller/admin
-    // Don't redirect just because username is null (it might still be loading)
+
     if (role && role !== "seller" && role !== "admin") {
       router.push("/");
       return;
     }
-    
-    // If no role at all after loading, redirect
+
     if (!role) {
       router.push("/");
       return;
@@ -68,7 +65,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (authLoading) {
-      return; // Wait for auth to finish loading
+      return; 
     }
     if (!username || (role !== "seller" && role !== "admin")) {
       return;
@@ -79,7 +76,7 @@ export default function Dashboard() {
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
-        // Failed to fetch products
+
       } finally {
         setLoading(false);
       }
@@ -89,7 +86,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {

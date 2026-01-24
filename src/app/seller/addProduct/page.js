@@ -45,18 +45,16 @@ export default function AddProduct() {
   useLoadingFavicon(authLoading || loading, "Add Product");
 
   useEffect(() => {
-    // Wait for auth to finish loading before checking
+
     if (authLoading) {
       return;
     }
-    
-    // Only redirect if role is explicitly not seller/admin
+
     if (role && role !== "seller" && role !== "admin") {
       router.push("/");
       return;
     }
-    
-    // If no role at all after loading, redirect
+
     if (!role) {
       router.push("/");
       return;
@@ -82,7 +80,7 @@ export default function AddProduct() {
 
     try {
       if (image) {
-        // Upload via server-side API route to avoid RLS issues
+
         const formData = new FormData();
         formData.append('file', image);
         formData.append('sellerUsername', username);
@@ -110,8 +108,6 @@ export default function AddProduct() {
         username,
       });
 
-      // Check if response indicates success (has productId or success message without "fail")
-      // Must have productId OR (message without fail/error AND no error fields)
       const isSuccess = data && (
         data.productId || 
         (
@@ -127,8 +123,7 @@ export default function AddProduct() {
       if (isSuccess) {
         setPopupMessage(data.message || "Product added successfully!");
         setShowPopup(true);
-        
-        // Clear form only on success
+
         setProductName("");
         setDescription("");
         setPrice("");
@@ -140,9 +135,9 @@ export default function AddProduct() {
           setShowPopup(false);
         }, 3000);
       } else {
-        // Handle error response - prioritize errors array over message
+
         let errorMessage = "Failed to add product. Please try again.";
-        
+
         if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
           errorMessage = data.errors.join(". ");
         } else if (data?.error) {
@@ -150,7 +145,7 @@ export default function AddProduct() {
         } else if (data?.message) {
           errorMessage = data.message;
         }
-        
+
         setPopupMessage("Adding of product failed. " + errorMessage);
         setShowPopup(true);
         setTimeout(() => {
@@ -158,9 +153,9 @@ export default function AddProduct() {
         }, 5000);
       }
     } catch (err) {
-      // Extract error message - prioritize errors array
+
       let errorMessage = "Failed to add product. Please try again.";
-      
+
       if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
         errorMessage = err.response.errors.join(". ");
       } else if (err.response?.message) {
@@ -168,7 +163,7 @@ export default function AddProduct() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setPopupMessage("Adding of product failed. " + errorMessage);
       setShowPopup(true);
       setTimeout(() => {

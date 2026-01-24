@@ -52,7 +52,7 @@ export default function Dashboard() {
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
-        // Failed to fetch products
+
       } finally {
         setLoading(false);
       }
@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
@@ -166,7 +166,6 @@ export default function Dashboard() {
     return (parseFloat(selectedProduct.price) * quantity).toFixed(2);
   }, [selectedProduct, quantity]);
 
-  // Memoize product card component
   const ProductCard = memo(({ product, onView }) => (
     <div
       key={product.id || product._id || product.product_id}
@@ -210,7 +209,7 @@ export default function Dashboard() {
       </div>
     </div>
   ));
-  
+
   ProductCard.displayName = 'ProductCard';
 
   return (

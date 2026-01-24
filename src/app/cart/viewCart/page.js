@@ -158,7 +158,7 @@ export default function ViewCart() {
   const handleSelectSeller = (sellerUsername) => {
     const sellerItems = cartItems.filter(item => item.seller_username === sellerUsername);
     const allSelected = sellerItems.every(item => selectedItems.has(item.id));
-    
+
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
       sellerItems.forEach(item => {
@@ -174,7 +174,7 @@ export default function ViewCart() {
 
   const handleDeleteSelected = async () => {
     if (selectedItems.size === 0) return;
-    
+
     const itemsToDelete = Array.from(selectedItems);
     for (const itemId of itemsToDelete) {
       await handleRemove(itemId);
@@ -219,7 +219,7 @@ export default function ViewCart() {
 
     const selectedCartItems = cartItems.filter(item => selectedItems.has(item.id));
     const itemIds = Array.from(selectedItems);
-    
+
     router.push(`/checkout?items=${encodeURIComponent(JSON.stringify(itemIds))}`);
   };
 
@@ -227,7 +227,6 @@ export default function ViewCart() {
   const selectedCount = getSelectedItemCount();
   const selectedSubtotal = calculateSelectedSubtotal();
 
-  // Calculate pagination for seller groups
   const sellerGroups = Object.entries(groupedItems);
   const paginatedSellerGroups = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -237,7 +236,6 @@ export default function ViewCart() {
 
   const totalPages = Math.ceil(sellerGroups.length / itemsPerPage);
 
-  // Reset to page 1 when cart items change
   useEffect(() => {
     setCurrentPage(1);
   }, [cartItems.length]);

@@ -55,7 +55,7 @@ export default function AdminDashboard() {
     if (authLoading) {
       return;
     }
-    
+
     if (role !== "admin") {
       setLoading(false);
       return;
@@ -347,7 +347,7 @@ export default function AdminDashboard() {
 
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-4 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Visit Statistics (Last 30 Days)</h2>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">

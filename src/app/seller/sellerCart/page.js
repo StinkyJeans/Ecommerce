@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -8,53 +7,39 @@ import { cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../components/sellerNavbar";
-
-
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const { username, role, loading: authLoading } = useAuth();
   const router = useRouter();
-
   useEffect(() => {
-    // Wait for auth to finish loading before checking
     if (authLoading) {
       return;
     }
-    
-    // Only redirect if role is explicitly not seller/admin
     if (role && role !== "seller" && role !== "admin") {
       router.push("/");
       return;
     }
-    
-    // If no role at all after loading, redirect
     if (!role) {
       router.push("/");
       return;
     }
   }, [username, role, authLoading, router]);
-
   useEffect(() => {
     if (!username || (role !== "seller" && role !== "admin")) {
       return;
     }
-
     const fetchCart = async () => {
       try {
         const data = await cartFunctions.getCart(username);
         setCartItems(data.cart || []);
       } catch (err) {
-        // Failed to fetch cart
       } finally {
         setLoading(false);
       }
     };
-
     fetchCart();
   }, [username]);
-
-
   return (
     <div className="flex h-screen">
       <Navbar />
@@ -69,7 +54,6 @@ export default function ViewCart() {
             Back
           </button>
         </div>
-
         {loading ? (
           <p className="text-gray-600 text-center mt-20">Loading your cart...</p>
         ) : cartItems.length === 0 ? (
@@ -103,11 +87,9 @@ export default function ViewCart() {
                 <p className="text-red-600 font-bold text-lg mb-4">
                   ₱{formatPrice(item.price)}
                 </p>
-
                 <button className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition cursor-pointer">
                   Checkout
                 </button>
-
                 <button
                   className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition"
                   title="Remove item"
@@ -121,4 +103,4 @@ export default function ViewCart() {
       </main>
     </div>
   );
-}
+}

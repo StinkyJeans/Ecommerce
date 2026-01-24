@@ -3,45 +3,34 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
 import { sanitizeString, validateLength, isValidPhone, isValidPostalCode } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
-
 export async function GET(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const { searchParams } = new URL(req.url);
     const username = sanitizeString(searchParams.get('username'), 50);
-
-    // Input validation
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
-
-    // Verify ownership - user can only access their own addresses
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
     const supabase = await createClient();
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'getShippingAddresses');
     }
-
     const { data: addresses, error } = await supabase
       .from('shipping_addresses')
       .select('*')
       .eq('username', username)
       .order('is_default', { ascending: false })
       .order('created_at', { ascending: false });
-
     if (error) {
       return handleError(error, 'getShippingAddresses');
     }
-
     return NextResponse.json({ 
       success: true,
       addresses: addresses || []
@@ -50,18 +39,13 @@ export async function GET(req) {
     return handleError(err, 'getShippingAddresses');
   }
 }
-
 export async function POST(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const body = await req.json();
-    
-    // Sanitize inputs
     const username = sanitizeString(body.username, 50);
     const fullName = sanitizeString(body.fullName, 100);
     const phoneNumber = sanitizeString(body.phoneNumber, 20);
@@ -72,21 +56,14 @@ export async function POST(req) {
     const postalCode = sanitizeString(body.postalCode, 20);
     const country = sanitizeString(body.country || 'Philippines', 100);
     const isDefault = body.isDefault === true || body.isDefault === 'true';
-
-    // Input validation
     if (!username || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
       return createValidationErrorResponse("Missing required fields");
     }
-
-    // Verify ownership
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
-    // Validate field lengths and formats
     const validationErrors = [];
-    
     if (!validateLength(fullName, 2, 100)) {
       validationErrors.push("Full name must be between 2 and 100 characters");
     }
@@ -105,28 +82,22 @@ export async function POST(req) {
     if (!isValidPostalCode(postalCode)) {
       validationErrors.push("Invalid postal code format. Please use 3-10 alphanumeric characters");
     }
-    
     if (validationErrors.length > 0) {
       return createValidationErrorResponse(validationErrors);
     }
-
     const supabase = await createClient();
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'addShippingAddress');
     }
-
     if (isDefault) {
       const { error: updateError } = await supabase
         .from('shipping_addresses')
         .update({ is_default: false })
         .eq('username', username)
         .eq('is_default', true);
-
       if (updateError) {
-        // Error updating default addresses - log but continue
       }
     }
-
     const { data: newAddress, error: insertError } = await supabase
       .from('shipping_addresses')
       .insert({
@@ -143,11 +114,9 @@ export async function POST(req) {
       })
       .select()
       .single();
-
     if (insertError) {
       return handleError(insertError, 'addShippingAddress');
     }
-
     return NextResponse.json({ 
       success: true,
       message: "Shipping address added successfully",
@@ -157,18 +126,13 @@ export async function POST(req) {
     return handleError(err, 'addShippingAddress');
   }
 }
-
 export async function PUT(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const body = await req.json();
-    
-    // Sanitize inputs
     const id = sanitizeString(body.id, 100);
     const fullName = sanitizeString(body.fullName, 100);
     const phoneNumber = sanitizeString(body.phoneNumber, 20);
@@ -179,15 +143,10 @@ export async function PUT(req) {
     const postalCode = sanitizeString(body.postalCode, 20);
     const country = sanitizeString(body.country || 'Philippines', 100);
     const isDefault = body.isDefault === true || body.isDefault === 'true';
-
-    // Input validation
     if (!id || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
       return createValidationErrorResponse("Missing required fields");
     }
-
-    // Validate field lengths and formats
     const validationErrors = [];
-    
     if (!validateLength(fullName, 2, 100)) {
       validationErrors.push("Full name must be between 2 and 100 characters");
     }
@@ -206,34 +165,27 @@ export async function PUT(req) {
     if (!isValidPostalCode(postalCode)) {
       validationErrors.push("Invalid postal code format. Please use 3-10 alphanumeric characters");
     }
-    
     if (validationErrors.length > 0) {
       return createValidationErrorResponse(validationErrors);
     }
-
     const supabase = await createClient();
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'updateShippingAddress');
     }
-
     const { data: existingAddress } = await supabase
       .from('shipping_addresses')
       .select('username')
       .eq('id', id)
       .single();
-
     if (!existingAddress) {
       return NextResponse.json({ 
         message: "Address not found" 
       }, { status: 404 });
     }
-
-    // Verify ownership
     const ownershipCheck = await verifyOwnership(existingAddress.username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
     if (isDefault) {
       const { error: updateError } = await supabase
         .from('shipping_addresses')
@@ -241,12 +193,9 @@ export async function PUT(req) {
         .eq('username', existingAddress.username)
         .eq('is_default', true)
         .neq('id', id);
-
       if (updateError) {
-        // Error updating default addresses - log but continue
       }
     }
-
     const { data: updatedAddress, error: updateError } = await supabase
       .from('shipping_addresses')
       .update({
@@ -263,11 +212,9 @@ export async function PUT(req) {
       .eq('id', id)
       .select()
       .single();
-
     if (updateError) {
       return handleError(updateError, 'updateShippingAddress');
     }
-
     return NextResponse.json({ 
       success: true,
       message: "Shipping address updated successfully",
@@ -277,56 +224,42 @@ export async function PUT(req) {
     return handleError(err, 'updateShippingAddress');
   }
 }
-
 export async function DELETE(req) {
   try {
-    // Authentication check
     const authResult = await requireAuth();
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const { searchParams } = new URL(req.url);
     const id = sanitizeString(searchParams.get('id'), 100);
-
-    // Input validation
     if (!id) {
       return createValidationErrorResponse("Address ID is required");
     }
-
     const supabase = await createClient();
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'deleteShippingAddress');
     }
-
-    // Get address to verify ownership
     const { data: existingAddress } = await supabase
       .from('shipping_addresses')
       .select('username')
       .eq('id', id)
       .single();
-
     if (!existingAddress) {
       return NextResponse.json({ 
         message: "Address not found" 
       }, { status: 404 });
     }
-
-    // Verify ownership
     const ownershipCheck = await verifyOwnership(existingAddress.username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-
     const { error: deleteError } = await supabase
       .from('shipping_addresses')
       .delete()
       .eq('id', id);
-
     if (deleteError) {
       return handleError(deleteError, 'deleteShippingAddress');
     }
-
     return NextResponse.json({ 
       success: true,
       message: "Shipping address deleted successfully"
@@ -334,4 +267,4 @@ export async function DELETE(req) {
   } catch (err) {
     return handleError(err, 'deleteShippingAddress');
   }
-}
+}

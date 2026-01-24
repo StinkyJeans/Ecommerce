@@ -3,41 +3,30 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole, verifySellerOwnership } from "@/lib/auth";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
-
 export async function GET(request) {
   try {
-    // Authentication check - must be seller
     const authResult = await requireRole('seller');
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-
     const supabase = await createClient();
-    
     const { searchParams } = new URL(request.url);
     const username = sanitizeString(searchParams.get('username'), 50);
-    
-    // Input validation
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
-
-    // Verify ownership - seller can only view their own products
     const ownershipCheck = await verifySellerOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-    
     const { data: products, error } = await supabase
       .from('products')
       .select('*')
       .eq('seller_username', username)
       .order('created_at', { ascending: false });
-    
     if (error) {
       return handleError(error, 'getSellerProducts');
     }
-    
     const transformedProducts = (products || []).map(product => ({
       ...product,
       productId: product.product_id,
@@ -47,7 +36,6 @@ export async function GET(request) {
       createdAt: product.created_at,
       updatedAt: product.updated_at,
     }));
-    
     return NextResponse.json({ success: true, products: transformedProducts, count: transformedProducts.length });
   } catch (err) {
     return handleError(err, 'getSellerProducts');

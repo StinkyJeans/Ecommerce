@@ -50,7 +50,6 @@ function ResetPasswordContent() {
       return;
     }
 
-    // Validate password strength
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.valid) {
       setPopupMessage(passwordValidation.errors.join(". "));
@@ -90,11 +89,10 @@ function ResetPasswordContent() {
         return;
       }
 
-      // Update password_changed_at timestamp
       try {
         await authFunctions.updatePasswordChangedAt();
       } catch (err) {
-        // Failed to update password changed timestamp - don't block the success flow
+
       }
 
       setPopupMessage("Password reset successfully! Redirecting to login...");
