@@ -1,20 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { parseAndVerifyBody } from "@/lib/signing";
 import { handleError } from "@/lib/errors";
 import { sendSellerApprovalEmail } from "@/lib/email/service";
 export async function POST(req) {
   try {
-    const { sellerId, action } = await req.json();
-    if (!sellerId || !action) {
-      return NextResponse.json({ 
-        message: "sellerId and action are required" 
-      }, { status: 400 });
-    }
-    if (action !== 'approve' && action !== 'reject') {
-      return NextResponse.json({ 
-        message: "action must be 'approve' or 'reject'" 
-      }, { status: 400 });
-    }
     const supabase = await createClient();
     if (!supabase) {
       return NextResponse.json({ message: "Supabase client not initialized" }, { status: 500 });
@@ -28,7 +18,7 @@ export async function POST(req) {
     if (user.email) {
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('email', user.email)
         .maybeSingle();
       userData = data;
@@ -37,7 +27,7 @@ export async function POST(req) {
     if (!userData && user.user_metadata?.username) {
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('username', user.user_metadata.username)
         .maybeSingle();
       userData = data;
@@ -54,6 +44,19 @@ export async function POST(req) {
         message: "Forbidden: Admin access required",
         error: `User role is '${userData.role}', expected 'admin'`
       }, { status: 403 });
+    }
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
+    const { sellerId, action } = body;
+    if (!sellerId || !action) {
+      return NextResponse.json({ 
+        message: "sellerId and action are required" 
+      }, { status: 400 });
+    }
+    if (action !== 'approve' && action !== 'reject') {
+      return NextResponse.json({ 
+        message: "action must be 'approve' or 'reject'" 
+      }, { status: 400 });
     }
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     const { data: updatedSeller, error: updateError } = await supabase
@@ -101,4 +104,4 @@ export async function POST(req) {
   } catch (err) {
     return handleError(err, 'approveSeller');
   }
-}
+}

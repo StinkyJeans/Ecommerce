@@ -65,21 +65,9 @@ export default function ViewCart() {
     setErrorMessage("");
 
     try {
-      const res = await fetch(
-        `/api/updateCartQuantity?id=${itemId}&action=${action}&username=${encodeURIComponent(
-          username
-        )}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const data = await cartFunctions.updateCartQuantity(itemId, action, username);
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         if (data.removed) {
           setCartItems((prevItems) =>
             prevItems.filter((item) => item.id !== itemId)
@@ -102,7 +90,7 @@ export default function ViewCart() {
         setErrorMessage(data.message || "Failed to update quantity");
       }
     } catch (error) {
-      setErrorMessage(`Error: ${error.message}`);
+      setErrorMessage(error.response?.message || error.message || "Failed to update quantity");
     } finally {
       setUpdatingId(null);
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { verifyRequestSignature } from "@/lib/signing";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 export async function PATCH(req) {
@@ -9,6 +10,9 @@ export async function PATCH(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
+    const { userData } = authResult;
+    const verify = await verifyRequestSignature(req, null, userData.id);
+    if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
     const id = sanitizeString(searchParams.get("id"), 100);
     const action = sanitizeString(searchParams.get("action"), 20);

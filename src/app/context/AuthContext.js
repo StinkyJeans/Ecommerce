@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { authFunctions } from "@/lib/supabase/api";
+import { setSigningKey, clearSigningKey, getSigningKey } from "@/lib/signing-client";
 
 const AuthContext = createContext();
 
@@ -72,6 +73,12 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        if (!getSigningKey()) {
+          fetch('/api/signing-key', { credentials: 'include' })
+            .then((r) => r.json())
+            .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); })
+            .catch(() => {});
+        }
 
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
         const metadataRole = session.user.user_metadata?.role;
@@ -108,6 +115,12 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        if (!getSigningKey()) {
+          fetch('/api/signing-key', { credentials: 'include' })
+            .then((r) => r.json())
+            .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); })
+            .catch(() => {});
+        }
 
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
         const metadataRole = session.user.user_metadata?.role;
@@ -187,6 +200,7 @@ export function AuthProvider({ children }) {
     } catch (err) {
 
     }
+    clearSigningKey();
     clearCache();
     setRole(null);
     setUsername(null);

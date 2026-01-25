@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { verifyRequestSignature, parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPhone, isValidPostalCode } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
 export async function GET(req) {
@@ -9,6 +10,9 @@ export async function GET(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
+    const { userData } = authResult;
+    const verify = await verifyRequestSignature(req, null, userData.id);
+    if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
     const username = sanitizeString(searchParams.get('username'), 50);
     if (!username) {
@@ -132,7 +136,9 @@ export async function PUT(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-    const body = await req.json();
+    const { userData } = authResult;
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
     const id = sanitizeString(body.id, 100);
     const fullName = sanitizeString(body.fullName, 100);
     const phoneNumber = sanitizeString(body.phoneNumber, 20);
@@ -230,6 +236,9 @@ export async function DELETE(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
+    const { userData } = authResult;
+    const verify = await verifyRequestSignature(req, null, userData.id);
+    if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
     const id = sanitizeString(searchParams.get('id'), 100);
     if (!id) {
@@ -267,4 +276,4 @@ export async function DELETE(req) {
   } catch (err) {
     return handleError(err, 'deleteShippingAddress');
   }
-}
+}

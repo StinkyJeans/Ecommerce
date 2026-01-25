@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole, verifyOwnership } from "@/lib/auth";
+import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPrice, isValidImageUrl } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 function generateProductId() {
@@ -15,7 +16,9 @@ export async function POST(req) {
       return authResult;
     }
     const { userData } = authResult;
-    const { productName, description, price, category, idUrl, username } = await req.json();
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
+    const { productName, description, price, category, idUrl, username } = body;
     const validationErrors = [];
     if (!productName || !productName.trim()) {
       validationErrors.push("Product name is required");

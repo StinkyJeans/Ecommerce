@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, isValidQuantity, isValidPrice } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
 export async function POST(req) {
@@ -9,7 +10,9 @@ export async function POST(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-    const body = await req.json();
+    const { userData } = authResult;
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
     const username = sanitizeString(body.username, 50);
     const items = body.items;
     const shipping_address_id = body.shipping_address_id;

@@ -7,6 +7,7 @@ import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { createClient } from "@/lib/supabase/client";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { authFunctions } from "@/lib/supabase/api";
+import { setSigningKey } from "@/lib/signing-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
@@ -99,6 +100,7 @@ export default function LoginPage() {
       const data = await authFunctions.login({ email, password });
 
       setPasswordChangedMessage("");
+      if (data.signingKey) setSigningKey(data.signingKey);
 
       setRole(data.role);
 

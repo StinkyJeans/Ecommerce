@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isValidEmail, sanitizeString } from "@/lib/validation";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 import { createErrorResponse, createValidationErrorResponse, handleError } from "@/lib/errors";
+import { generateAndSaveSigningKey } from "@/lib/signing";
 
 export async function POST(req) {
   try {
@@ -29,7 +30,7 @@ export async function POST(req) {
 
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('role, email, seller_status, password_changed_at')
+      .select('id, role, email, seller_status, password_changed_at')
       .eq('email', sanitizedEmail)
       .single();
 
@@ -110,10 +111,13 @@ export async function POST(req) {
       return createErrorResponse("Login failed", 401);
     }
 
+    const signingKey = await generateAndSaveSigningKey(userData.id);
+
     return NextResponse.json({
       message: "Login successful",
       role: userData.role || "user",
-      user: authData.user
+      user: authData.user,
+      signingKey,
     });
 
   } catch (error) {

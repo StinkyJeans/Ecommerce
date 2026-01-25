@@ -1,3 +1,4 @@
+import { getSigningKey, buildCanonicalRequest, signRequest } from "@/lib/signing-client";
 
 async function callApi(endpoint, options = {}) {
   const { method = 'GET', body } = options;
@@ -10,6 +11,16 @@ async function callApi(endpoint, options = {}) {
   if (body && method !== 'GET') {
     fetchOptions.body = JSON.stringify(body);
   }
+
+  const key = getSigningKey();
+  if (key && !(body && body instanceof FormData)) {
+    const timestamp = Date.now().toString();
+    const canonical = await buildCanonicalRequest(method, endpoint, body, timestamp);
+    const signature = await signRequest(canonical, key);
+    fetchOptions.headers['X-Signature'] = signature;
+    fetchOptions.headers['X-Request-Timestamp'] = timestamp;
+  }
+
   const response = await fetch(endpoint, fetchOptions);
   const data = await response.json();
   if (!response.ok) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
+import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPrice, isValidQuantity, isValidImageUrl } from "@/lib/validation";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 import { createErrorResponse, createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
@@ -11,11 +12,12 @@ export async function POST(req) {
       return authResult;
     }
     const { userData } = authResult;
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
     const rateLimitResult = checkRateLimit(req, 'addToCart', userData.username);
     if (rateLimitResult && !rateLimitResult.allowed) {
       return createRateLimitResponse(rateLimitResult.resetTime);
     }
-    const body = await req.json();
     const username = sanitizeString(body.username, 50);
     const product_id = sanitizeString(body.productId || body.product_id, 100);
     const product_name = sanitizeString(body.productName || body.product_name, 200);

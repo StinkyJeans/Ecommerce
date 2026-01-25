@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole, verifySellerOwnership } from "@/lib/auth";
+import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPrice, isValidImageUrl } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
 export async function PUT(req) {
@@ -10,7 +11,9 @@ export async function PUT(req) {
       return authResult;
     }
     const { userData } = authResult;
-    const { productId, productName, description, price, category, idUrl, username } = await req.json();
+    const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
+    if (verifyError) return verifyError;
+    const { productId, productName, description, price, category, idUrl, username } = body;
     if (!productId || !productName || !description || !price || !category || !username) {
       return createValidationErrorResponse("All fields are required");
     }

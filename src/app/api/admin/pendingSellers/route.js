@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyRequestSignature } from "@/lib/signing";
 import { handleError } from "@/lib/errors";
 export async function GET(req) {
   try {
@@ -16,7 +17,7 @@ export async function GET(req) {
     if (user.email) {
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('email', user.email)
         .maybeSingle();
       userData = data;
@@ -25,7 +26,7 @@ export async function GET(req) {
     if (!userData && user.user_metadata?.username) {
       const { data, error } = await supabase
         .from('users')
-        .select('role')
+        .select('id, role')
         .eq('username', user.user_metadata.username)
         .maybeSingle();
       userData = data;
@@ -43,6 +44,8 @@ export async function GET(req) {
         error: `User role is '${userData.role}', expected 'admin'`
       }, { status: 403 });
     }
+    const verify = await verifyRequestSignature(req, null, userData.id);
+    if (!verify.valid) return verify.response;
     const { data: pendingSellers, error } = await supabase
       .from('users')
       .select('id, username, email, contact, id_url, created_at')
