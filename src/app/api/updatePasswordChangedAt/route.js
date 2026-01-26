@@ -8,21 +8,10 @@ export async function POST(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
-    const { user, userData } = authResult;
+    const { userData } = authResult;
     const { verifyError } = await parseAndVerifyBody(req, userData.id);
     if (verifyError) return verifyError;
     const supabase = await createClient();
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, email')
-      .eq('email', user.email)
-      .maybeSingle();
-    if (userError || !userData) {
-      return NextResponse.json(
-        { success: true, message: "Password changed" },
-        { status: 200 }
-      );
-    }
     const { error: updateError } = await supabase
       .from('users')
       .update({ password_changed_at: new Date().toISOString() })
