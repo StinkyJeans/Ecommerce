@@ -89,10 +89,18 @@ export async function verifyOwnership(resourceUsername) {
     return authResult;
   }
   const { user, userData } = authResult;
+  
+  // Normalize usernames for case-insensitive comparison
+  const normalizedResource = resourceUsername?.toLowerCase().trim();
+  const normalizedUsername = userData.username?.toLowerCase().trim();
+  const normalizedEmail = userData.email?.toLowerCase().trim();
+  const normalizedUserEmail = user.email?.toLowerCase().trim();
+  
   const isOwner = 
-    resourceUsername === userData.username ||
-    resourceUsername === userData.email ||
-    resourceUsername === user.email;
+    normalizedResource === normalizedUsername ||
+    normalizedResource === normalizedEmail ||
+    normalizedResource === normalizedUserEmail;
+    
   if (!isOwner) {
     return NextResponse.json(
       { 
@@ -110,7 +118,9 @@ export async function verifySellerOwnership(sellerUsername) {
     return authResult;
   }
   const { userData } = authResult;
-  const isOwner = sellerUsername === userData.username;
+  const a = (sellerUsername || "").toLowerCase().trim();
+  const b = (userData.username || "").toLowerCase().trim();
+  const isOwner = a && b && a === b;
   if (!isOwner) {
     return NextResponse.json(
       { 

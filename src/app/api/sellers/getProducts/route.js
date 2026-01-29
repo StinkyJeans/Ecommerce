@@ -23,10 +23,11 @@ export async function GET(request) {
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
+    // Use canonical DB username so the query matches products regardless of client param casing
     const { data: products, error } = await supabase
       .from('products')
       .select('*')
-      .eq('seller_username', username)
+      .eq('seller_username', userData.username)
       .order('created_at', { ascending: false });
     if (error) {
       return handleError(error, 'getSellerProducts');

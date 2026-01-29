@@ -34,25 +34,25 @@ export default function SearchBar({
   };
   return (
     <div className={`relative w-full max-w-md ${className}`}>
-      <div className="relative flex items-center">
+      <div className="relative flex items-center group">
         <FontAwesomeIcon
           icon={faSearch}
-          className="absolute left-3 sm:left-4 text-gray-400 pointer-events-none text-sm sm:text-base"
+          className="absolute left-4 text-[#666666] dark:text-[#a3a3a3] group-focus-within:text-[#FFBF00] pointer-events-none text-base transition-colors"
         />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-9 sm:pl-11 pr-9 sm:pr-10 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition touch-manipulation"
+          className="w-full pl-12 pr-12 py-3.5 text-base bg-white dark:bg-[#2C2C2C] border-2 border-[#E0E0E0] dark:border-[#404040] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#666666] dark:placeholder-[#a3a3a3] focus:outline-none focus:border-[#FFBF00] focus:ring-2 focus:ring-[#FFBF00]/30 transition-all touch-manipulation"
         />
         {searchTerm && (
           <button
             onClick={clearSearch}
-            className="absolute right-2 sm:right-3 text-gray-400 hover:text-gray-600 transition cursor-pointer p-1 touch-manipulation"
+            className="absolute right-3 text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5] transition cursor-pointer p-1.5 hover:bg-[#E0E0E0] dark:hover:bg-[#404040] rounded-lg touch-manipulation"
             aria-label="Clear search"
           >
-            <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
+            <FontAwesomeIcon icon={faTimes} className="text-base" />
           </button>
         )}
       </div>

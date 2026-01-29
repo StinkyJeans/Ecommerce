@@ -46,12 +46,31 @@ export async function GET(req) {
     }
     const verify = await verifyRequestSignature(req, null, userData.id);
     if (!verify.valid) return verify.response;
-    const { data: pendingSellers, error } = await supabase
+    
+    // Get pending sellers - include both 'pending' status and NULL status (new registrations)
+    // First try to get sellers with pending status
+    const { data: pendingStatusSellers, error: pendingError } = await supabase
       .from('users')
-      .select('id, username, email, contact, id_url, created_at')
+      .select('id, username, email, contact, id_url, seller_status, created_at')
       .eq('role', 'seller')
       .eq('seller_status', 'pending')
       .order('created_at', { ascending: false });
+    
+    // Then get sellers with NULL status
+    const { data: nullStatusSellers, error: nullError } = await supabase
+      .from('users')
+      .select('id, username, email, contact, id_url, seller_status, created_at')
+      .eq('role', 'seller')
+      .is('seller_status', null)
+      .order('created_at', { ascending: false });
+    
+    // Combine results
+    const pendingSellers = [
+      ...(pendingStatusSellers || []),
+      ...(nullStatusSellers || [])
+    ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    const error = pendingError || nullError;
     if (error) {
       return handleError(error, 'getPendingSellers');
     }
@@ -62,4 +81,4 @@ export async function GET(req) {
   } catch (err) {
     return handleError(err, 'getPendingSellers');
   }
-}
+}

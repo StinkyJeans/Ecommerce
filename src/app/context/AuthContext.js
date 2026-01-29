@@ -61,6 +61,7 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    // Use cached data immediately for instant display
     const cachedUsername = getCachedData(CACHE_KEY_USERNAME);
     const cachedRole = getCachedData(CACHE_KEY_ROLE);
     const cachedEmail = getCachedData(CACHE_KEY_EMAIL);
@@ -68,21 +69,24 @@ export function AuthProvider({ children }) {
     if (cachedUsername && cachedRole) {
       setUsername(cachedUsername);
       setRole(cachedRole);
-      setLoading(false);
+      setLoading(false); // Show cached data immediately
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        if (!getSigningKey()) {
-          fetch('/api/signing-key', { credentials: 'include' })
-            .then((r) => r.json())
-            .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); })
-            .catch(() => {});
-        }
+    // Optimize: Fetch session and signing key in parallel
+    const sessionPromise = supabase.auth.getSession();
+    const signingKeyPromise = getSigningKey() 
+      ? Promise.resolve(null) 
+      : fetch('/api/signing-key', { credentials: 'include' })
+          .then((r) => r.json())
+          .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); return d?.signingKey; })
+          .catch(() => null);
 
+    Promise.all([sessionPromise, signingKeyPromise]).then(([{ data: { session } }]) => {
+      if (session) {
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
         const metadataRole = session.user.user_metadata?.role;
 
+        // Use metadata immediately if available (faster than DB query)
         if (metadataUsername) {
           setUsername(metadataUsername);
           setCachedData(CACHE_KEY_USERNAME, metadataUsername);
@@ -95,16 +99,30 @@ export function AuthProvider({ children }) {
           setCachedData(CACHE_KEY_EMAIL, session.user.email);
         }
 
+        // If we have metadata, show it immediately and fetch fresh data in background
         if (metadataUsername && metadataRole) {
           setLoading(false);
-
+          // Fetch user data in background without blocking
           fetchUserData(session.user.email, true);
         } else {
-
-          fetchUserData(session.user.email);
+          // No metadata, need to fetch from DB (but show cached if available)
+          if (!cachedUsername || !cachedRole) {
+            fetchUserData(session.user.email);
+          } else {
+            // We have cached data, just refresh in background
+            setLoading(false);
+            fetchUserData(session.user.email, true);
+          }
         }
       } else {
         clearCache();
+        setLoading(false);
+      }
+    }).catch(() => {
+      // If session fetch fails, use cached data if available
+      if (cachedUsername && cachedRole) {
+        setLoading(false);
+      } else {
         setLoading(false);
       }
     });
@@ -115,6 +133,7 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        // Only fetch signing key if not already cached
         if (!getSigningKey()) {
           fetch('/api/signing-key', { credentials: 'include' })
             .then((r) => r.json())
@@ -125,6 +144,7 @@ export function AuthProvider({ children }) {
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
         const metadataRole = session.user.user_metadata?.role;
 
+        // Use metadata immediately if available (faster than DB query)
         if (metadataUsername) {
           setUsername(metadataUsername);
           setCachedData(CACHE_KEY_USERNAME, metadataUsername);
@@ -137,11 +157,24 @@ export function AuthProvider({ children }) {
           setCachedData(CACHE_KEY_EMAIL, session.user.email);
         }
 
+        // If we have metadata, show it immediately and fetch fresh data in background
         if (metadataUsername && metadataRole) {
           setLoading(false);
+          // Fetch in background to avoid blocking
           fetchUserData(session.user.email, true);
         } else {
-          fetchUserData(session.user.email);
+          // Check if we have cached data to show immediately
+          const cachedUsername = getCachedData(CACHE_KEY_USERNAME);
+          const cachedRole = getCachedData(CACHE_KEY_ROLE);
+          
+          if (cachedUsername && cachedRole) {
+            setLoading(false);
+            // Refresh in background
+            fetchUserData(session.user.email, true);
+          } else {
+            // No cache, need to fetch (this will set loading to false when done)
+            fetchUserData(session.user.email);
+          }
         }
       } else {
         clearCache();
@@ -165,27 +198,33 @@ export function AuthProvider({ children }) {
     }
 
     try {
+      // Optimized query with only needed columns and using index
       const { data: userData, error } = await supabase
         .from('users')
         .select('username, role')
-        .eq('email', email)
-        .single();
+        .eq('email', email.toLowerCase().trim()) // Normalize email for index lookup
+        .maybeSingle(); // Use maybeSingle instead of single to avoid errors
 
       if (error) {
+        console.error('Error fetching user data:', error);
         if (!background) setLoading(false);
         return;
       }
 
       if (userData) {
-        setUsername(userData.username || null);
-        setRole(userData.role || null);
-
-        if (userData.username) setCachedData(CACHE_KEY_USERNAME, userData.username);
-        if (userData.role) setCachedData(CACHE_KEY_ROLE, userData.role);
+        // Only update if data is different to avoid unnecessary re-renders
+        if (userData.username && userData.username !== username) {
+          setUsername(userData.username);
+          setCachedData(CACHE_KEY_USERNAME, userData.username);
+        }
+        if (userData.role && userData.role !== role) {
+          setRole(userData.role);
+          setCachedData(CACHE_KEY_ROLE, userData.role);
+        }
         setCachedData(CACHE_KEY_EMAIL, email);
       }
     } catch (err) {
-
+      console.error('Exception fetching user data:', err);
     } finally {
       if (!background) setLoading(false);
     }

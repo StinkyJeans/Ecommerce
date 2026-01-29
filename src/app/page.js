@@ -10,18 +10,18 @@ import { authFunctions } from "@/lib/supabase/api";
 import { setSigningKey } from "@/lib/signing-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faStore,
-  faUser,
+  faShoppingBag,
   faLock,
   faEye,
   faEyeSlash,
-  faSignInAlt,
   faExclamationTriangle,
   faTimes,
   faCheckCircle,
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { AuthHeaderLogin } from "@/app/components/auth/AuthHeader";
+import { AuthFooterLogin } from "@/app/components/auth/AuthFooter";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -39,8 +39,6 @@ export default function LoginPage() {
 
   useLoadingFavicon(loading || googleLoading, "Login");
 
-  const register = () => router.push("/register");
-
   const handleGoogleLogin = async () => {
     if (!supabase) {
       setPopupMessage("Unable to initialize. Please try again.");
@@ -49,46 +47,32 @@ export default function LoginPage() {
       setTimeout(() => setShowPopup(false), 4000);
       return;
     }
-
     setGoogleLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/auth/callback?next=/dashboard`;
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: redirectUrl,
-        },
+        options: { redirectTo: redirectUrl },
       });
-
       if (error) {
-
-        let errorMessage = "Failed to sign in with Google. Please try again.";
-
-        if (error.message && error.message.includes("provider is not enabled")) {
-          errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
-        } else if (error.message) {
-          errorMessage = `Google login error: ${error.message}`;
-        }
-
-        setPopupMessage(errorMessage);
+        let msg = "Failed to sign in with Google. Please try again.";
+        if (error.message?.includes("provider is not enabled"))
+          msg = "Google login is not enabled. Please contact the administrator or use email/password.";
+        else if (error.message) msg = `Google login error: ${error.message}`;
+        setPopupMessage(msg);
         setPopupType("error");
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 6000);
-        setGoogleLoading(false);
       }
-    } catch (error) {
-
-      let errorMessage = "Something went wrong. Please try again.";
-
-      if (error.message && error.message.includes("provider is not enabled")) {
-        errorMessage = "Google login is not enabled. Please contact the administrator or use username/password login.";
-      }
-
-      setPopupMessage(errorMessage);
+    } catch (err) {
+      let msg = "Something went wrong. Please try again.";
+      if (err.message?.includes("provider is not enabled"))
+        msg = "Google login is not enabled. Please contact the administrator or use email/password.";
+      setPopupMessage(msg);
       setPopupType("error");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 6000);
+    } finally {
       setGoogleLoading(false);
     }
   };
@@ -98,218 +82,154 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await authFunctions.login({ email, password });
-
       setPasswordChangedMessage("");
       if (data.signingKey) setSigningKey(data.signingKey);
-
       setRole(data.role);
-
-      if (data.role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (data.role === "seller") {
-        router.push("/seller/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      if (data.role === "admin") router.push("/admin/dashboard");
+      else if (data.role === "seller") router.push("/seller/dashboard");
+      else router.push("/dashboard");
     } catch (error) {
-
       setPasswordChangedMessage("");
-
-      const errorData = error.response || {};
+      const err = error.response || {};
       const status = error.status || 500;
-
-      if (status === 403 && errorData.sellerStatus === 'pending') {
-        setPopupMessage(errorData.details || "Waiting for admin approval. Please wait for admin approval before logging in.");
+      if (status === 403 && err.sellerStatus === "pending") {
+        setPopupMessage(err.details || "Waiting for admin approval. Please wait before logging in.");
         setPopupType("warning");
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 5000);
-      } else if (status === 403 && errorData.sellerStatus === 'rejected') {
-        setPopupMessage(errorData.details || "Your seller account has been rejected. Please contact support.");
+      } else if (status === 403 && err.sellerStatus === "rejected") {
+        setPopupMessage(err.details || "Your seller account has been rejected. Please contact support.");
         setPopupType("error");
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 5000);
       } else {
-        const errorMessage = errorData.message || error.message || "Invalid Email or Password";
-
-        setPopupMessage(errorMessage);
+        setPopupMessage(err.message || error.message || "Invalid Email or Password");
         setPopupType("error");
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 4000);
-
-        if (errorData.passwordChangedAt) {
-          const relativeTime = formatRelativeTime(errorData.passwordChangedAt);
-          setPasswordChangedMessage(`You have changed your password ${relativeTime}`);
-        }
+        if (err.passwordChangedAt)
+          setPasswordChangedMessage(`You have changed your password ${formatRelativeTime(err.passwordChangedAt)}`);
       }
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), status === 403 ? 5000 : 4000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
-      </div>
+    <div className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col">
+      <AuthHeaderLogin />
 
-      {showPopup && (
-        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in ${
-          popupType === 'error' 
-            ? 'bg-gradient-to-r from-red-500 to-red-600' 
-            : popupType === 'warning'
-            ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-            : 'bg-gradient-to-r from-green-500 to-green-600'
-        } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3`}>
-          <div className="flex-shrink-0 mt-0.5">
-            {popupType === 'error' && <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />}
-            {popupType === 'warning' && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg sm:text-xl" />}
-            {popupType === 'success' && <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl" />}
-          </div>
-          <div className="flex-1">
-            <p className="font-medium text-sm sm:text-base break-words">{popupMessage}</p>
-          </div>
-          <button
-            onClick={() => setShowPopup(false)}
-            className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
-          >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
-          </button>
-        </div>
-      )}
-
-      <form
-        onSubmit={handleLogin}
-        className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
-      >
-        {(loading || googleLoading) && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">{googleLoading ? "Redirecting to Google..." : "Logging in..."}</p>
-            </div>
+      <div className="flex-1 flex items-center justify-center p-4">
+        {showPopup && (
+          <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in ${
+            popupType === "error" ? "bg-red-500" : popupType === "warning" ? "bg-amber-500" : "bg-green-500"
+          } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
+            {popupType === "error" && <FontAwesomeIcon icon={faTimes} className="text-lg flex-shrink-0 mt-0.5" />}
+            {popupType === "warning" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
+            {popupType === "success" && <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />}
+            <p className="font-medium text-sm sm:text-base break-words flex-1">{popupMessage}</p>
+            <button onClick={() => setShowPopup(false)} className="text-white/80 hover:text-white">
+              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            </button>
           </div>
         )}
 
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <FontAwesomeIcon icon={faStore} className="text-white text-2xl" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Sign in to TotallyNormal Store
-          </p>
-        </div>
-
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (passwordChangedMessage) {
-                  setPasswordChangedMessage("");
-                }
-              }}
-              className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <FontAwesomeIcon
-                icon={showPassword ? faEyeSlash : faEye}
-                className="text-sm"
-              />
-            </button>
-          </div>
-          {passwordChangedMessage && (
-            <div className="mt-2 flex items-start gap-2 text-sm text-amber-600">
-              <FontAwesomeIcon icon={faExclamationTriangle} className="mt-0.5 flex-shrink-0" />
-              <p className="flex-1">{passwordChangedMessage}</p>
+        <form
+          onSubmit={handleLogin}
+          className="relative w-full max-w-md bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-lg border border-[#E0E0E0] dark:border-[#404040] p-6 sm:p-8"
+        >
+          {(loading || googleLoading) && (
+            <div className="absolute inset-0 bg-white/95 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#2F79F4] rounded-full animate-spin" />
+                <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">{googleLoading ? "Redirecting to Google..." : "Signing in..."}</p>
+              </div>
             </div>
           )}
-          <div className="flex justify-end mt-2">
-            <button
-              type="button"
-              onClick={() => router.push("/auth/forgot-password")}
-              className="text-sm text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
-            >
-              Forgot password?
-            </button>
+
+          <div className="text-center mb-6">
+            <div className="inline-flex w-12 h-12 bg-[#2F79F4] rounded-lg items-center justify-center mb-4 shadow">
+              <FontAwesomeIcon icon={faShoppingBag} className="text-white text-lg" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-white">Welcome back</h1>
+            <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1">Sign in to your Totally Normal account</p>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={loading || googleLoading}
-          className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
-        >
-          <span className="cursor-pointer flex items-center justify-center gap-2">
-            <FontAwesomeIcon icon={faSignInAlt} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
-            Login
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading || googleLoading}
+            className="w-full py-3 px-4 bg-white border border-[#E0E0E0] dark:bg-[#404040] dark:border-[#505050] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-medium flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors disabled:opacity-50"
+          >
+            <FontAwesomeIcon icon={faGoogle} className="text-xl" />
+            Login with Gmail
+          </button>
 
-        <div className="mt-6 flex items-center gap-4">
-          <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="text-gray-500 text-sm">OR</span>
-          <div className="flex-1 h-px bg-gray-300"></div>
-        </div>
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-[#E0E0E0] dark:bg-[#404040]" />
+            <span className="text-[#666666] dark:text-[#a3a3a3] text-sm font-medium">OR</span>
+            <div className="flex-1 h-px bg-[#E0E0E0] dark:bg-[#404040]" />
+          </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={loading || googleLoading}
-          className="cursor-pointer w-full mt-4 py-3 sm:py-3.5 px-4 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base flex items-center justify-center gap-3"
-        >
-          <FontAwesomeIcon icon={faGoogle} className="text-xl text-red-600" />
-          <span>Continue with Google</span>
-        </button>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Email Address</label>
+            <input
+              type="email"
+              placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+              required
+            />
+          </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
-            Don't have an account?{" "}
-            <span
-              onClick={register}
-              className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
-            >
-              Register now
-            </span>
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5]">Password</label>
+              <button
+                type="button"
+                onClick={() => router.push("/auth/forgot-password")}
+                className="text-sm text-[#2F79F4] hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); if (passwordChangedMessage) setPasswordChangedMessage(""); }}
+                className="w-full px-4 py-3 pr-12 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
+              >
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-lg" />
+              </button>
+            </div>
+            {passwordChangedMessage && (
+              <p className="mt-2 text-sm text-[#FFBF00] dark:text-[#FFC107]">{passwordChangedMessage}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || googleLoading}
+            className="w-full py-3 px-4 bg-[#2F79F4] hover:bg-[#2563eb] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
+          >
+            Sign In
+          </button>
+
+          <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
+            Don&apos;t have an account?{" "}
+            <button type="button" onClick={() => router.push("/register")} className="text-[#2F79F4] font-medium hover:underline">
+              Sign Up
+            </button>
           </p>
-        </div>
-      </form>
+        </form>
+      </div>
+
+      <AuthFooterLogin />
     </div>
   );
 }

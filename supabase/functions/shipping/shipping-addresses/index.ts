@@ -58,6 +58,16 @@ serve(async (req) => {
       const postalCode = sanitizeString(body.postalCode, 20);
       const country = sanitizeString(body.country || 'Philippines', 100);
       const isDefault = body.isDefault === true || body.isDefault === 'true';
+      const addressType = sanitizeString(body.addressType || 'home', 10);
+      
+      // Validate addressType
+      if (addressType && addressType !== 'home' && addressType !== 'work') {
+        return createCorsResponse(
+          { message: 'Address type must be "home" or "work"', success: false },
+          400
+        );
+      }
+      
       if (userData.username !== username && userData.role !== 'admin') {
         return createCorsResponse(
           { message: 'Forbidden: You can only add addresses to your own account', success: false },
@@ -126,6 +136,7 @@ serve(async (req) => {
           postal_code: postalCode,
           country,
           is_default: isDefault,
+          address_type: addressType || 'home',
         })
         .select()
         .single();
@@ -157,6 +168,16 @@ serve(async (req) => {
       const postalCode = sanitizeString(body.postalCode, 20);
       const country = sanitizeString(body.country || 'Philippines', 100);
       const isDefault = body.isDefault === true || body.isDefault === 'true';
+      const addressType = sanitizeString(body.addressType || 'home', 10);
+      
+      // Validate addressType
+      if (addressType && addressType !== 'home' && addressType !== 'work') {
+        return createCorsResponse(
+          { message: 'Address type must be "home" or "work"', success: false },
+          400
+        );
+      }
+      
       if (userData.username !== username && userData.role !== 'admin') {
         return createCorsResponse(
           { message: 'Forbidden: You can only update your own addresses', success: false },
@@ -225,6 +246,7 @@ serve(async (req) => {
           postal_code: postalCode,
           country,
           is_default: isDefault,
+          address_type: addressType || 'home',
         })
         .eq('id', id)
         .eq('username', username)
@@ -285,4 +307,4 @@ serve(async (req) => {
       405
     );
   });
-});
+});

@@ -7,10 +7,10 @@ import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { orderFunctions, shippingFunctions } from "@/lib/supabase/api";
 import { getImageUrl } from "@/lib/supabase/storage";
-import Header from "@/app/components/header";
-import Navbar from "@/app/components/navbar";
-import SellerNavbar from "@/app/seller/components/sellerNavbar";
+import UserPortalSidebar from "@/app/components/UserPortalSidebar";
 import Pagination from "@/app/components/Pagination";
+import ThemeToggle from "@/app/components/ThemeToggle";
+import CityAutocomplete from "@/app/components/CityAutocomplete";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMapMarkerAlt,
@@ -25,7 +25,11 @@ import {
   faHome,
   faCity,
   faEnvelope,
-  faSpinner
+  faSpinner,
+  faGlobe,
+  faCog,
+  faUndo,
+  faBriefcase
 } from "@fortawesome/free-solid-svg-icons";
 
 function AccountPageContent() {
@@ -38,6 +42,9 @@ function AccountPageContent() {
   const [orders, setOrders] = useState([]);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [deletingAddressId, setDeletingAddressId] = useState(null);
+  const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -47,12 +54,64 @@ function AccountPageContent() {
     province: "",
     postalCode: "",
     country: "Philippines",
-    isDefault: false
+    isDefault: false,
+    addressType: "home"
   });
   const [message, setMessage] = useState({ text: "", type: "" });
   const [addressesPage, setAddressesPage] = useState(1);
   const [ordersPage, setOrdersPage] = useState(1);
   const itemsPerPage = 10;
+  const [useFallbackMode, setUseFallbackMode] = useState(false);
+  const [autoFilledFields, setAutoFilledFields] = useState({
+    province: false,
+    country: false
+  });
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedCityFallback, setSelectedCityFallback] = useState("");
+
+  // Fallback data for common countries
+  const countryData = {
+    Philippines: {
+      provinces: [
+        "Metro Manila", "Abra", "Agusan del Norte", "Agusan del Sur", "Aklan", "Albay",
+        "Antique", "Apayao", "Aurora", "Basilan", "Bataan", "Batanes", "Batangas",
+        "Benguet", "Biliran", "Bohol", "Bukidnon", "Bulacan", "Cagayan", "Camarines Norte",
+        "Camarines Sur", "Camiguin", "Capiz", "Catanduanes", "Cavite", "Cebu", "Compostela Valley",
+        "Cotabato", "Davao del Norte", "Davao del Sur", "Davao Occidental", "Davao Oriental",
+        "Dinagat Islands", "Eastern Samar", "Guimaras", "Ifugao", "Ilocos Norte", "Ilocos Sur",
+        "Iloilo", "Isabela", "Kalinga", "La Union", "Laguna", "Lanao del Norte", "Lanao del Sur",
+        "Leyte", "Maguindanao", "Marinduque", "Masbate", "Misamis Occidental", "Misamis Oriental",
+        "Mountain Province", "Negros Occidental", "Negros Oriental", "Northern Samar", "Nueva Ecija",
+        "Nueva Vizcaya", "Occidental Mindoro", "Oriental Mindoro", "Palawan", "Pampanga",
+        "Pangasinan", "Quezon", "Quirino", "Rizal", "Romblon", "Samar", "Sarangani",
+        "Siquijor", "Sorsogon", "South Cotabato", "Southern Leyte", "Sultan Kudarat",
+        "Sulu", "Surigao del Norte", "Surigao del Sur", "Tarlac", "Tawi-Tawi", "Zambales",
+        "Zamboanga del Norte", "Zamboanga del Sur", "Zamboanga Sibugay"
+      ],
+      cities: {}
+    },
+    "United States": {
+      provinces: [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+        "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+        "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+        "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+        "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+        "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
+        "Wisconsin", "Wyoming"
+      ],
+      cities: {}
+    },
+    Canada: {
+      provinces: [
+        "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador",
+        "Northwest Territories", "Nova Scotia", "Nunavut", "Ontario", "Prince Edward Island",
+        "Quebec", "Saskatchewan", "Yukon"
+      ],
+      cities: {}
+    }
+  };
 
   useLoadingFavicon(authLoading || loading, "Manage My Account");
 
@@ -121,6 +180,36 @@ function AccountPageContent() {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    if (!confirm("Are you sure you want to cancel this order?")) {
+      return;
+    }
+
+    setCancellingOrderId(orderId);
+    try {
+      const data = await orderFunctions.cancelOrder({
+        order_id: orderId,
+        username: username,
+        cancellation_reason: "Cancelled by user"
+      });
+
+      if (data.success) {
+        setMessage({ text: "Order cancelled successfully", type: "success" });
+        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+        fetchOrders();
+      } else {
+        setMessage({ text: data.message || "Failed to cancel order", type: "error" });
+        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.message || error.message || "Something went wrong";
+      setMessage({ text: errorMessage, type: "error" });
+      setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+    } finally {
+      setCancellingOrderId(null);
+    }
+  };
+
   const handleAddAddress = () => {
     setEditingAddress(null);
     setFormData({
@@ -132,8 +221,13 @@ function AccountPageContent() {
       province: "",
       postalCode: "",
       country: "Philippines",
-      isDefault: false
+      isDefault: false,
+      addressType: "home"
     });
+    setAutoFilledFields({ province: false, country: false });
+    setUseFallbackMode(false);
+    setSelectedProvince("");
+    setSelectedCityFallback("");
     setShowAddressForm(true);
   };
 
@@ -148,8 +242,13 @@ function AccountPageContent() {
       province: address.province || "",
       postalCode: address.postal_code || "",
       country: address.country || "Philippines",
-      isDefault: address.is_default || false
+      isDefault: address.is_default || false,
+      addressType: address.address_type || "home"
     });
+    setAutoFilledFields({ province: false, country: false });
+    setUseFallbackMode(false);
+    setSelectedProvince(address.province || "");
+    setSelectedCityFallback("");
     setShowAddressForm(true);
   };
 
@@ -158,6 +257,7 @@ function AccountPageContent() {
       return;
     }
 
+    setDeletingAddressId(id);
     try {
       const data = await shippingFunctions.deleteAddress(id, username);
 
@@ -173,12 +273,68 @@ function AccountPageContent() {
       const errorMessage = error.response?.message || error.message || "Something went wrong";
       setMessage({ text: errorMessage, type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+    } finally {
+      setDeletingAddressId(null);
     }
+  };
+
+  const handleCitySelect = (locationData) => {
+    if (locationData) {
+      setFormData((prev) => ({
+        ...prev,
+        city: locationData.city || prev.city,
+        province: locationData.province || prev.province,
+        country: locationData.country || prev.country
+      }));
+      setAutoFilledFields({
+        province: !!locationData.province,
+        country: !!locationData.country
+      });
+    }
+  };
+
+  const handleClearAutoFill = (field) => {
+    if (field === "province") {
+      setFormData((prev) => ({ ...prev, province: "" }));
+      setAutoFilledFields((prev) => ({ ...prev, province: false }));
+    } else if (field === "country") {
+      setFormData((prev) => ({ ...prev, country: "Philippines" }));
+      setAutoFilledFields((prev) => ({ ...prev, country: false }));
+    }
+  };
+
+  const handleCountryChange = (e) => {
+    const newCountry = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      country: newCountry,
+      province: "",
+      city: ""
+    }));
+    setSelectedProvince("");
+    setSelectedCityFallback("");
+  };
+
+  const handleProvinceChange = (e) => {
+    const newProvince = e.target.value;
+    setSelectedProvince(newProvince);
+    setFormData((prev) => ({
+      ...prev,
+      province: newProvince,
+      city: ""
+    }));
+    setSelectedCityFallback("");
+  };
+
+  const handleCityChangeFallback = (e) => {
+    const newCity = e.target.value;
+    setSelectedCityFallback(newCity);
+    setFormData((prev) => ({ ...prev, city: newCity }));
   };
 
   const handleSubmitAddress = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSavingAddress(true);
 
     try {
       const body = {
@@ -192,7 +348,8 @@ function AccountPageContent() {
         province: formData.province,
         postalCode: formData.postalCode,
         country: formData.country,
-        isDefault: formData.isDefault
+        isDefault: formData.isDefault,
+        addressType: formData.addressType
       };
 
       const data = editingAddress
@@ -216,8 +373,13 @@ function AccountPageContent() {
           province: "",
           postalCode: "",
           country: "Philippines",
-          isDefault: false
+          isDefault: false,
+          addressType: "home"
         });
+        setAutoFilledFields({ province: false, country: false });
+        setUseFallbackMode(false);
+        setSelectedProvince("");
+        setSelectedCityFallback("");
         fetchAddresses();
       } else {
 
@@ -235,40 +397,62 @@ function AccountPageContent() {
       setMessage({ text: errorMessage, type: "error" });
       setTimeout(() => setMessage({ text: "", type: "" }), 5000);
     } finally {
-      setLoading(false);
+      setSavingAddress(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex">
-      {role === 'seller' || role === 'admin' ? <SellerNavbar /> : <Navbar />}
-      <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-4">
-            <Header />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 max-w-7xl w-full">
-            <div className="mb-4 sm:mb-6 md:mb-8">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent px-1">
-                Manage My Account
-              </h1>
-              <p className="text-gray-600 text-xs sm:text-sm md:text-base mt-2 sm:mt-3 px-1">
-                Manage your shipping addresses and orders
-              </p>
-            </div>
+    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
+      <Suspense fallback={<div className="w-64 bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
+        <UserPortalSidebar />
+      </Suspense>
 
-          {(authLoading || loading) && (
+      <main className="flex-1 ml-64 overflow-auto">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
+          <div className="px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
+                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Totally Normal</span>
+                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Store</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-8">
+          {/* Breadcrumbs */}
+          <div className="mb-4">
+            <nav className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer" onClick={() => router.push("/dashboard")}>Home</span>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900 dark:text-gray-100 font-semibold">My Account</span>
+            </nav>
+          </div>
+
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              My Account
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Manage your shipping addresses and order history
+            </p>
+          </div>
+
+          {authLoading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
-                <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-                <p className="text-gray-600 font-medium">Loading...</p>
+                <div className="h-12 w-12 border-4 border-t-transparent border-blue-500 dark:border-blue-400 rounded-full animate-spin"></div>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
               </div>
             </div>
           )}
 
-          {!authLoading && !loading && (
+          {!authLoading && (
             <>
               {message.text && (
             <div className={`mb-4 sm:mb-6 p-4 sm:p-5 rounded-lg ${
@@ -288,19 +472,20 @@ function AccountPageContent() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8 pb-4 sm:pb-6 border-b border-gray-200">
+          {/* Tabs */}
+          <div className="flex flex-wrap gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => {
                 setActiveTab("addresses");
                 router.push("/account?tab=addresses");
               }}
-              className={`min-h-[44px] px-4 sm:px-5 md:px-6 py-3 sm:py-3.5 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${
+              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
                 activeTab === "addresses"
-                  ? "bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                  ? "bg-orange-500 text-white shadow-md"
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
               }`}
             >
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm sm:text-base" />
+              <FontAwesomeIcon icon={faMapMarkerAlt} />
               <span>Shipping Addresses</span>
             </button>
             <button
@@ -308,28 +493,35 @@ function AccountPageContent() {
                 setActiveTab("orders");
                 router.push("/account?tab=orders");
               }}
-              className={`min-h-[44px] px-4 sm:px-5 md:px-6 py-3 sm:py-3.5 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${
+              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
                 activeTab === "orders"
-                  ? "bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                  ? "bg-orange-500 text-white shadow-md"
+                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
               }`}
             >
-              <FontAwesomeIcon icon={faBox} className="text-sm sm:text-base" />
+              <FontAwesomeIcon icon={faBox} />
               <span>My Orders</span>
+            </button>
+            <button
+              onClick={() => router.push("/account/settings")}
+              className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+            >
+              <FontAwesomeIcon icon={faCog} />
+              <span>Account Settings</span>
             </button>
           </div>
 
           {activeTab === "addresses" && (
             <div className="space-y-4 sm:space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 px-1">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 px-1">
                   Shipping Addresses
                 </h2>
                 <button
                   onClick={handleAddAddress}
-                  className="min-h-[44px] w-full sm:w-auto px-4 sm:px-5 md:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faPlus} className="text-sm sm:text-base" />
+                  <FontAwesomeIcon icon={faPlus} />
                   <span>Add Address</span>
                 </button>
               </div>
@@ -430,38 +622,204 @@ function AccountPageContent() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            City *
-                          </label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <FontAwesomeIcon icon={faCity} className="text-gray-400 text-sm" />
-                            </div>
-                            <input
-                              type="text"
-                              value={formData.city}
-                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Province *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.province}
-                            onChange={(e) => setFormData({ ...formData, province: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                            required
-                          />
-                        </div>
+                      {/* Mode Toggle */}
+                      <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
+                        <span className="text-sm font-medium text-gray-700">Address Input Mode:</span>
+                        <button
+                          type="button"
+                          onClick={() => setUseFallbackMode(false)}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            !useFallbackMode
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          Auto-fill (OpenStreetMap)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUseFallbackMode(true)}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            useFallbackMode
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          Manual Dropdowns
+                        </button>
                       </div>
+
+                      {!useFallbackMode ? (
+                        <>
+                          {/* City Autocomplete Mode */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              City *
+                            </label>
+                            <CityAutocomplete
+                              value={formData.city}
+                              onChange={(value) => setFormData({ ...formData, city: value })}
+                              onCitySelect={handleCitySelect}
+                              placeholder="Search for a city..."
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                              Start typing to search for a city. Province and country will auto-fill.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                Province *
+                                {autoFilledFields.province && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleClearAutoFill("province")}
+                                    className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                    title="Clear auto-filled value"
+                                  >
+                                    <FontAwesomeIcon icon={faUndo} className="text-xs" />
+                                    Clear
+                                  </button>
+                                )}
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.province}
+                                onChange={(e) => {
+                                  setFormData({ ...formData, province: e.target.value });
+                                  setAutoFilledFields((prev) => ({ ...prev, province: false }));
+                                }}
+                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none ${
+                                  autoFilledFields.province
+                                    ? "border-blue-300 bg-blue-50"
+                                    : "border-gray-300"
+                                }`}
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                Country *
+                                {autoFilledFields.country && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleClearAutoFill("country")}
+                                    className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                    title="Clear auto-filled value"
+                                  >
+                                    <FontAwesomeIcon icon={faUndo} className="text-xs" />
+                                    Clear
+                                  </button>
+                                )}
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.country}
+                                onChange={(e) => {
+                                  setFormData({ ...formData, country: e.target.value });
+                                  setAutoFilledFields((prev) => ({ ...prev, country: false }));
+                                }}
+                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none ${
+                                  autoFilledFields.country
+                                    ? "border-blue-300 bg-blue-50"
+                                    : "border-gray-300"
+                                }`}
+                                required
+                              />
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* Fallback Dropdown Mode */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Country *
+                            </label>
+                            <select
+                              value={formData.country}
+                              onChange={handleCountryChange}
+                              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                              required
+                            >
+                              {Object.keys(countryData).map((country) => (
+                                <option key={country} value={country}>
+                                  {country}
+                                </option>
+                              ))}
+                              <option value="Other">Other (Manual Entry)</option>
+                            </select>
+                          </div>
+
+                          {formData.country !== "Other" && countryData[formData.country] && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Province/State *
+                              </label>
+                              <select
+                                value={selectedProvince}
+                                onChange={handleProvinceChange}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                                required
+                              >
+                                <option value="">Select Province/State</option>
+                                {countryData[formData.country].provinces.map((province) => (
+                                  <option key={province} value={province}>
+                                    {province}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          {(formData.country === "Other" || !countryData[formData.country]) && (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  Province/State *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={formData.province}
+                                  onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  City *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={formData.city}
+                                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                                  required
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {formData.country !== "Other" && countryData[formData.country] && selectedProvince && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                City *
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.city}
+                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                                placeholder="Enter city name"
+                                required
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -477,44 +835,63 @@ function AccountPageContent() {
                             required
                           />
                         </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Country *
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.country}
-                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                            required
-                          />
-                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="isDefault"
-                          checked={formData.isDefault}
-                          onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                          className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                        />
-                        <label htmlFor="isDefault" className="text-sm font-medium text-gray-700">
-                          Set as default address
-                        </label>
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="isDefault"
+                            checked={formData.isDefault}
+                            onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <label htmlFor="isDefault" className="text-sm font-medium text-gray-700">
+                            Set as default address
+                          </label>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-medium text-gray-700">Address Type:</span>
+                          <div className="flex items-center gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="addressType"
+                                value="home"
+                                checked={formData.addressType === "home"}
+                                onChange={(e) => setFormData({ ...formData, addressType: e.target.value })}
+                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              />
+                              <FontAwesomeIcon icon={faHome} className="text-gray-600 text-sm" />
+                              <span className="text-sm font-medium text-gray-700">Home</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="addressType"
+                                value="work"
+                                checked={formData.addressType === "work"}
+                                onChange={(e) => setFormData({ ...formData, addressType: e.target.value })}
+                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              />
+                              <FontAwesomeIcon icon={faBriefcase} className="text-gray-600 text-sm" />
+                              <span className="text-sm font-medium text-gray-700">Work</span>
+                            </label>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex gap-3 pt-4">
                         <button
                           type="submit"
-                          disabled={loading}
-                          className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={savingAddress}
+                          className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {loading ? (
+                          {savingAddress ? (
                             <span className="flex items-center justify-center gap-2">
                               <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                              Saving...
+                              {editingAddress ? "Updating..." : "Adding..."}
                             </span>
                           ) : (
                             editingAddress ? "Update Address" : "Add Address"
@@ -526,7 +903,8 @@ function AccountPageContent() {
                             setShowAddressForm(false);
                             setEditingAddress(null);
                           }}
-                          className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-all"
+                          disabled={savingAddress}
+                          className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Cancel
                         </button>
@@ -537,12 +915,12 @@ function AccountPageContent() {
               )}
 
               {addresses.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 md:p-12 text-center">
-                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-4xl sm:text-5xl md:text-6xl text-gray-300 mb-4 sm:mb-6" />
-                  <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-4 sm:mb-6 px-2">No shipping addresses yet</p>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sm:p-8 md:p-12 text-center">
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-4xl sm:text-5xl md:text-6xl text-gray-300 dark:text-gray-600 mb-4 sm:mb-6" />
+                  <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg md:text-xl mb-4 sm:mb-6 px-2">No shipping addresses yet</p>
                   <button
                     onClick={handleAddAddress}
-                    className="min-h-[44px] px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg inline-flex items-center justify-center gap-2"
+                    className="min-h-[44px] px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg inline-flex items-center justify-center gap-2"
                   >
                     <FontAwesomeIcon icon={faPlus} className="text-sm sm:text-base" />
                     <span>Add Your First Address</span>
@@ -560,38 +938,123 @@ function AccountPageContent() {
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      {address.is_default && (
-                        <div className="mb-3 sm:mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-full">
-                          <FontAwesomeIcon icon={faCheck} className="text-xs" />
-                          <span>Default Address</span>
+                      <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
+                        {address.is_default && (
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-full">
+                            <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                            <span>Default Address</span>
+                          </div>
+                        )}
+                        {address.address_type && (
+                          <div className={`inline-flex items-center gap-2 px-3 py-1.5 text-white text-xs sm:text-sm font-semibold rounded-full ${
+                            address.address_type === "work" 
+                              ? "bg-blue-600" 
+                              : "bg-green-600"
+                          }`}>
+                            <FontAwesomeIcon 
+                              icon={address.address_type === "work" ? faBriefcase : faHome} 
+                              className="text-xs" 
+                            />
+                            <span className="capitalize">{address.address_type}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-3 sm:space-y-4 flex-1 mb-4 sm:mb-6">
+                        {/* Full Name */}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center mt-0.5">
+                            <FontAwesomeIcon icon={faUser} className="text-red-600 text-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Recipient Name</p>
+                            <p className="font-bold text-base sm:text-lg md:text-xl text-gray-800 break-words">{address.full_name}</p>
+                          </div>
                         </div>
-                      )}
-                      <div className="space-y-2 sm:space-y-3 flex-1 mb-4 sm:mb-6">
-                        <p className="font-bold text-base sm:text-lg md:text-xl text-gray-800">{address.full_name}</p>
-                        <p className="text-gray-600 text-sm sm:text-base">{address.phone_number}</p>
-                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-                          {address.address_line1}
-                          {address.address_line2 && `, ${address.address_line2}`}
-                        </p>
-                        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-                          {address.city}, {address.province} {address.postal_code}
-                        </p>
-                        <p className="text-gray-700 text-sm sm:text-base">{address.country}</p>
+
+                        {/* Phone Number */}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mt-0.5">
+                            <FontAwesomeIcon icon={faPhone} className="text-blue-600 text-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone Number</p>
+                            <p className="text-gray-700 text-sm sm:text-base break-words">{address.phone_number}</p>
+                          </div>
+                        </div>
+
+                        {/* Address Line 1 */}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                            <FontAwesomeIcon icon={faHome} className="text-green-600 text-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Street Address</p>
+                            <p className="text-gray-700 text-sm sm:text-base leading-relaxed break-words">{address.address_line1}</p>
+                            {address.address_line2 && (
+                              <p className="text-gray-600 text-sm sm:text-base leading-relaxed break-words mt-1">
+                                {address.address_line2}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* City, Province, Postal Code */}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
+                            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-purple-600 text-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Location</p>
+                            <div className="space-y-1">
+                              <p className="text-gray-700 text-sm sm:text-base">
+                                <span className="font-medium">City:</span> {address.city}
+                              </p>
+                              <p className="text-gray-700 text-sm sm:text-base">
+                                <span className="font-medium">Province:</span> {address.province}
+                              </p>
+                              <p className="text-gray-700 text-sm sm:text-base">
+                                <span className="font-medium">Postal Code:</span> {address.postal_code}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Country */}
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center mt-0.5">
+                            <FontAwesomeIcon icon={faGlobe} className="text-orange-600 text-sm" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Country</p>
+                            <p className="text-gray-700 text-sm sm:text-base font-medium">{address.country}</p>
+                          </div>
+                        </div>
                       </div>
                       <div className="flex gap-2 sm:gap-3 mt-auto pt-4 border-t border-gray-200">
                         <button
                           onClick={() => handleEditAddress(address)}
-                          className="min-h-[44px] flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2"
+                          disabled={deletingAddressId === address.id}
+                          className="min-h-[44px] flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <FontAwesomeIcon icon={faEdit} className="text-xs sm:text-sm" />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => handleDeleteAddress(address.id)}
-                          className="min-h-[44px] flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2"
+                          disabled={deletingAddressId === address.id}
+                          className="min-h-[44px] flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <FontAwesomeIcon icon={faTrash} className="text-xs sm:text-sm" />
-                          <span>Delete</span>
+                          {deletingAddressId === address.id ? (
+                            <>
+                              <FontAwesomeIcon icon={faSpinner} className="text-xs sm:text-sm animate-spin" />
+                              <span>Deleting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FontAwesomeIcon icon={faTrash} className="text-xs sm:text-sm" />
+                              <span>Delete</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -613,87 +1076,117 @@ function AccountPageContent() {
 
           {activeTab === "orders" && (
             <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 px-1">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 sm:mb-6 px-1">
                 My Orders
               </h2>
 
               {orders.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 md:p-12 text-center">
-                  <FontAwesomeIcon icon={faBox} className="text-4xl sm:text-5xl md:text-6xl text-gray-300 mb-4 sm:mb-6" />
-                  <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-4 sm:mb-6 px-2">No orders yet</p>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
+                  <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FontAwesomeIcon icon={faBox} className="text-5xl text-gray-400 dark:text-gray-500" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                    No orders yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Start shopping to see your orders here
+                  </p>
                   <button
                     onClick={() => router.push("/dashboard")}
-                    className="min-h-[44px] mt-4 sm:mt-6 px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg"
+                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
                   >
                     Start Shopping
                   </button>
                 </div>
               ) : (
                 <>
-                <div className="space-y-4 sm:space-y-5 md:space-y-6">
+                <div className="space-y-6">
                   {paginatedOrders.map((order) => (
                     <div
                       key={order.id}
-                      className="bg-white rounded-xl shadow-md p-4 sm:p-5 md:p-6 border border-gray-200 hover:shadow-lg transition-all"
+                      className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-3 sm:gap-4">
-                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
-                              {order.id_url ? (
-                                <img
-                                  src={order.id_url || '/placeholder-image.jpg'}
-                                  alt={order.product_name}
-                                  className="absolute inset-0 w-full h-full object-cover"
-                                  style={{ minHeight: '100%', minWidth: '100%' }}
-                                  onError={(e) => {
-                                    e.target.src = '/placeholder-image.jpg';
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                  <FontAwesomeIcon icon={faBox} className="text-gray-400 text-xl sm:text-2xl" />
-                                </div>
-                              )}
+                      <div className="flex items-start gap-6">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                          {order.id_url ? (
+                            <img
+                              src={order.id_url || '/placeholder-image.jpg'}
+                              alt={order.product_name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.src = '/placeholder-image.jpg';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <FontAwesomeIcon icon={faBox} className="text-gray-400 dark:text-gray-500 text-2xl" />
                             </div>
-                            <div className="flex-1 min-w-0 space-y-2 sm:space-y-3">
-                              <h3 className="font-bold text-base sm:text-lg md:text-xl text-gray-800 line-clamp-2">
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-2">
                                 {order.product_name}
                               </h3>
-                              <p className="text-gray-600 text-xs sm:text-sm">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                                 Seller: <span className="font-medium">{order.seller_username}</span>
                               </p>
-                              <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
-                                <span className="text-gray-600">
-                                  Quantity: <span className="font-semibold">{order.quantity}</span>
-                                </span>
-                                <span className="text-gray-600">
-                                  Price: <span className="font-semibold">₱{formatPrice(order.price)}</span>
-                                </span>
-                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Order Date: <span className="font-medium">{new Date(order.created_at).toLocaleDateString()}</span>
+                              </p>
+                            </div>
+                            <div className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap ${
+                              order.status === "pending"
+                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                                : order.status === "shipped"
+                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                                : order.status === "delivered"
+                                ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                                : order.status === "cancelled"
+                                ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                                : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                            }`}>
+                              {order.status.toUpperCase()}
                             </div>
                           </div>
-                        </div>
-                        <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 md:gap-3">
-                          <div className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap ${
-                            order.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : order.status === "shipped"
-                              ? "bg-blue-100 text-blue-800"
-                              : order.status === "delivered"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}>
-                            {order.status.toUpperCase()}
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+                              <span>
+                                Quantity: <span className="font-semibold text-gray-900 dark:text-gray-100">{order.quantity}</span>
+                              </span>
+                              <span>
+                                Unit Price: <span className="font-semibold text-gray-900 dark:text-gray-100">₱{formatPrice(order.price)}</span>
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Amount</p>
+                              <p className="text-2xl font-bold text-orange-500">
+                                ₱{formatPrice(order.total_amount)}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right sm:text-left">
-                            <p className="text-base sm:text-lg md:text-xl font-bold text-red-600 mb-1">
-                              ₱{formatPrice(order.total_amount)}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(order.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
+                          {order.status === "pending" && (
+                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                              <button
+                                onClick={() => handleCancelOrder(order.id)}
+                                disabled={cancellingOrderId === order.id}
+                                className="px-4 py-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {cancellingOrderId === order.id ? (
+                                  <>
+                                    <FontAwesomeIcon icon={faSpinner} className="text-sm animate-spin" />
+                                    <span>Cancelling...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <FontAwesomeIcon icon={faTimes} className="text-sm" />
+                                    <span>Cancel Order</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -714,7 +1207,6 @@ function AccountPageContent() {
           )}
             </>
           )}
-          </div>
         </div>
       </main>
     </div>
@@ -724,7 +1216,7 @@ function AccountPageContent() {
 export default function AccountPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">Loading...</p>

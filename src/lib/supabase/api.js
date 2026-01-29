@@ -34,6 +34,11 @@ async function callApi(endpoint, options = {}) {
   }
   return data;
 }
+export const userFunctions = {
+  async getProfile() {
+    return callApi("/api/user/profile");
+  },
+};
 export const authFunctions = {
   async login({ email, password }) {
     return callApi('/api/login', {
@@ -121,6 +126,9 @@ export const cartFunctions = {
       method: 'DELETE',
     });
   },
+  async clearCart() {
+    return callApi('/api/clearCart', { method: 'DELETE' });
+  },
 };
 export const orderFunctions = {
   async getOrders(username) {
@@ -132,21 +140,39 @@ export const orderFunctions = {
       body: { username, items, shipping_address_id, payment_method, delivery_option },
     });
   },
+  async cancelOrder({ order_id, username, cancellation_reason }) {
+    return callApi('/api/orders/cancel', {
+      method: 'POST',
+      body: { order_id, username, cancellation_reason },
+    });
+  },
+};
+
+export const sellerOrderFunctions = {
+  async getSellerOrders(sellerUsername, status = 'all') {
+    return callApi(`/api/sellers/getOrders?seller_username=${encodeURIComponent(sellerUsername)}&status=${encodeURIComponent(status)}`);
+  },
+  async updateOrderStatus({ order_id, status, tracking_number }) {
+    return callApi('/api/sellers/updateOrderStatus', {
+      method: 'PATCH',
+      body: { order_id, status, tracking_number },
+    });
+  },
 };
 export const shippingFunctions = {
   async getAddresses(username) {
     return callApi(`/api/shipping-addresses?username=${encodeURIComponent(username)}`);
   },
-  async addAddress({ username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault }) {
+  async addAddress({ username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType }) {
     return callApi('/api/shipping-addresses', {
       method: 'POST',
-      body: { username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault },
+      body: { username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType },
     });
   },
-  async updateAddress({ id, username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault }) {
+  async updateAddress({ id, username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType }) {
     return callApi('/api/shipping-addresses', {
       method: 'PUT',
-      body: { id, username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault },
+      body: { id, username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType },
     });
   },
   async deleteAddress(id, username) {

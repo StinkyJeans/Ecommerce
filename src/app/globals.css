@@ -1,22 +1,39 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (toggle) instead of prefers-color-scheme */
+@custom-variant dark (&&:where(.dark, .dark *));
+
+/*
+ * Design palette: white page, white cards, dark charcoal sidebar/text,
+ * golden orange (#FFBF00) accent for CTAs/active/highlights,
+ * light gray borders (#E0E0E0), blue (#2F79F4) for secondary links.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page: #FFFFFF;
+  --card: #FFFFFF;
+  --ink: #2C2C2C;
+  --ink-muted: #666666;
+  --accent: #FFBF00;
+  --accent-blue: #2F79F4;
+  --border: #E0E0E0;
+  --success: #4CAF50;
+  --error: #F44336;
+  --info-bg: #FFF8E1;
+  --info-border: #FFDA6A;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-page: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-ink: #2C2C2C;
+  --color-ink-muted: #666666;
+  --color-accent: #FFBF00;
+  --color-accent-blue: #2F79F4;
+  --color-border: #E0E0E0;
+  --color-success: #4CAF50;
+  --color-error: #F44336;
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
 }
 
 * {
@@ -26,15 +43,27 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  background: #FFFFFF;
+}
+
+html.dark {
+  background: #1a1a1a;
 }
 
 body {
-  background: linear-gradient(to bottom right, #fef2f2, #ffffff, #fef2f2);
-  color: #171717;
+  background: #FFFFFF;
+  color: var(--ink);
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body,
+.dark body {
+  background: #1a1a1a;
+  color: #e5e5e5;
 }
 
 img {
@@ -99,4 +128,33 @@ svg {
   );
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
+}
+
+/* Optimize animations for performance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optimize font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Image optimization */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }

@@ -14,19 +14,28 @@ export async function GET(req) {
     const verify = await verifyRequestSignature(req, null, userData.id);
     if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
-    const username = sanitizeString(searchParams.get('username'), 50);
+    let username = sanitizeString(searchParams.get('username'), 50);
+    
+    // If no username in query, use authenticated user's username
+    if (!username) {
+      username = userData.username;
+    }
+    
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
+    
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
+    
     const supabase = await createClient();
+    // Use authenticated user's username to ensure consistency
     const { data: cart, error } = await supabase
       .from('cart_items')
       .select('*')
-      .eq('username', username)
+      .eq('username', userData.username)
       .order('created_at', { ascending: false });
     if (error) {
       return handleError(error, 'getCart');

@@ -16,11 +16,13 @@ import {
   faCalendar,
   faSpinner,
   faSearch,
-  faIdCard,
+  faFileAlt,
   faEye,
   faCheckCircle,
-  faClock,
-  faTimes
+  faTimes,
+  faFilter,
+  faChevronLeft,
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function AdminViewSellers() {
@@ -31,12 +33,12 @@ export default function AdminViewSellers() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSeller, setSelectedSeller] = useState(null);
-  const [showIdModal, setShowIdModal] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 4;
 
-  useLoadingFavicon(authLoading || loading, "View Sellers");
+  useLoadingFavicon(authLoading || loading, "Seller Approvals");
 
   useEffect(() => {
     if (!authLoading) {
@@ -52,7 +54,11 @@ export default function AdminViewSellers() {
     let filtered = sellers;
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter((seller) => seller.seller_status === statusFilter);
+      if (statusFilter === "pending") {
+        filtered = filtered.filter((seller) => seller.seller_status === 'pending' || seller.seller_status === null);
+      } else {
+        filtered = filtered.filter((seller) => seller.seller_status === statusFilter);
+      }
     }
 
     if (searchTerm.trim() !== "") {
@@ -94,24 +100,24 @@ export default function AdminViewSellers() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      approved: "bg-green-100 text-green-800 border-green-300",
-      rejected: "bg-red-100 text-red-800 border-red-300",
-    };
-    return badges[status] || "bg-gray-100 text-gray-800 border-gray-300";
+  const handleApprove = async (sellerId) => {
+    // TODO: Implement approve functionality
+    console.log("Approve seller:", sellerId);
   };
 
-  const getStatusIcon = (status) => {
-    if (status === "approved") return faCheckCircle;
-    if (status === "rejected") return faTimes;
-    return faClock;
+  const handleReject = async (sellerId) => {
+    // TODO: Implement reject functionality
+    console.log("Reject seller:", sellerId);
   };
 
-  const viewIdPicture = (seller) => {
+  const openApplicationDetails = (seller) => {
     setSelectedSeller(seller);
-    setShowIdModal(true);
+    setShowDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedSeller(null);
   };
 
   if (role !== "admin" && !authLoading) {
@@ -120,231 +126,346 @@ export default function AdminViewSellers() {
 
   const statusCounts = {
     all: sellers.length,
-    pending: sellers.filter(s => s.seller_status === 'pending').length,
+    pending: sellers.filter(s => s.seller_status === 'pending' || s.seller_status === null).length,
     approved: sellers.filter(s => s.seller_status === 'approved').length,
     rejected: sellers.filter(s => s.seller_status === 'rejected').length,
   };
 
-   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
-      </div>
-
+  return (
+    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
       <AdminNavbar />
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
         {authLoading || loading ? (
-          <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+          <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Loading sellers...</p>
+              <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Loading sellers...</p>
             </div>
           </div>
         ) : (
-          <>
-            <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-              <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
-                  <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
-                      View Sellers
-                    </h1>
-                    <p className="text-gray-600">Manage and view all registered sellers</p>
-                  </div>
-                  <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200">
-                    <FontAwesomeIcon icon={faStore} className="text-red-600" />
-                    <span className="font-semibold text-gray-800">{sellers.length}</span>
-                    <span className="text-gray-600">Sellers</span>
-                  </div>
-                </div>
+          <div className="p-8">
+            {/* Breadcrumbs */}
+            <div className="mb-4">
+              <nav className="text-sm text-gray-500 dark:text-gray-400">
+                <span>Admin Portal</span>
+                <span className="mx-2">/</span>
+                <span>Seller Management</span>
+                <span className="mx-2">/</span>
+                <span className="text-gray-900 dark:text-gray-100 font-medium">Approvals</span>
+              </nav>
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-4">
-              <div className="relative flex-1">
+            {/* Page Header */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Seller Approval Management
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Review and manage pending seller registration requests to maintain marketplace quality.
+              </p>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="mb-6 space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
+                  <FontAwesomeIcon icon={faSearch} className="text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
-                  placeholder="Search by username, email, or contact..."
+                  placeholder="Search by applicant or store name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none bg-white"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setStatusFilter("all")}
-                  className={`px-4 py-3 rounded-lg font-semibold transition-all border ${
-                    statusFilter === "all"
-                      ? "bg-gradient-to-r from-red-600 to-orange-600 text-white border-transparent"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  All ({statusCounts.all})
-                </button>
+              {/* Filter Buttons */}
+              <div className="flex gap-3 flex-wrap">
                 <button
                   onClick={() => setStatusFilter("pending")}
-                  className={`px-4 py-3 rounded-lg font-semibold transition-all border ${
+                  className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
                     statusFilter === "pending"
-                      ? "bg-yellow-500 text-white border-transparent"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  Pending ({statusCounts.pending})
+                  Pending
                 </button>
                 <button
                   onClick={() => setStatusFilter("approved")}
-                  className={`px-4 py-3 rounded-lg font-semibold transition-all border ${
+                  className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
                     statusFilter === "approved"
-                      ? "bg-green-500 text-white border-transparent"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  Approved ({statusCounts.approved})
+                  Approved
                 </button>
                 <button
                   onClick={() => setStatusFilter("rejected")}
-                  className={`px-4 py-3 rounded-lg font-semibold transition-all border ${
+                  className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
                     statusFilter === "rejected"
-                      ? "bg-red-500 text-white border-transparent"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                      ? "bg-orange-500 text-white shadow-md"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  Rejected ({statusCounts.rejected})
+                  Rejected
+                </button>
+                <button
+                  className="px-5 py-2.5 rounded-xl font-semibold transition-all bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faFilter} className="text-sm" />
+                  More Filters
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
-          {filteredSellers.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 text-center">
-              <FontAwesomeIcon icon={faStore} className="text-gray-400 text-5xl mb-4" />
-              <p className="text-gray-600 text-lg font-semibold">
-                {searchTerm || statusFilter !== "all" ? "No sellers found" : "No sellers registered yet"}
-              </p>
-              <p className="text-gray-500 text-sm mt-2">
-                {searchTerm || statusFilter !== "all" ? "Try adjusting your filters" : "Sellers will appear here once they register"}
-              </p>
-            </div>
-          ) : (
-            <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-              {paginatedSellers.map((seller) => (
-                <div key={seller.id} className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg">
-                          {seller.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-sm sm:text-base md:text-lg text-gray-800">{seller.username}</h3>
-                          <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${getStatusBadge(seller.seller_status)}`}>
-                            <FontAwesomeIcon icon={getStatusIcon(seller.seller_status)} className="text-xs" />
-                            <span className="capitalize">{seller.seller_status || "pending"}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-1 text-sm text-gray-600 mt-3">
-                        <div className="flex items-center gap-2">
-                          <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
-                          <span className="truncate">{seller.email}</span>
-                        </div>
-                        {seller.contact && (
-                          <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
-                            <span>{seller.contact}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <FontAwesomeIcon icon={faCalendar} className="text-gray-400" />
-                          <span>{new Date(seller.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
+            {/* Table */}
+            {filteredSellers.length === 0 ? (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
+                <FontAwesomeIcon icon={faStore} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
+                <p className="text-gray-600 dark:text-gray-300 text-lg font-semibold">
+                  {searchTerm || statusFilter !== "all" ? "No sellers found" : "No sellers registered yet"}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+                  {searchTerm || statusFilter !== "all" ? "Try adjusting your filters" : "Sellers will appear here once they register"}
+                </p>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {/* Table Header */}
+                <div className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <div className="col-span-3">APPLICANT</div>
+                    <div className="col-span-2">STORE NAME</div>
+                    <div className="col-span-2">APPLICATION DATE</div>
+                    <div className="col-span-2">DOCUMENTS</div>
+                    <div className="col-span-3">ACTIONS</div>
                   </div>
+                </div>
 
-                  {seller.id_url && (
-                    <div className="mb-4">
-                      <button
-                        onClick={() => viewIdPicture(seller)}
-                        className="w-full relative group"
-                      >
-                        <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
-                          <img
-                            src={getImageUrl(seller.id_url, 'seller-ids')}
-                            alt="ID Preview"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              e.target.src = '/placeholder-image.jpg';
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                                <FontAwesomeIcon icon={faEye} className="text-red-600 text-xl" />
-                              </div>
-                              <p className="text-white text-sm mt-2 font-medium">View ID</p>
-                            </div>
+                {/* Table Body */}
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {paginatedSellers.map((seller) => (
+                    <div key={seller.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* APPLICANT */}
+                        <div className="col-span-3 flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-full flex items-center justify-center text-white font-semibold">
+                            {seller.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{seller.username}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{seller.email}</p>
                           </div>
                         </div>
-                      </button>
+
+                        {/* STORE NAME */}
+                        <div className="col-span-2">
+                          <p className="text-gray-900 dark:text-gray-100">{seller.username}'s Store</p>
+                        </div>
+
+                        {/* APPLICATION DATE */}
+                        <div className="col-span-2">
+                          <p className="text-gray-700 dark:text-gray-300">
+                            {new Date(seller.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </div>
+
+                        {/* DOCUMENTS */}
+                        <div className="col-span-2">
+                          {seller.id_url ? (
+                            <button
+                              onClick={() => openApplicationDetails(seller)}
+                              className="flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors font-medium"
+                            >
+                              <FontAwesomeIcon icon={faFileAlt} />
+                              <span className="text-sm">View Docs</span>
+                            </button>
+                          ) : (
+                            <span className="text-gray-400 dark:text-gray-500 text-sm">No documents</span>
+                          )}
+                        </div>
+
+                        {/* ACTIONS */}
+                        <div className="col-span-3 flex items-center gap-2">
+                          <button
+                            onClick={() => openApplicationDetails(seller)}
+                            className="px-3 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <FontAwesomeIcon icon={faEye} />
+                            View Details
+                          </button>
+                          <button
+                            onClick={() => handleApprove(seller.id)}
+                            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold text-sm transition-colors shadow-sm hover:shadow-md"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(seller.id)}
+                            className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
-            {totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={filteredSellers.length}
-              />
+              </div>
             )}
-            </>
-          )}
-        </div>
-          </>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing <span className="font-semibold text-gray-900 dark:text-gray-100">{paginatedSellers.length}</span> of{" "}
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{statusCounts.pending}</span> pending applications
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-xl font-semibold transition-all min-w-[40px] ${
+                        currentPage === page
+                          ? "bg-orange-500 text-white shadow-md"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} className="text-sm" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </main>
 
-      {showIdModal && selectedSeller && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] overflow-auto relative m-2 sm:m-0 shadow-2xl">
-            <button
-              onClick={() => {
-                setShowIdModal(false);
-                setSelectedSeller(null);
-              }}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
-            >
-              <FontAwesomeIcon icon={faTimes} className="text-gray-600 text-sm sm:text-base" />
-            </button>
-            <div className="p-4 sm:p-5">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3">ID Verification - {selectedSeller.username}</h3>
-              <div className="mb-3 space-y-1.5 text-xs sm:text-sm text-gray-600">
-                <p><strong>Email:</strong> <span className="break-words">{selectedSeller.email}</span></p>
-                {selectedSeller.contact && <p><strong>Contact:</strong> {selectedSeller.contact}</p>}
-                <p><strong>Status:</strong> <span className="capitalize">{selectedSeller.seller_status || "pending"}</span></p>
-                <p><strong>Registered:</strong> {new Date(selectedSeller.created_at).toLocaleString()}</p>
+      {/* Application Details Modal */}
+      {showDetailsModal && selectedSeller && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto relative shadow-2xl border border-gray-200 dark:border-gray-700">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Application Details</h2>
+              <button
+                onClick={closeDetailsModal}
+                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
+                aria-label="Close"
+              >
+                <FontAwesomeIcon icon={faTimes} className="text-gray-600 dark:text-gray-300" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Applicant */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Applicant</h3>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {selectedSeller.username?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-bold text-gray-900 dark:text-gray-100 text-lg">{selectedSeller.username}</p>
+                    <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                      <FontAwesomeIcon icon={faEnvelope} className="text-orange-500 w-4" />
+                      {selectedSeller.email}
+                    </p>
+                    {selectedSeller.contact && (
+                      <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <FontAwesomeIcon icon={faPhone} className="text-orange-500 w-4" />
+                        {selectedSeller.contact}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              {selectedSeller.id_url && (
-                <div className="border-2 border-gray-200 rounded-lg overflow-hidden mb-4">
-                  <img
-                    src={getImageUrl(selectedSeller.id_url, 'seller-ids')}
-                    alt="ID Document"
-                    className="w-full h-auto max-h-[50vh] object-contain"
-                    onError={(e) => {
-                      e.target.src = '/placeholder-image.jpg';
-                    }}
-                  />
+
+              {/* Store & Date */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Store Name</h3>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium">{selectedSeller.username}'s Store</p>
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Application Date</h3>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCalendar} className="text-orange-500" />
+                    {new Date(selectedSeller.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</h3>
+                <span className={`inline-flex px-4 py-2 rounded-xl text-sm font-semibold capitalize ${
+                  (selectedSeller.seller_status || 'pending') === 'approved'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                    : (selectedSeller.seller_status || 'pending') === 'rejected'
+                    ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                }`}>
+                  {selectedSeller.seller_status || 'pending'}
+                </span>
+              </div>
+
+              {/* Documents */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faFileAlt} className="text-orange-500" />
+                  ID / Business Document
+                </h3>
+                {selectedSeller.id_url ? (
+                  <div className="border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900/50">
+                    <img
+                      src={getImageUrl(selectedSeller.id_url, 'seller-ids') || selectedSeller.id_url}
+                      alt="ID Document"
+                      className="w-full h-auto max-h-[40vh] object-contain"
+                      onError={(e) => { e.target.src = '/placeholder-image.jpg'; }}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm py-4">No document uploaded</p>
+                )}
+              </div>
+
+              {/* Actions */}
+              {(selectedSeller.seller_status === 'pending' || selectedSeller.seller_status == null) && (
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => { handleApprove(selectedSeller.id); closeDetailsModal(); }}
+                    className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <FontAwesomeIcon icon={faCheckCircle} />
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => { handleReject(selectedSeller.id); closeDetailsModal(); }}
+                    className="flex-1 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                    Reject
+                  </button>
                 </div>
               )}
             </div>

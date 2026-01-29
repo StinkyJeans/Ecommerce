@@ -46,60 +46,93 @@ export async function GET(req) {
     }
     const verify = await verifyRequestSignature(req, null, userData.id);
     if (!verify.valid) return verify.response;
-    const { count: totalUsers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'user');
-    const { count: totalSellers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'seller');
-    const { count: approvedSellers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'seller')
-      .eq('seller_status', 'approved');
-    const { count: pendingSellers } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('role', 'seller')
-      .eq('seller_status', 'pending');
-    const { count: totalProducts } = await supabase
+    
+    // Execute all count queries
+    const [usersResult, sellersResult, approvedResult, pendingStatusResult, nullStatusResult] = await Promise.all([
+      supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'user'),
+      supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'seller'),
+      supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'seller')
+        .eq('seller_status', 'approved'),
+      supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'seller')
+        .eq('seller_status', 'pending'),
+      supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'seller')
+        .is('seller_status', null)
+    ]);
+    
+    const totalUsers = usersResult.count || 0;
+    const totalSellers = sellersResult.count || 0;
+    const approvedSellers = approvedResult.count || 0;
+    const pendingSellers = (pendingStatusResult.count || 0) + (nullStatusResult.count || 0);
+    // Get products count
+    const productsResult = await supabase
       .from('products')
       .select('*', { count: 'exact', head: true });
+    const totalProducts = productsResult.count || 0;
+    
+    // Get visits data
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const { count: totalVisits } = await supabase
-      .from('website_visits')
-      .select('*', { count: 'exact', head: true });
-    const { data: dailyVisits, error: visitsError } = await supabase
-      .from('website_visits')
-      .select('created_at')
-      .gte('created_at', thirtyDaysAgo.toISOString())
-      .order('created_at', { ascending: true });
-    const { data: uniqueVisitorsData } = await supabase
-      .from('website_visits')
-      .select('visitor_id')
-      .gte('created_at', thirtyDaysAgo.toISOString())
-      .not('visitor_id', 'is', null);
-    const uniqueVisitors = uniqueVisitorsData 
+    
+    const [visitsResult, dailyVisitsResult, uniqueVisitorsResult, pageViewsResult] = await Promise.all([
+      supabase
+        .from('website_visits')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('website_visits')
+        .select('created_at')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('website_visits')
+        .select('visitor_id')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .not('visitor_id', 'is', null),
+      supabase
+        .from('website_visits')
+        .select('page_path')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+    ]);
+    
+    const totalVisits = visitsResult.count || 0;
+    const dailyVisits = dailyVisitsResult.data || [];
+    const uniqueVisitorsData = uniqueVisitorsResult.data || [];
+    const pageViewsData = pageViewsResult.data || [];
+    
+    const uniqueVisitors = uniqueVisitorsData.length > 0
       ? new Set(uniqueVisitorsData.map(v => v.visitor_id)).size 
       : 0;
-    const { data: pageViewsData } = await supabase
-      .from('website_visits')
-      .select('page_path')
-      .gte('created_at', thirtyDaysAgo.toISOString());
+    
     const pageViews = {};
-    if (pageViewsData) {
+    if (pageViewsData && pageViewsData.length > 0) {
       pageViewsData.forEach(visit => {
-        pageViews[visit.page_path] = (pageViews[visit.page_path] || 0) + 1;
+        if (visit.page_path) {
+          pageViews[visit.page_path] = (pageViews[visit.page_path] || 0) + 1;
+        }
       });
     }
+    
     const dailyVisitsGrouped = {};
-    if (dailyVisits) {
+    if (dailyVisits && dailyVisits.length > 0) {
       dailyVisits.forEach(visit => {
-        const date = new Date(visit.created_at).toISOString().split('T')[0];
-        dailyVisitsGrouped[date] = (dailyVisitsGrouped[date] || 0) + 1;
+        if (visit.created_at) {
+          const date = new Date(visit.created_at).toISOString().split('T')[0];
+          dailyVisitsGrouped[date] = (dailyVisitsGrouped[date] || 0) + 1;
+        }
       });
     }
     const dailyVisitsArray = Object.entries(dailyVisitsGrouped)
@@ -130,4 +163,4 @@ export async function GET(req) {
   } catch (err) {
     return handleError(err, 'getStatistics');
   }
-}
+}

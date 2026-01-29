@@ -13,7 +13,7 @@ export async function PUT(req) {
     const { userData } = authResult;
     const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
     if (verifyError) return verifyError;
-    const { productId, productName, description, price, category, idUrl, username } = body;
+    const { productId, productName, description, price, category, idUrl, username, stockQuantity, isAvailable } = body;
     if (!productId || !productName || !description || !price || !category || !username) {
       return createValidationErrorResponse("All fields are required");
     }
@@ -41,14 +41,35 @@ export async function PUT(req) {
       return createValidationErrorResponse("Invalid image URL format");
     }
     const supabase = await createClient();
+    
+    // Convert price to numeric
+    const numericPrice = typeof price === 'number' ? price : parseFloat(price);
+    
     const updateData = {
       product_name: sanitizedProductName,
       description: sanitizedDescription,
-      price: typeof price === 'number' ? price.toString() : price,
+      price: numericPrice,
       category: sanitizedCategory,
     };
+    
     if (idUrl) {
       updateData.id_url = idUrl;
+    }
+    
+    // Update stock fields if provided
+    if (stockQuantity !== undefined && stockQuantity !== null) {
+      const stockQty = parseInt(stockQuantity, 10);
+      if (!isNaN(stockQty) && stockQty >= 0) {
+        updateData.stock_quantity = stockQty;
+        // Auto-update availability if not explicitly set
+        if (isAvailable === undefined) {
+          updateData.is_available = stockQty > 0;
+        }
+      }
+    }
+    
+    if (isAvailable !== undefined) {
+      updateData.is_available = Boolean(isAvailable);
     }
     const { data: updatedProduct, error } = await supabase
       .from('products')
@@ -76,4 +97,4 @@ export async function PUT(req) {
   } catch (err) {
     return handleError(err, 'updateProduct');
   }
-}
+}

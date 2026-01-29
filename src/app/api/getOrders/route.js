@@ -31,35 +31,31 @@ export async function GET(req) {
     if (error) {
       return handleError(error, 'getOrders');
     }
-    const ordersWithImages = await Promise.all(
-      (orders || []).map(async (order) => {
-        if (order.id_url) {
-          return order;
-        }
-        try {
-          const { data: product, error: productError } = await supabase
-            .from('products')
-            .select('id_url')
-            .eq('product_id', order.product_id)
-            .single();
-          if (productError) {
-            return {
-              ...order,
-              id_url: null,
-            };
-          }
-          return {
-            ...order,
-            id_url: product?.id_url || null,
-          };
-        } catch (err) {
-          return {
-            ...order,
-            id_url: null,
-          };
-        }
-      })
-    );
+    
+    // Optimize: Batch fetch all missing product images in one query instead of N queries
+    const ordersWithoutImages = (orders || []).filter(order => !order.id_url);
+    const productIds = [...new Set(ordersWithoutImages.map(order => order.product_id))];
+    
+    let productImageMap = {};
+    if (productIds.length > 0) {
+      const { data: products } = await supabase
+        .from('products')
+        .select('product_id, id_url')
+        .in('product_id', productIds);
+      
+      if (products) {
+        productImageMap = products.reduce((acc, product) => {
+          acc[product.product_id] = product.id_url;
+          return acc;
+        }, {});
+      }
+    }
+    
+    // Map images to orders efficiently
+    const ordersWithImages = (orders || []).map(order => ({
+      ...order,
+      id_url: order.id_url || productImageMap[order.product_id] || null
+    }));
     return NextResponse.json({ 
       orders: ordersWithImages || [],
       count: ordersWithImages?.length || 0 

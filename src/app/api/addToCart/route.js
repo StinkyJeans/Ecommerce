@@ -51,14 +51,52 @@ export async function POST(req) {
       return createValidationErrorResponse("Quantity must be a positive integer");
     }
     const supabase = await createClient();
+    
+    // Check product exists and stock availability
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('stock_quantity, is_available, price')
+      .eq('product_id', product_id)
+      .single();
+    
+    if (productError || !product) {
+      return NextResponse.json({
+        message: "Product not found or no longer available",
+        success: false
+      }, { status: 404 });
+    }
+    
+    if (!product.is_available) {
+      return NextResponse.json({
+        message: "Product is currently unavailable",
+        success: false
+      }, { status: 400 });
+    }
+    
+    const requestedQuantity = quantity || 1;
+    const availableStock = product.stock_quantity || 0;
+    
+    // Check existing cart quantity
     const { data: existing, error: fetchError } = await supabase
       .from('cart_items')
       .select('*')
       .eq('username', username)
       .eq('product_id', product_id)
       .single();
+    
+    const currentCartQuantity = existing && !fetchError ? existing.quantity : 0;
+    const totalRequestedQuantity = currentCartQuantity + requestedQuantity;
+    
+    if (availableStock < totalRequestedQuantity) {
+      return NextResponse.json({
+        message: `Insufficient stock. Available: ${availableStock}, Requested: ${totalRequestedQuantity}`,
+        success: false,
+        available_stock: availableStock
+      }, { status: 400 });
+    }
+    
     if (existing && !fetchError) {
-      const newQuantity = existing.quantity + (quantity || 1);
+      const newQuantity = existing.quantity + requestedQuantity;
       const { data: updated, error: updateError } = await supabase
         .from('cart_items')
         .update({ quantity: newQuantity })
@@ -74,7 +112,9 @@ export async function POST(req) {
         quantity: updated.quantity
       }, { status: 200 });
     }
-    const priceString = typeof price === 'number' ? price.toString() : price;
+    // Use current product price from database
+    const currentPrice = parseFloat(product.price) || parseFloat(price);
+    const priceString = typeof currentPrice === 'number' ? currentPrice.toString() : currentPrice;
     const { data: cartItem, error: insertError } = await supabase
       .from('cart_items')
       .insert({

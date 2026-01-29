@@ -3,6 +3,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 config.autoAddCss = false;
 
@@ -30,16 +31,28 @@ export const metadata = {
 
 import VisitTracker from "./components/VisitTracker";
 
+const themeScript = `(function(){
+  var d=document.documentElement;
+  var t=localStorage.getItem('theme');
+  var p=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  d.classList.toggle('dark',t==='dark'||(!t&&p));
+})();`;
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
       >
-        <AuthProvider>
-          <VisitTracker />
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <VisitTracker />
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

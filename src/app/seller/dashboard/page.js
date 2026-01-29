@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import ProductImage from "@/app/components/ProductImage";
-
+import { useEffect, useState, Suspense, useCallback } from "react";
+import dynamic from "next/dynamic";
 import SearchBar from "@/app/components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -12,23 +10,25 @@ import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-  faPlus, 
-  faMinus, 
   faTh, 
   faList, 
-  faSearch, 
-  faEye, 
-  faTimes, 
-  faAlignLeft, 
-  faShoppingCart, 
-  faCheckCircle, 
-  faTag, 
-  faCalculator, 
-  faSpinner, 
-  faCartPlus 
+  faSearch,
+  faEye
 } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/app/components/header";
 import Navbar from "../components/sellerNavbar";
+import { ProductGridSkeleton } from "@/app/components/ProductSkeleton";
+
+// Lazy load components
+const ProductCard = dynamic(() => import("@/app/components/ProductCard"), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-2xl h-96" />,
+  ssr: false
+});
+
+const ProductModal = dynamic(() => import("@/app/components/ProductModal"), {
+  loading: () => null,
+  ssr: false
+});
 
 export default function Dashboard() {
   const [products, setProducts] = useState([]);
@@ -130,8 +130,8 @@ export default function Dashboard() {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
-  const handleAddToCart = async () => {
-    if (!selectedProduct) return;
+  const handleAddToCart = useCallback(async (product, qty = quantity) => {
+    if (!product) return;
 
     if (!username) {
       setCartMessage("login");
@@ -140,16 +140,17 @@ export default function Dashboard() {
     }
 
     setAddingToCart(true);
+    setSelectedProduct(product);
 
     try {
       const data = await cartFunctions.addToCart({
         username,
-        productId: selectedProduct.product_id || selectedProduct.productId,
-        productName: selectedProduct.product_name || selectedProduct.productName,
-        description: selectedProduct.description,
-        price: selectedProduct.price,
-        idUrl: selectedProduct.id_url || selectedProduct.idUrl,
-        quantity: quantity,
+        productId: product.product_id || product.productId,
+        productName: product.product_name || product.productName,
+        description: product.description,
+        price: product.price,
+        idUrl: product.id_url || product.idUrl,
+        quantity: qty,
       });
 
       if (data.success) {
@@ -172,7 +173,7 @@ export default function Dashboard() {
     } finally {
       setAddingToCart(false);
     }
-  };
+  }, [username, quantity]);
 
   const closePopup = () => {
     setPopupVisible(false);
@@ -187,16 +188,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
-      </div>
-
+    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
       <Navbar />
 
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+        <div className="z-20 bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] shadow-sm">
           <div className="px-4 sm:px-5 lg:px-6 pt-3 sm:pt-4">
             <Header />
             {!isScrolled && (
@@ -213,7 +209,7 @@ export default function Dashboard() {
           </div>
         </div>
         {isScrolled && (
-          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="sticky top-0 z-30 bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] shadow-sm animate-in slide-in-from-top-2 fade-in duration-300">
             <div className="px-4 sm:px-5 lg:px-6 py-2.5 flex justify-center">
               <div className="w-full max-w-2xl">
                 <SearchBar
@@ -228,15 +224,14 @@ export default function Dashboard() {
 
         <div className="flex-1 overflow-auto px-4 sm:px-5 lg:px-6 py-5 sm:py-6">
           {loading ? (
-            <div className="flex justify-center items-center h-96">
-              <div className="text-center">
-                <div className="relative mb-6">
-                  <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
-                  <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
-                </div>
-                <p className="text-gray-700 font-semibold text-lg">Loading Products...</p>
-                <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
+            <div className="space-y-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="h-10 w-48 bg-[#E0E0E0] dark:bg-[#404040] rounded-xl animate-pulse" />
+                <div className="h-10 w-32 bg-[#E0E0E0] dark:bg-[#404040] rounded-xl animate-pulse" />
               </div>
+              <Suspense fallback={<ProductGridSkeleton count={12} />}>
+                <ProductGridSkeleton count={12} />
+              </Suspense>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-96 text-center">
@@ -258,23 +253,23 @@ export default function Dashboard() {
             <>
               <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-bold text-red-600 text-lg">{filteredProducts.length}</span>
-                      <span className="ml-2 text-gray-500">
+                  <div className="bg-white dark:bg-[#2C2C2C] px-4 py-2 rounded-xl shadow-sm border border-[#E0E0E0] dark:border-[#404040]">
+                    <p className="text-sm text-[#666666] dark:text-[#a3a3a3]">
+                      <span className="font-bold text-[#FFBF00] text-lg">{filteredProducts.length}</span>
+                      <span className="ml-2">
                         {filteredProducts.length === 1 ? "Product" : "Products"} Available
                       </span>
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
+                <div className="flex items-center gap-2 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-sm border border-[#E0E0E0] dark:border-[#404040] p-1">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "grid"
-                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-100"
+                        ? "bg-[#FFBF00] text-[#2C2C2C] shadow-md"
+                        : "text-[#666666] dark:text-[#a3a3a3] hover:bg-[#E0E0E0] dark:hover:bg-[#404040]"
                     }`}
                   >
                     <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
@@ -284,8 +279,8 @@ export default function Dashboard() {
                     onClick={() => setViewMode("list")}
                     className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
                       viewMode === "list"
-                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-100"
+                        ? "bg-[#FFBF00] text-[#2C2C2C] shadow-md"
+                        : "text-[#666666] dark:text-[#a3a3a3] hover:bg-[#E0E0E0] dark:hover:bg-[#404040]"
                     }`}
                   >
                     <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
@@ -295,51 +290,24 @@ export default function Dashboard() {
               </div>
 
               {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id || product._id || product.product_id}
-                      className="group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
-                    >
-                      <div className="relative h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden flex-shrink-0">
-                        <ProductImage
-                          src={product.id_url}
-                          alt={product.product_name}
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-1.5 sm:p-2 shadow-lg">
-                            <FontAwesomeIcon icon={faEye} className="text-red-600 text-xs sm:text-base" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3 sm:p-4 md:p-4 flex flex-col flex-1">
-                        <div className="flex-1">
-                          <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 truncate mb-1 sm:mb-2 group-hover:text-red-600 transition-colors">
-                            {product.product_name}
-                          </h2>
-                          <div className="flex items-center justify-between mb-2 sm:mb-3">
-                            <div>
-                              <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Price</p>
-                              <p className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                                ₱{formatPrice(product.price)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleView(product)}
-                          className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2 sm:py-2.5 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 touch-manipulation text-xs sm:text-sm mt-auto min-h-[40px]"
-                        >
-                          <FontAwesomeIcon icon={faEye} className="text-xs sm:text-sm" />
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <Suspense fallback={<ProductGridSkeleton count={8} />}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
+                    {filteredProducts.map((product) => (
+                      <ProductCard
+                        key={product.id || product._id || product.product_id}
+                        product={{
+                          ...product,
+                          productName: product.product_name || product.productName,
+                          idUrl: product.id_url || product.idUrl,
+                          sellerUsername: product.seller_username || product.sellerUsername
+                        }}
+                        onView={handleView}
+                        onAddToCart={handleAddToCart}
+                        isAddingToCart={addingToCart && selectedProduct?.product_id === (product.product_id || product.productId)}
+                      />
+                    ))}
+                  </div>
+                </Suspense>
               ) : (
                 <div className="space-y-4">
                   {filteredProducts.map((product) => (
@@ -367,13 +335,13 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-gray-500 mb-1">Price</p>
-                            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                            <p className="text-xl sm:text-2xl font-bold text-gray-800">
                               ₱{formatPrice(product.price)}
                             </p>
                           </div>
                           <button
                             onClick={() => handleView(product)}
-                            className="cursor-pointer px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+                            className="cursor-pointer px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                           >
                             <FontAwesomeIcon icon={faEye} className="text-base" />
                             View Details
@@ -389,166 +357,21 @@ export default function Dashboard() {
         </div>
 
         {popupVisible && selectedProduct && (
-          <div 
-            className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200"
-            onClick={closePopup}
-          >
-            <div 
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative">
-                <div className="relative w-full h-72 sm:h-96">
-                  <ProductImage
-                    src={selectedProduct.id_url}
-                    alt={selectedProduct.product_name}
-                    className="object-cover rounded-t-3xl"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
-                    priority
-                  />
-                </div>
-                <button
-                  onClick={closePopup}
-                  className="cursor-pointer absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm"
-                >
-                  <FontAwesomeIcon icon={faTimes} className="text-xl" />
-                </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-8">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white drop-shadow-2xl">
-                    {selectedProduct.product_name}
-                  </h2>
-                </div>
-              </div>
-
-              <div className="p-6 sm:p-8">
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-2 text-base" />
-                    Description
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-base">
-                    {selectedProduct.description || "No description available"}
-                  </p>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    <FontAwesomeIcon icon={faShoppingCart} className="mr-2" />
-                    Quantity
-                  </h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-2">
-                      <button
-                        onClick={decreaseQuantity}
-                        className="cursor-pointer w-10 h-10 flex items-center justify-center bg-white rounded-lg hover:bg-red-50 hover:text-red-600 transition-all shadow-sm"
-                      >
-                        <FontAwesomeIcon icon={faMinus} className="text-base" />
-                      </button>
-                      <span className="w-16 text-center font-bold text-gray-800 text-xl">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={increaseQuantity}
-                        className="cursor-pointer w-10 h-10 flex items-center justify-center bg-white rounded-lg hover:bg-green-50 hover:text-green-600 transition-all shadow-sm"
-                      >
-                        <FontAwesomeIcon icon={faPlus} className="text-base" />
-                      </button>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-500">Available in stock</p>
-                      <p className="text-sm text-green-600 font-semibold">
-                        <FontAwesomeIcon icon={faCheckCircle} className="mr-1 text-sm" />
-                        Ready to ship
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-2xl p-4 sm:p-6 mb-6 border border-red-100 overflow-hidden">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 md:gap-4 mb-2 sm:mb-3 min-w-0">
-                    <div className="flex-1 min-w-0 w-full sm:w-auto">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
-                        <span className="whitespace-nowrap">Unit Price</span>
-                      </p>
-                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 break-words overflow-wrap-anywhere">
-                        ₱{formatPrice(selectedProduct.price)}
-                      </p>
-                    </div>
-                    <div className="text-center px-2 sm:px-4 flex-shrink-0">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">×</p>
-                      <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">{quantity}</p>
-                    </div>
-                    <div className="text-left sm:text-right flex-1 min-w-0 w-full sm:w-auto">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center sm:justify-end">
-                        <FontAwesomeIcon icon={faCalculator} className="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
-                        <span className="whitespace-nowrap">Total</span>
-                      </p>
-                      <p className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
-                        ₱{formatPrice(calculateTotalPrice())}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={cartMessage !== "" || addingToCart}
-                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {addingToCart ? (
-                    <>
-                      <FontAwesomeIcon icon={faSpinner} className="text-xl animate-spin" />
-                      Adding to Cart...
-                    </>
-                  ) : (
-                    <>
-                      <FontAwesomeIcon icon={faCartPlus} className="text-xl" />
-                      Add {quantity} {quantity === 1 ? "Item" : "Items"} to Cart
-                    </>
-                  )}
-                </button>
-
-                {cartMessage && (
-                  <div className="mt-4 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div
-                      className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all shadow-lg ${
-                        cartMessage === "success"
-                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                          : cartMessage === "exists"
-                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                          : cartMessage === "login"
-                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                          : "bg-gradient-to-r from-red-500 to-red-600 text-white"
-                      }`}
-                    >
-                      <i
-                        className={`fas ${
-                          cartMessage === "success"
-                            ? "fa-check-circle"
-                            : cartMessage === "exists"
-                            ? "fa-info-circle"
-                            : cartMessage === "login"
-                            ? "fa-user-lock"
-                            : "fa-exclamation-circle"
-                        } text-2xl`}
-                      ></i>
-                      <span>
-                        {cartMessage === "success" &&
-                          `${quantity} ${quantity === 1 ? "item" : "items"} added to cart successfully!`}
-                        {cartMessage === "exists" &&
-                          "Product quantity updated in your cart!"}
-                        {cartMessage === "login" &&
-                          "Please log in to add items to your cart."}
-                        {cartMessage === "error" &&
-                          "Failed to add product. Please try again."}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={null}>
+            <ProductModal
+              product={{
+                ...selectedProduct,
+                productName: selectedProduct.product_name || selectedProduct.productName,
+                idUrl: selectedProduct.id_url || selectedProduct.idUrl,
+                sellerUsername: selectedProduct.seller_username || selectedProduct.sellerUsername
+              }}
+              onClose={closePopup}
+              onAddToCart={(product, qty) => handleAddToCart(product, qty)}
+              isAddingToCart={addingToCart}
+              username={username}
+              initialQuantity={quantity}
+            />
+          </Suspense>
         )}
       </main>
     </div>

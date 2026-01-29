@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -8,378 +8,291 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faStore,
   faIdCard,
-  faSyncAlt,
-  faCloudUploadAlt,
   faShieldAlt,
-  faUser,
+  faEnvelope,
+  faPhone,
   faLock,
   faEye,
   faEyeSlash,
-  faEnvelope,
-  faPhone,
   faCheckCircle,
-  faInfoCircle,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
+import { AuthHeaderSeller } from "@/app/components/auth/AuthHeader";
+import { AuthFooterSeller } from "@/app/components/auth/AuthFooter";
+
+const ACCEPT = "image/jpeg,image/png,image/gif,image/webp,application/pdf";
 
 export default function SellerRegisterPage() {
   const router = useRouter();
-
+  const fileInputRef = useRef(null);
   const [displayName, setDisplayName] = useState("");
-  const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
+  const [password, setPassword] = useState("");
   const [idFile, setIdFile] = useState(null);
   const [idPreview, setIdPreview] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [popupError, setPopupError] = useState(false);
 
-  useLoadingFavicon(loading, "Seller Registration");
+  useLoadingFavicon(loading, "Become a Seller");
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFile = (file) => {
+    if (!file || !ACCEPT.split(",").some((t) => file.type === t.trim())) return;
     setIdFile(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setIdPreview(reader.result);
-      reader.readAsDataURL(file);
+    if (file.type.startsWith("image/")) {
+      const r = new FileReader();
+      r.onloadend = () => setIdPreview(r.result);
+      r.readAsDataURL(file);
     } else {
       setIdPreview(null);
     }
   };
 
+  const onDrop = (e) => {
+    e.preventDefault();
+    handleFile(e.dataTransfer.files?.[0]);
+  };
+  const onDragOver = (e) => e.preventDefault();
+
+  const handleFileChange = (e) => handleFile(e.target.files?.[0]);
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!idFile) {
+      setPopupMessage("Please upload your ID document.");
+      setPopupError(true);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 4000);
+      return;
+    }
     setLoading(true);
     let idUrl = "";
-
     try {
-      if (idFile) {
-
-        const formData = new FormData();
-        formData.append('file', idFile);
-        formData.append('email', email);
-
-        const uploadResponse = await fetch('/api/upload-seller-id', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadResponse.json();
-
-        if (!uploadResponse.ok) {
-
-          const errorMsg = uploadData.error || uploadData.message || 'Failed to upload ID document';
-          throw new Error(errorMsg);
-        }
-
-        if (!uploadData.url) {
-          throw new Error('Upload succeeded but no URL was returned');
-        }
-        idUrl = uploadData.url;
-      }
-
-      if (!idUrl) {
-        throw new Error('ID document is required. Please upload a valid ID image.');
-      }
-
-      const data = await authFunctions.sellerRegister({
-        displayName,
-        password,
-        email,
-        contact,
-        idUrl,
-      });
-
-      const isSuccess = data && 
-        data.message && 
-        data.success !== false && 
-        !data.message.toLowerCase().includes('fail') && 
-        !data.message.toLowerCase().includes('error') &&
-        !data.error &&
-        !data.errors;
-
-      if (isSuccess) {
-        const successMessage = data.details 
-          ? `${data.message}\n\n${data.details}`
-          : data.message || "Seller registered successfully! Your account is pending admin approval. You will be able to login and start selling once approved (usually within 24-48 hours).";
-        setPopupMessage(successMessage);
+      const formData = new FormData();
+      formData.append("file", idFile);
+      formData.append("email", email);
+      const res = await fetch("/api/upload-seller-id", { method: "POST", body: formData });
+      const up = await res.json();
+      if (!res.ok) throw new Error(up.error || up.message || "Upload failed.");
+      if (!up.url) throw new Error("Upload succeeded but no URL returned.");
+      idUrl = up.url;
+    } catch (err) {
+      setPopupMessage("Upload failed: " + (err.message || "Please try again."));
+      setPopupError(true);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 5000);
+      setLoading(false);
+      return;
+    }
+    try {
+      const data = await authFunctions.sellerRegister({ displayName, password, email, contact, idUrl });
+      const ok = data?.message && data.success !== false && !data.error && !data.errors;
+      if (ok) {
+        setPopupMessage(data.details ? `${data.message}\n\n${data.details}` : data.message);
+        setPopupError(false);
         setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-          router.push("/");
-        }, 6000);
+        setTimeout(() => { setShowPopup(false); router.push("/"); }, 6000);
       } else {
-
-        const errorMessage = data?.error || data?.message || data?.errors || "Registration failed. Please try again.";
-        setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
+        setPopupMessage(data?.error || data?.message || (Array.isArray(data?.errors) ? data.errors.join(". ") : "Registration failed."));
+        setPopupError(true);
         setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 5000);
       }
     } catch (err) {
-
-      let errorMessage = "Registration failed. Please try again.";
-
-      if (err.response?.errors && Array.isArray(err.response.errors) && err.response.errors.length > 0) {
-        errorMessage = err.response.errors.join(". ");
-      } else if (err.response?.errors && typeof err.response.errors === 'string') {
-        errorMessage = err.response.errors;
-      } else if (err.response?.error) {
-        errorMessage = err.response.error;
-      } else if (err.response?.message) {
-        errorMessage = err.response.message;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setPopupMessage("Upload or registration failed. " + errorMessage);
+      let msg = "Registration failed. Please try again.";
+      if (err.response?.errors && Array.isArray(err.response.errors)) msg = err.response.errors.join(". ");
+      else if (err.response?.message) msg = err.response.message;
+      else if (err.message) msg = err.message;
+      setPopupMessage(msg);
+      setPopupError(true);
       setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 5000);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 p-4 relative">
+    <div className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col">
+      <AuthHeaderSeller />
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
-      </div>
-
-      {showPopup && (
-        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 ${
-          popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing')
-            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-            : 'bg-gradient-to-r from-green-500 to-green-600 text-white'
-        }`}>
-          <div className="flex items-start gap-3">
-            <FontAwesomeIcon 
-              icon={popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing') ? faInfoCircle : faCheckCircle} 
-              className="text-lg sm:text-xl flex-shrink-0 mt-0.5" 
-            />
-            <div className="flex-1">
-              <p className="font-semibold text-sm sm:text-base mb-1">
-                {popupMessage.toLowerCase().includes('failed') || popupMessage.toLowerCase().includes('error') || popupMessage.toLowerCase().includes('missing')
-                  ? 'Registration Failed!'
-                  : 'Registration Successful!'
-                }
-              </p>
-              <p className="text-sm break-words whitespace-pre-line">{popupMessage}</p>
+      <div className="flex-1 flex items-center justify-center p-4 py-8">
+        {showPopup && (
+          <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 animate-fade-in ${
+            popupError ? "bg-[#F44336]" : "bg-[#4CAF50]"
+          } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
+            <FontAwesomeIcon icon={popupError ? faTimes : faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold">{popupError ? "Error" : "Application submitted"}</p>
+              <p className="text-sm mt-1 break-words whitespace-pre-line">{popupMessage}</p>
             </div>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
-            >
+            <button onClick={() => setShowPopup(false)} className="text-white/80 hover:text-white">
               <FontAwesomeIcon icon={faTimes} className="text-sm" />
             </button>
           </div>
-        </div>
-      )}
-
-      <form
-        onSubmit={handleRegister}
-        className="relative bg-white p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-2xl max-w-4xl w-full overflow-y-auto max-h-[95vh] sm:max-h-auto"
-      >
-
-        {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Registering seller account...</p>
-            </div>
-          </div>
         )}
 
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full mb-3 shadow-lg">
-            <FontAwesomeIcon icon={faStore} className="text-white text-xl" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
-            Become a Seller
-          </h1>
-          <p className="text-gray-500 text-xs sm:text-sm">
-            Start selling on  totallynormalstore today
-          </p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              <FontAwesomeIcon icon={faIdCard} className="mr-2 text-red-600" />
-              Upload Valid ID
-            </label>
-            <div
-              className="w-full h-40 sm:h-52 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all group relative overflow-hidden touch-manipulation"
-              onClick={() => document.getElementById("idFileInput").click()}
-            >
-              {idPreview ? (
-                <>
-                  <img
-                    src={idPreview}
-                    alt="ID Preview"
-                    className="absolute inset-0 w-full h-full object-cover rounded-xl z-0"
-                    style={{ minHeight: '100%', minWidth: '100%' }}
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center rounded-xl z-10">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                      <FontAwesomeIcon icon={faSyncAlt} className="text-white text-3xl mb-2" />
-                      <p className="text-white font-medium">Change Image</p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center p-6">
-                  <FontAwesomeIcon icon={faCloudUploadAlt} className="text-5xl text-gray-400 mb-4" />
-                  <p className="text-gray-600 font-medium mb-2">
-                    Click to upload your ID
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    PNG, JPG up to 10MB
-                  </p>
-                </div>
-              )}
+        <form
+          onSubmit={handleRegister}
+          className="relative w-full max-w-4xl bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-lg border border-[#E0E0E0] dark:border-[#404040] overflow-hidden"
+        >
+          {loading && (
+            <div className="absolute inset-0 bg-white/90 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-20">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#FFBF00] rounded-full animate-spin" />
+                <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">Submitting application...</p>
+              </div>
             </div>
-            <input
-              id="idFileInput"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-              required
-            />
-            <p className="mt-3 text-xs text-gray-500 flex items-center gap-2">
-              <FontAwesomeIcon icon={faShieldAlt} className="text-green-600" />
-              Your ID is securely encrypted and used for verification only
-            </p>
-          </div>
+          )}
 
-          <div className="flex-1 space-y-4">
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Display Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faUser} className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Enter your display name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a strong password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-[#E0E0E0] dark:divide-[#404040]">
+            {/* Left: Become a Seller + Verification */}
+            <div className="p-6 sm:p-8">
+              <h2 className="text-xl font-bold text-[#2C2C2C] dark:text-white">Become a Seller</h2>
+              <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 mb-6">Join our global marketplace and reach millions of customers today.</p>
+              <h3 className="text-sm font-semibold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">Verification Documents</h3>
+              <div
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-[#E0E0E0] dark:border-[#404040] rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center min-h-[180px] cursor-pointer bg-gray-50 dark:bg-[#404040]/30 hover:border-[#FFBF00] transition-colors"
+              >
+                {idPreview ? (
+                  <img src={idPreview} alt="ID preview" className="max-h-32 rounded-lg object-contain mx-auto mb-2" />
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faIdCard} className="text-4xl text-[#FFBF00] mb-3" />
+                    <p className="text-[#666666] dark:text-[#a3a3a3] text-sm text-center mb-2">
+                      Drag and drop your ID card image here, or click to browse.
+                    </p>
+                    <p className="text-[#999999] text-xs mb-3">Accepted formats: JPG, PNG, PDF.</p>
+                  </>
+                )}
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                  className="px-4 py-2 bg-[#FFF8E1] border border-[#FFDA6A] text-[#2C2C2C] dark:text-[#FFBF00] rounded-lg text-sm font-medium hover:bg-[#FFDA6A]/30"
                 >
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
+                  Select File
                 </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faPhone} className="text-gray-400" />
-            </div>
-            <input
-              type="number"
-              placeholder="09123456789"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPT}
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <div className="mt-4 p-3 rounded-xl bg-[#FFF8E1] dark:bg-[#FFF8E1]/10 border border-[#FFDA6A] dark:border-[#FFDA6A]/50 flex gap-3">
+                <FontAwesomeIcon icon={faShieldAlt} className="text-[#FFBF00] mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-[#2C2C2C] dark:text-[#e5e5e5]">
+                  Your data is protected by industry-standard encryption. We only use your ID for merchant verification purposes and do not share it with third parties.
+                </p>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6 touch-manipulation text-base"
-            >
-              <span className="cursor-pointer flex items-center justify-center gap-2">
-                <FontAwesomeIcon icon={faCheckCircle} />
-                Register as Seller
-              </span>
-            </button>
+            {/* Right: Business Details */}
+            <div className="p-6 sm:p-8">
+              <h3 className="text-sm font-bold text-[#666666] dark:text-[#a3a3a3] uppercase tracking-wide">Business Details</h3>
+              <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 mb-6">Enter the name customers will see on your storefront.</p>
 
-            <div className="text-center pt-4">
-              <p className="text-gray-600 text-sm">
-                Already have an account?{" "}
-                <span
-                  onClick={() => router.push("/")}
-                  className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
-                >
-                  Login here
-                </span>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Display Name</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
+                      <FontAwesomeIcon icon={faStore} className="text-sm" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Totally Awesome Goods"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Business Email</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
+                      <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="seller@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Phone Number</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
+                      <FontAwesomeIcon icon={faPhone} className="text-sm" />
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Password</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
+                      <FontAwesomeIcon icon={faLock} className="text-sm" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a secure password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-12 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
+                    >
+                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !idFile}
+                className="w-full mt-6 py-3 px-4 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
+              >
+                Submit Application
+              </button>
+
+              <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
+                Already have a seller account?{" "}
+                <button type="button" onClick={() => router.push("/")} className="text-[#FFBF00] font-medium hover:underline">
+                  Log in
+                </button>
               </p>
             </div>
           </div>
-        </div>
+        </form>
+      </div>
 
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <FontAwesomeIcon icon={faInfoCircle} className="text-blue-600 text-lg mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-gray-800 mb-1">
-                Seller Verification Process
-              </p>
-              <p className="text-xs text-gray-600">
-                Your account will be reviewed within 24-48 hours. You'll receive an email once approved to start selling.
-              </p>
-            </div>
-          </div>
-        </div>
-      </form>
+      <AuthFooterSeller />
     </div>
   );
-};
+}

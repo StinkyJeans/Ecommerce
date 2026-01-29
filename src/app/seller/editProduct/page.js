@@ -197,32 +197,36 @@ function EditProductContent() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 dark:bg-red-900/20 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 dark:bg-orange-900/20 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-10 animate-pulse delay-700"></div>
+      </div>
       <Navbar />
       <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
         {authLoading || fetching ? (
           <div className="flex-1 flex items-center justify-center min-h-[60vh]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Loading product...</p>
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full animate-spin"></div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Loading product...</p>
             </div>
           </div>
         ) : (
           <>
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+        <div className="z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
           <div className="px-4 sm:px-5 lg:px-6 pt-3 sm:pt-4">
             <div className="py-4 sm:py-5 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-400 dark:to-orange-400 bg-clip-text text-transparent">
                   Edit Product
                 </h1>
-                <p className="text-gray-600 text-sm sm:text-base mt-1">
+                <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base mt-1">
                   Update your product information
                 </p>
               </div>
               <button
                 onClick={() => router.push("/seller/viewProduct")}
-                className="cursor-pointer px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation"
+                className="cursor-pointer px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation"
               >
                 <FontAwesomeIcon icon={faTimes} className="text-base sm:text-lg" />
                 <span className="hidden sm:inline">Cancel</span>
@@ -233,12 +237,12 @@ function EditProductContent() {
 
         <div className="flex-1 overflow-auto px-4 sm:px-5 lg:px-6 py-5 sm:py-6">
           <div className="max-w-2xl mx-auto">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-100">
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-100 dark:border-gray-700">
               <div className="mb-5 sm:mb-6">
-                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Product Image
                 </label>
-                <div className="relative w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="relative w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
                   {idPreview ? (
                     <>
                       <img
@@ -249,14 +253,14 @@ function EditProductContent() {
                       />
                       <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 z-10 flex items-center justify-center">
                         <div className="opacity-0 hover:opacity-100 transition-opacity">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                            <FontAwesomeIcon icon={faImage} className="text-red-600 text-xl" />
+                          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                            <FontAwesomeIcon icon={faImage} className="text-red-600 dark:text-red-400 text-xl" />
                           </div>
                         </div>
                       </div>
                     </>
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
                       <FontAwesomeIcon icon={faCloudUploadAlt} className="text-4xl mb-2" />
                       <p className="text-sm">No image selected</p>
                     </div>
@@ -275,7 +279,7 @@ function EditProductContent() {
                       setImage(null);
                       setIdPreview(null);
                     }}
-                    className="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                    className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 flex items-center gap-1"
                   >
                     <FontAwesomeIcon icon={faTimes} className="text-xs" />
                     Remove image
@@ -284,8 +288,8 @@ function EditProductContent() {
               </div>
 
               <div className="mb-5 sm:mb-6">
-                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTag} className="text-red-600 text-sm" />
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faTag} className="text-red-600 dark:text-red-400 text-sm" />
                   Product Name
                 </label>
                 <input
@@ -293,14 +297,14 @@ function EditProductContent() {
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Enter product name"
                 />
               </div>
 
               <div className="mb-5 sm:mb-6">
-                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faAlignLeft} className="text-red-600 text-sm" />
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faAlignLeft} className="text-red-600 dark:text-red-400 text-sm" />
                   Description
                 </label>
                 <textarea
@@ -308,15 +312,15 @@ function EditProductContent() {
                   onChange={(e) => setDescription(e.target.value)}
                   required
                   rows="4"
-                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none resize-none text-sm sm:text-base"
+                  className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none resize-none text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Enter product description"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5 sm:mb-6">
                 <div>
-                  <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faDollarSign} className="text-red-600 text-sm" />
+                  <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faDollarSign} className="text-red-600 dark:text-red-400 text-sm" />
                     Price
                   </label>
                   <input
@@ -326,21 +330,21 @@ function EditProductContent() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={getCategoryIcon(category)} className="text-red-600 text-sm" />
+                  <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                    <FontAwesomeIcon icon={getCategoryIcon(category)} className="text-red-600 dark:text-red-400 text-sm" />
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base bg-white"
+                    className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Select category</option>
                     <option value="Pc">Computers & Laptops</option>
@@ -372,8 +376,8 @@ function EditProductContent() {
         </div>
 
         {showPopup && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 animate-in zoom-in-95">
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 animate-in zoom-in-95 border border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
                   <FontAwesomeIcon
@@ -382,14 +386,14 @@ function EditProductContent() {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200">
                     {popupMessage.includes("success") ? "Success!" : "Notice"}
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-600 mt-1">{popupMessage}</p>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">{popupMessage}</p>
                 </div>
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
                 >
                   <FontAwesomeIcon icon={faTimes} className="text-lg" />
                 </button>
@@ -407,13 +411,13 @@ function EditProductContent() {
 export default function EditProduct() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+      <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
         <Navbar />
         <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center min-h-[60vh]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Loading...</p>
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full animate-spin"></div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
             </div>
           </div>
         </main>

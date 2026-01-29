@@ -1,29 +1,33 @@
 "use client";
 
 import { useEffect, useState, Suspense, useMemo } from "react";
-import Image from "next/image";
 import ProductImage from "@/app/components/ProductImage";
-import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions, orderFunctions, shippingFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import Navbar from "@/app/components/navbar";
-import Header from "@/app/components/header";
+import ThemeToggle from "@/app/components/ThemeToggle";
 import {
   faTrash,
-  faEdit,
   faChevronRight,
   faSpinner,
-  faMapMarkerAlt,
-  faPhone,
+  faTruck,
   faCreditCard,
-  faMoneyBillWave,
-  faExclamationCircle,
-  faTimes,
+  faLock,
   faCheckCircle,
+  faMinus,
+  faPlus,
+  faArrowRight,
+  faEdit,
+  faTimes,
+  faUser,
+  faPhone,
+  faHome,
+  faMapMarkerAlt,
+  faGlobe,
+  faCheck
 } from "@fortawesome/free-solid-svg-icons";
 
 function CheckoutContent() {
@@ -35,14 +39,13 @@ function CheckoutContent() {
   const [cartItems, setCartItems] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [showAddressModal, setShowAddressModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [deliveryOption, setDeliveryOption] = useState("standard");
+  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [cvv, setCvv] = useState("");
   const [voucherCode, setVoucherCode] = useState("");
-  const [shippingFee, setShippingFee] = useState(128.16);
   const [errorMessage, setErrorMessage] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   useLoadingFavicon(authLoading || loading || placingOrder, "Checkout");
 
@@ -94,7 +97,7 @@ function CheckoutContent() {
         setAddresses(data.addresses || []);
       }
     } catch (error) {
-
+      console.error("Error fetching addresses:", error);
     }
   };
 
@@ -104,20 +107,12 @@ function CheckoutContent() {
     }, 0);
   };
 
-  const calculateTotal = () => {
-    return calculateSubtotal() + shippingFee;
+  const calculateTax = () => {
+    return calculateSubtotal() * 0.06; // 6% tax
   };
 
-  const groupItemsBySeller = () => {
-    const grouped = {};
-    cartItems.forEach(item => {
-      const seller = item.seller_username || 'Unknown';
-      if (!grouped[seller]) {
-        grouped[seller] = [];
-      }
-      grouped[seller].push(item);
-    });
-    return grouped;
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateTax();
   };
 
   const handlePlaceOrder = async () => {
@@ -144,7 +139,7 @@ function CheckoutContent() {
         })),
         shipping_address_id: selectedAddress.id,
         payment_method: paymentMethod,
-        delivery_option: deliveryOption
+        delivery_option: "standard"
       });
 
       if (data.success) {
@@ -162,332 +157,399 @@ function CheckoutContent() {
     }
   };
 
-  const groupedItems = groupItemsBySeller();
+  const updateQuantity = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+    // TODO: Implement quantity update
+    console.log("Update quantity:", itemId, newQuantity);
+  };
+
+  const removeItem = async (itemId) => {
+    // TODO: Implement remove item
+    console.log("Remove item:", itemId);
+  };
+
   const subtotal = calculateSubtotal();
+  const tax = calculateTax();
   const total = calculateTotal();
-
-  const sellerGroups = Object.entries(groupedItems);
-  const paginatedSellerGroups = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return sellerGroups.slice(startIndex, endIndex);
-  }, [sellerGroups, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(sellerGroups.length / itemsPerPage);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [cartItems.length]);
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading...</p>
+          <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading checkout...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex">
-      <Navbar />
-      <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        <div className="z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-4">
-            <Header />
+    <div className="min-h-screen bg-white dark:bg-[#1a1a1a]">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
+              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Totally Normal</span>
+              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Store</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Shop</button>
+              <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Categories</button>
+              <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Deals</button>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl border-none focus:ring-2 focus:ring-orange-500 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                />
+                <FontAwesomeIcon icon={faChevronRight} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            </div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">
-            {errorMessage && (
-              <div className="mb-4">
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 flex items-center gap-3">
-                  <FontAwesomeIcon icon={faExclamationCircle} className="text-red-600 text-xl" />
-                  <div className="flex-1">
-                    <p className="text-red-800 font-semibold">{errorMessage}</p>
-                  </div>
-                  <button
-                    onClick={() => setErrorMessage("")}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <FontAwesomeIcon icon={faTimes} className="text-base" />
-                  </button>
+      </header>
+
+      {/* Breadcrumbs */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <nav className="text-sm text-gray-500 dark:text-gray-400">
+            <span>Cart</span>
+            <span className="mx-2">/</span>
+            <span>Information</span>
+            <span className="mx-2">/</span>
+            <span className="text-gray-900 dark:text-gray-100 font-semibold">Checkout</span>
+          </nav>
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {errorMessage && (
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+            <p className="text-red-800 dark:text-red-300 font-semibold">{errorMessage}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Shopping Cart Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Your Shopping Cart</h1>
+                <span className="text-gray-600 dark:text-gray-400">{cartItems.length} Items</span>
+              </div>
+
+              <div className="border-b border-gray-200 dark:border-gray-700 mb-4 pb-2">
+                <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  <div className="col-span-6">Product</div>
+                  <div className="col-span-3 text-center">Quantity</div>
+                  <div className="col-span-3 text-right">Total</div>
                 </div>
               </div>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">Shipping Address</h2>
-                    <button
-                      onClick={() => setShowAddressModal(true)}
-                      className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg font-semibold transition-colors flex items-center gap-2"
-                    >
-                      <FontAwesomeIcon icon={faEdit} className="text-sm" />
-                      Edit
-                    </button>
-                  </div>
-
-                  {selectedAddress ? (
-                    <div className="space-y-2">
-                      <p className="font-semibold text-gray-900">{selectedAddress.full_name}</p>
-                      <p className="text-gray-600 flex items-center gap-2">
-                        <FontAwesomeIcon icon={faPhone} className="text-sm" />
-                        {selectedAddress.phone_number}
-                      </p>
-                      <p className="text-gray-600 flex items-start gap-2">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm mt-1" />
-                        <span>
-                          {selectedAddress.address_line1}
-                          {selectedAddress.address_line2 && `, ${selectedAddress.address_line2}`}
-                          <br />
-                          {selectedAddress.city}, {selectedAddress.province} {selectedAddress.postal_code}
-                          <br />
-                          {selectedAddress.country}
-                        </span>
+              <div className="space-y-4">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                      <ProductImage
+                        src={item.id_url || item.idUrl}
+                        alt={item.product_name || item.productName}
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                        {item.product_name || item.productName}
+                      </h3>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                      >
+                        REMOVE
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
+                        className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-l-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FontAwesomeIcon icon={faMinus} className="text-xs" />
+                      </button>
+                      <input
+                        type="number"
+                        value={item.quantity || 1}
+                        readOnly
+                        className="w-12 h-8 border-y border-gray-300 dark:border-gray-600 text-center text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
+                      />
+                      <button
+                        onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
+                        className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-r-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FontAwesomeIcon icon={faPlus} className="text-xs" />
+                      </button>
+                    </div>
+                    <div className="w-24 text-right">
+                      <p className="font-bold text-gray-900 dark:text-gray-100">
+                        ₱{formatPrice(parseFloat(item.price || 0) * (item.quantity || 1))}
                       </p>
                     </div>
-                  ) : (
-                    <div className="text-center py-6">
-                      <p className="text-gray-600 mb-4">No shipping address selected</p>
-                      <button
-                        onClick={() => router.push("/account?tab=addresses")}
-                        className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
-                      >
-                        Add Shipping Address
-                      </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Shipping Information */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faTruck} className="text-orange-500" />
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shipping Information</h2>
+                </div>
+                <button
+                  onClick={() => setShowAddressModal(true)}
+                  className="px-4 py-2 text-sm font-medium text-[#2F79F4] hover:text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <FontAwesomeIcon icon={faEdit} className="text-sm" />
+                  Edit
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={selectedAddress?.full_name || ""}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                  <input
+                    type="text"
+                    value={selectedAddress?.phone_number || ""}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Address Line 1</label>
+                  <input
+                    type="text"
+                    value={selectedAddress?.address_line1 || ""}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Address Line 2 (Optional)</label>
+                  <input
+                    type="text"
+                    value={selectedAddress?.address_line2 || ""}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">City</label>
+                    <input
+                      type="text"
+                      value={selectedAddress?.city || ""}
+                      readOnly
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Province</label>
+                    <input
+                      type="text"
+                      value={selectedAddress?.province || ""}
+                      readOnly
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Postal Code</label>
+                    <input
+                      type="text"
+                      value={selectedAddress?.postal_code || ""}
+                      readOnly
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                    <input
+                      type="text"
+                      value={selectedAddress?.country || ""}
+                      readOnly
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2 mb-4">
+                <FontAwesomeIcon icon={faCreditCard} className="text-orange-500" />
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Payment Method</h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Credit Card Option */}
+                <div className={`p-4 rounded-xl border-2 ${paymentMethod === "card" ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-600" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"}`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-5 h-5 rounded-full border-2 ${paymentMethod === "card" ? "bg-orange-500 border-orange-500" : "border-gray-300 dark:border-gray-600"}`}>
+                      {paymentMethod === "card" && <div className="w-full h-full rounded-full bg-white scale-50"></div>}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">Credit Card</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">All major cards accepted</p>
+                    </div>
+                    <FontAwesomeIcon icon={faCreditCard} className="text-2xl text-gray-400" />
+                  </div>
+                  {paymentMethod === "card" && (
+                    <div className="space-y-3 pl-8">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Card Number</label>
+                        <div className="relative">
+                          <FontAwesomeIcon icon={faCreditCard} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="0000 0000 0000 0000"
+                            value={cardNumber}
+                            onChange={(e) => setCardNumber(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">MM/YY</label>
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            value={expiryDate}
+                            onChange={(e) => setExpiryDate(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">CVV</label>
+                          <input
+                            type="text"
+                            placeholder="***"
+                            value={cvv}
+                            onChange={(e) => setCvv(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {paginatedSellerGroups.map(([sellerUsername, items], packageIndex) => {
-                  const actualPackageIndex = (currentPage - 1) * itemsPerPage + packageIndex;
-                  return (
-                  <div key={sellerUsername} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-                    <div className="p-4 border-b border-gray-200 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-gray-800">
-                          Package {actualPackageIndex + 1} of {sellerGroups.length}
-                        </span>
-                        <span className="text-sm text-gray-600">Fulfilled by {sellerUsername}</span>
-                      </div>
+                {/* PayPal Option */}
+                <div className={`p-4 rounded-xl border ${paymentMethod === "paypal" ? "bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-600" : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 ${paymentMethod === "paypal" ? "bg-orange-500 border-orange-500" : "border-gray-300 dark:border-gray-600"}`}>
+                      {paymentMethod === "paypal" && <div className="w-full h-full rounded-full bg-white scale-50"></div>}
                     </div>
-
-                    <div className="p-4 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-800 mb-3">Choose your delivery option</h3>
-                      <div className="space-y-2">
-                        <label className="flex items-center gap-3 p-3 border-2 border-red-500 rounded-lg cursor-pointer bg-red-50">
-                          <input
-                            type="radio"
-                            name="delivery"
-                            value="standard"
-                            checked={deliveryOption === "standard"}
-                            onChange={(e) => setDeliveryOption(e.target.value)}
-                            className="w-5 h-5 text-red-600"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-gray-800">Standard</span>
-                              <span className="font-bold text-red-600">₱{formatPrice(shippingFee.toFixed(2))}</span>
-                            </div>
-                            <p className="text-sm text-gray-600">Guaranteed by 17-25 Jan.</p>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="divide-y divide-gray-200">
-                      {items.map((item) => {
-                        const itemPrice = parseFloat(item.price || 0);
-                        const itemQuantity = item.quantity || 1;
-
-                        return (
-                          <div key={item.id} className="p-4">
-                            <div className="flex gap-4">
-                              <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                <ProductImage
-                                  src={item.id_url || item.idUrl}
-                                  alt={item.product_name || item.productName}
-                                  className="object-cover"
-                                  sizes="(max-width: 640px) 96px, 128px"
-                                />
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                                  {item.product_name || item.productName}
-                                </h3>
-                                {item.description && (
-                                  <p className="text-sm text-gray-600 mb-2 line-clamp-1">
-                                    {item.description}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-4 mb-2">
-                                  <span className="text-lg font-bold text-red-600">
-                                    ₱{formatPrice(itemPrice)}
-                                  </span>
-                                  {itemPrice < parseFloat(item.price) * 1.5 && (
-                                    <>
-                                      <span className="text-sm text-gray-400 line-through">
-                                        ₱{formatPrice((itemPrice * 1.5).toFixed(2))}
-                                      </span>
-                                      <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                                        53% OFF
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-gray-600">Qty: {itemQuantity}</span>
-                                  <button
-                                    onClick={() => router.push("/cart/viewCart")}
-                                    className="p-2 hover:bg-red-50 rounded-lg transition-colors text-gray-400 hover:text-red-600"
-                                    title="Remove from cart"
-                                  >
-                                    <FontAwesomeIcon icon={faTrash} className="text-base" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">PayPal</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Pay with your PayPal account</p>
                     </div>
                   </div>
-                  );
-                })}
-                {totalPages > 1 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                    itemsPerPage={itemsPerPage}
-                    totalItems={sellerGroups.length}
-                  />
-                )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 sticky top-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Order Summary</h2>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">₱{formatPrice(subtotal.toFixed(2))}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Shipping</span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">Free</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Estimated Tax</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">₱{formatPrice(tax.toFixed(2))}</span>
+                </div>
+                <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Total</span>
+                  <span className="text-2xl font-bold text-orange-500">₱{formatPrice(total.toFixed(2))}</span>
+                </div>
               </div>
 
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-xl shadow-xl p-6 border border-gray-100 lg:sticky lg:top-6 space-y-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Select payment method</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-3 p-4 border-2 border-red-500 rounded-lg cursor-pointer bg-red-50">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="cod"
-                          checked={paymentMethod === "cod"}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="w-5 h-5 text-red-600"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faMoneyBillWave} className="text-red-600" />
-                            <span className="font-semibold text-gray-800">Cash on Delivery</span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">Pay when you receive</p>
-                        </div>
-                      </label>
-
-                      <label className="flex items-center gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="card"
-                          checked={paymentMethod === "card"}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="w-5 h-5 text-red-600"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faCreditCard} className="text-gray-600" />
-                            <span className="font-semibold text-gray-800">Credit/Debit Card</span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">Tap to add card</p>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Voucher</h3>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="text"
-                        value={voucherCode}
-                        onChange={(e) => setVoucherCode(e.target.value)}
-                        placeholder="Enter Voucher Code"
-                        className="flex-1 min-w-0 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                      />
-                      <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-xs sm:text-sm transition-colors whitespace-nowrap">
-                        APPLY
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-gray-800">Invoice and Contact Info</h3>
-                      <button className="text-red-600 hover:text-red-700 font-semibold text-sm">
-                        Edit
-                      </button>
-                    </div>
-                    {selectedAddress && (
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>{selectedAddress.full_name}</p>
-                        <p>{selectedAddress.phone_number}</p>
-                        <p>{username}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-4">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Order Detail</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                          Subtotal ({cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)} {cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0) === 1 ? 'Item' : 'Items'})
-                        </span>
-                        <span className="font-semibold text-gray-800">
-                          ₱{formatPrice(subtotal.toFixed(2))}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Shipping Fee</span>
-                        <span className="font-semibold text-gray-800">
-                          ₱{formatPrice(shippingFee.toFixed(2))}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                        <span className="text-lg font-bold text-gray-800">Total:</span>
-                        <span className="text-xl font-bold text-orange-600">
-                          ₱{formatPrice(total.toFixed(2))}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={placingOrder || !selectedAddress || cartItems.length === 0}
-                    className="cursor-pointer w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {placingOrder ? (
-                      <>
-                        <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                        Placing Order...
-                      </>
-                    ) : (
-                      "PLACE ORDER NOW"
-                    )}
+              {/* Promo Code */}
+              <div className="mb-6">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="NORMAL10"
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <button className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">
+                    Apply
                   </button>
+                </div>
+              </div>
+
+              {/* Complete Purchase Button */}
+              <button
+                onClick={handlePlaceOrder}
+                disabled={placingOrder || !selectedAddress || cartItems.length === 0}
+                className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {placingOrder ? (
+                  <>
+                    <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Complete Purchase
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </>
+                )}
+              </button>
+
+              {/* Secure Checkout */}
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4 flex items-center justify-center gap-2">
+                <FontAwesomeIcon icon={faLock} className="text-sm" />
+                SECURE CHECKOUT POWERED BY NORMALPAY
+              </p>
+
+              {/* Normal Guarantee */}
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 dark:text-green-400 text-xl mt-1" />
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">Normal Guarantee</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      We offer a 30-day return policy on all items. If you're not completely satisfied, return your purchase for a full refund.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -495,104 +557,148 @@ function CheckoutContent() {
         </div>
       </main>
 
+      {/* Address Selection Modal */}
       {showAddressModal && (
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-md z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowAddressModal(false)}
         >
-          <div 
-            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          <div
+            className="bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-[#E0E0E0] dark:border-[#404040]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-2xl font-bold text-gray-800">Select Shipping Address</h2>
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-[#E0E0E0] dark:border-[#404040] flex items-center justify-between">
+              <h3 className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">Select Shipping Address</h3>
               <button
                 onClick={() => setShowAddressModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 hover:text-gray-800"
+                className="text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5] transition-colors"
               >
                 <FontAwesomeIcon icon={faTimes} className="text-xl" />
               </button>
             </div>
 
-            <div className="p-6">
+            {/* Address List */}
+            <div className="flex-1 overflow-y-auto p-6">
               {addresses.length === 0 ? (
                 <div className="text-center py-12">
-                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-5xl text-gray-300 mb-4" />
-                  <p className="text-gray-600 mb-4">No saved addresses found</p>
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-5xl text-[#666666] dark:text-[#a3a3a3] mb-4" />
+                  <p className="text-[#666666] dark:text-[#a3a3a3] text-lg font-semibold mb-2">No addresses found</p>
+                  <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mb-6">Please add an address in your account settings</p>
                   <button
                     onClick={() => {
                       setShowAddressModal(false);
                       router.push("/account?tab=addresses");
                     }}
-                    className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
+                    className="px-6 py-3 bg-[#2F79F4] hover:bg-[#2563eb] text-white rounded-xl font-semibold transition-colors"
                   >
-                    Add New Address
+                    Go to Addresses
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {addresses.map((address) => (
                     <div
                       key={address.id}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedAddress?.id === address.id
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 hover:border-gray-300 bg-white"
-                      }`}
                       onClick={() => {
                         setSelectedAddress(address);
                         setShowAddressModal(false);
                       }}
+                      className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedAddress?.id === address.id
+                          ? "border-[#2F79F4] bg-blue-50 dark:bg-blue-900/20"
+                          : "border-[#E0E0E0] dark:border-[#404040] hover:border-[#2F79F4] bg-white dark:bg-[#1a1a1a]"
+                      }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <p className="font-semibold text-gray-900">{address.full_name}</p>
-                            {address.is_default && (
-                              <span className="px-2 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded">
-                                DEFAULT
-                              </span>
+                      {address.is_default && (
+                        <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 bg-[#4CAF50] text-white text-xs font-semibold rounded-full">
+                          <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                          <span>Default</span>
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                          <FontAwesomeIcon icon={faUser} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Name</p>
+                            <p className="font-bold text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.full_name}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <FontAwesomeIcon icon={faPhone} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Phone</p>
+                            <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.phone_number}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <FontAwesomeIcon icon={faHome} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Address</p>
+                            <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.address_line1}</p>
+                            {address.address_line2 && (
+                              <p className="text-[#666666] dark:text-[#a3a3a3] break-words">{address.address_line2}</p>
                             )}
                           </div>
-                          <p className="text-gray-600 flex items-center gap-2 mb-1">
-                            <FontAwesomeIcon icon={faPhone} className="text-sm" />
-                            {address.phone_number}
-                          </p>
-                          <p className="text-gray-600 flex items-start gap-2">
-                            <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm mt-1" />
-                            <span>
-                              {address.address_line1}
-                              {address.address_line2 && `, ${address.address_line2}`}
-                              <br />
-                              {address.city}, {address.province} {address.postal_code}
-                              <br />
-                              {address.country}
-                            </span>
-                          </p>
                         </div>
-                        {selectedAddress?.id === address.id && (
-                          <FontAwesomeIcon icon={faCheckCircle} className="text-red-600 text-xl ml-4" />
-                        )}
+                        <div className="flex items-start gap-2">
+                          <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">
+                              {address.city}, {address.province} {address.postal_code}
+                            </p>
+                            <p className="text-[#666666] dark:text-[#a3a3a3] break-words">{address.country}</p>
+                          </div>
+                        </div>
                       </div>
+                      {selectedAddress?.id === address.id && (
+                        <div className="mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#404040] flex items-center gap-2 text-[#2F79F4]">
+                          <FontAwesomeIcon icon={faCheckCircle} className="text-sm" />
+                          <span className="text-sm font-medium">Selected</span>
+                        </div>
+                      )}
                     </div>
                   ))}
-
-                  <button
-                    onClick={() => {
-                      setShowAddressModal(false);
-                      router.push("/account?tab=addresses");
-                    }}
-                    className="w-full mt-4 px-6 py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-700 hover:border-red-500 hover:text-red-600 font-semibold transition-colors flex items-center justify-center gap-2"
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                    Add New Address
-                  </button>
                 </div>
               )}
             </div>
+
+            {/* Modal Footer */}
+            {addresses.length > 0 && (
+              <div className="px-6 py-4 border-t border-[#E0E0E0] dark:border-[#404040] flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowAddressModal(false);
+                    router.push("/account?tab=addresses");
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5] transition-colors"
+                >
+                  Manage Addresses
+                </button>
+                <button
+                  onClick={() => setShowAddressModal(false)}
+                  className="px-6 py-2 bg-[#2F79F4] hover:bg-[#2563eb] text-white rounded-lg font-semibold transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+              <button className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Privacy Policy</button>
+              <button className="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Terms of Service</button>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">© 2024 Totally Normal Store, Inc.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -600,10 +706,10 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50">
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading checkout...</p>
+          <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Loading checkout...</p>
         </div>
       </div>
     }>

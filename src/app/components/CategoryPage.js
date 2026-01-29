@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, memo } from "react";
-import Image from "next/image";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ProductImage from "./ProductImage";
-import Navbar from "./navbar";
-import SearchBar from "./searchbar";
+import UserSidebar from "./UserSidebar";
+import Pagination from "./Pagination";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import Header from "./header";
+import ThemeToggle from "./ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
@@ -15,18 +14,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
   faHeart,
-  faTimes,
-  faAlignLeft,
-  faTag,
-  faShoppingBag,
-  faCartPlus,
+  faShoppingCart,
+  faChevronDown,
+  faFilter,
+  faArrowUp,
+  faArrowDown,
+  faChevronRight,
   faCheckCircle,
-  faInfoCircle,
-  faUserLock,
-  faExclamationCircle,
-  faTh,
-  faList,
+  faTimes,
+  faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
+import dynamic from "next/dynamic";
+
+const ProductModal = dynamic(() => import("./ProductModal"), {
+  loading: () => null,
+  ssr: false
+});
 
 export default function CategoryPage({
   categoryName,
@@ -38,8 +41,16 @@ export default function CategoryPage({
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [quantity, setQuantity] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [ratingFilter, setRatingFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 16;
   const router = useRouter();
   const { username } = useAuth();
 
@@ -55,7 +66,7 @@ export default function CategoryPage({
         setProducts(data.products || []);
         setFilteredProducts(data.products || []);
       } catch (err) {
-
+        console.error("Error fetching products:", err);
       } finally {
         setLoading(false);
       }
@@ -63,27 +74,61 @@ export default function CategoryPage({
     fetchProducts();
   }, [categoryValue]);
 
-  const handleSearch = useCallback((searchTerm) => {
-    if (!searchTerm.trim()) {
-      setFilteredProducts(products);
-      return;
+  useEffect(() => {
+    let filtered = products;
+
+    // Search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(
+        (product) =>
+          product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
-    const filtered = products.filter(
-      (product) =>
-        product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((product) => product.category === categoryFilter);
+    }
+
+    // Price range filter
+    filtered = filtered.filter((product) => {
+      const price = parseFloat(product.price || 0);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+      if (sortBy === "newest") {
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      } else if (sortBy === "oldest") {
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      } else if (sortBy === "price-low") {
+        return parseFloat(a.price || 0) - parseFloat(b.price || 0);
+      } else if (sortBy === "price-high") {
+        return parseFloat(b.price || 0) - parseFloat(a.price || 0);
+      }
+      return 0;
+    });
+
     setFilteredProducts(filtered);
-  }, [products]);
+    setCurrentPage(1);
+  }, [products, searchTerm, categoryFilter, priceRange, ratingFilter, sortBy]);
 
   const handleView = useCallback((product) => {
     setSelectedProduct(product);
     setPopupVisible(true);
   }, []);
 
-  const handleAddToCart = useCallback(async () => {
-    if (!selectedProduct) return;
+  const closePopup = useCallback(() => {
+    setPopupVisible(false);
+    setSelectedProduct(null);
+    setCartMessage("");
+    setQuantity(1);
+  }, []);
+
+  const handleAddToCart = useCallback(async (product, qty = quantity) => {
+    if (!product) return;
 
     if (!username) {
       setCartMessage("login");
@@ -91,19 +136,43 @@ export default function CategoryPage({
       return;
     }
 
+    setAddingToCart(true);
+    setSelectedProduct(product);
+
     try {
-      await cartFunctions.addToCart({
+      const data = await cartFunctions.addToCart({
         username,
-        productId: selectedProduct.product_id || selectedProduct.productId,
-        productName: selectedProduct.product_name || selectedProduct.productName,
-        description: selectedProduct.description,
-        price: selectedProduct.price,
-        idUrl: selectedProduct.id_url || selectedProduct.idUrl,
-        quantity: 1,
+        productId: product.product_id || product.productId,
+        productName: product.product_name || product.productName,
+        description: product.description,
+        price: product.price,
+        idUrl: product.id_url || product.idUrl,
+        quantity: qty,
       });
-      setCartMessage("success");
-      window.dispatchEvent(new Event("cartUpdated"));
-      setTimeout(() => setCartMessage(""), 3000);
+
+      // Success if: cartItem exists (new item), updated exists (quantity updated), or message contains success/updated
+      if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
+        setCartMessage("success");
+        window.dispatchEvent(new Event("cartUpdated"));
+        setTimeout(() => {
+          setCartMessage("");
+          closePopup();
+        }, 2000);
+      } else if (data.message && (data.message.includes('already in cart') || data.message.includes('already in'))) {
+        setCartMessage("exists");
+        setTimeout(() => setCartMessage(""), 3000);
+      } else if (data.success === false) {
+        setCartMessage("error");
+        setTimeout(() => setCartMessage(""), 3000);
+      } else {
+        // Default to success if we got here without error
+        setCartMessage("success");
+        window.dispatchEvent(new Event("cartUpdated"));
+        setTimeout(() => {
+          setCartMessage("");
+          closePopup();
+        }, 2000);
+      }
     } catch (err) {
       if (err.response && err.response.message && err.response.message.includes('already in cart')) {
         setCartMessage("exists");
@@ -111,350 +180,229 @@ export default function CategoryPage({
         setCartMessage("error");
       }
       setTimeout(() => setCartMessage(""), 3000);
+    } finally {
+      setAddingToCart(false);
     }
-  }, [selectedProduct, username]);
+  }, [username, quantity, closePopup]);
 
-  const closePopup = useCallback(() => {
-    setPopupVisible(false);
-    setSelectedProduct(null);
-    setCartMessage("");
-  }, []);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, itemsPerPage]);
 
-  const productGridItems = useMemo(() => 
-    filteredProducts.map((product) => (
-      <div
-        key={product.id || product._id || product.product_id}
-        className="group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col"
-      >
-        <div className="relative h-40 sm:h-48 md:h-52 lg:h-56 overflow-hidden flex-shrink-0">
-          <ProductImage
-            src={product.idUrl}
-            alt={product.productName}
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, (max-width: 1536px) 25vw, 20vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-90">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-              <FontAwesomeIcon icon={faEye} className="text-red-600 text-base" />
-            </div>
-          </div>
-
-          <button className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white">
-            <FontAwesomeIcon icon={faHeart} className="text-red-600" />
-          </button>
-        </div>
-
-        <div className="p-3 sm:p-4 md:p-4 flex flex-col flex-1">
-          <div className="flex-1">
-            <h2 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 truncate mb-1 sm:mb-2 group-hover:text-red-600 transition-colors">
-              {product.productName}
-            </h2>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <div>
-                <p className="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">Price</p>
-                <p className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                  ₱{formatPrice(product.price)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => handleView(product)}
-            className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-2 sm:py-2.5 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 touch-manipulation text-xs sm:text-sm mt-auto min-h-[40px]"
-          >
-            <FontAwesomeIcon icon={faEye} className="text-xs sm:text-sm" />
-            View Details
-          </button>
-        </div>
-      </div>
-    )), [filteredProducts, handleView]);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 -left-20 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-40 -right-20 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-700"></div>
-      </div>
-
-      <Navbar />
-
-      <main className="flex-1 relative mt-16 md:mt-0 flex flex-col">
-        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-          <div className="px-4 sm:px-6 lg:px-8 pt-4">
-            <div className="py-6">
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg overflow-visible">
-                  <FontAwesomeIcon icon={categoryIcon} className="text-white" style={{ fontSize: '3.5rem', width: '3.5rem', height: '3.5rem' }} />
-                </div>
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                    {categoryName}
-                  </h1>
-                  <p className="text-gray-600 text-sm mt-1">
-                    Browse our collection of {categoryName.toLowerCase()}
-                  </p>
+    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
+      <UserSidebar />
+      
+      <main className="flex-1 ml-64 overflow-auto">
+        {/* Header */}
+        <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
+          <div className="px-8 py-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
+                <span className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">Totally Normal</span>
+                <span className="w-2 h-2 bg-[#FFBF00] rounded-full"></span>
+                <span className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">Store</span>
+              </div>
+              <div className="flex-1 max-w-2xl">
+                <div className="relative">
+                  <FontAwesomeIcon icon={faChevronRight} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3] pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#E0E0E0] dark:border-[#404040] rounded-xl focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#666666] dark:placeholder-[#a3a3a3]"
+                  />
                 </div>
               </div>
-            </div>
-
-            <div className="pb-4 flex justify-center">
-              <div className="w-full max-w-2xl">
-                <SearchBar
-                  placeholder={`🔍 Search ${categoryName.toLowerCase()}...`}
-                  onSearch={handleSearch}
-                  className="w-full mx-auto"
-                />
+              <div className="flex items-center gap-4">
+                <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors">New Arrivals</button>
+                <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors">Best Sellers</button>
+                <ThemeToggle />
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="p-8">
+          {/* Breadcrumbs */}
+          <div className="mb-4">
+            <nav className="text-sm text-[#666666] dark:text-[#a3a3a3]">
+              <span className="hover:text-[#FFBF00] cursor-pointer" onClick={() => router.push("/dashboard")}>Home</span>
+              <span className="mx-2">/</span>
+              <span className="text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold">All Products</span>
+            </nav>
+          </div>
+
+          {/* Page Title */}
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Our Collection</h1>
+            <p className="text-[#666666] dark:text-[#a3a3a3]">
+              Discover a curated selection of premium products designed for your everyday needs.
+            </p>
+          </div>
+
+          {/* Filters and Sort */}
+          <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button className="px-4 py-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors">
+                Category
+                <FontAwesomeIcon icon={faChevronDown} className="text-xs" />
+              </button>
+              <button className="px-4 py-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors">
+                Price Range
+                <FontAwesomeIcon icon={faChevronDown} className="text-xs" />
+              </button>
+              <button className="px-4 py-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors">
+                Rating
+                <FontAwesomeIcon icon={faChevronDown} className="text-xs" />
+              </button>
+              <button className="px-4 py-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors">
+                Sort By: {sortBy === "newest" ? "Newest" : sortBy === "oldest" ? "Oldest" : sortBy === "price-low" ? "Price: Low to High" : "Price: High to Low"}
+                <FontAwesomeIcon icon={sortBy.includes("price-low") ? faArrowUp : faArrowDown} className="text-xs" />
+              </button>
+            </div>
+            <p className="text-sm text-[#666666] dark:text-[#a3a3a3]">
+              Showing <span className="font-semibold text-[#2C2C2C] dark:text-[#e5e5e5]">{filteredProducts.length}</span> products
+            </p>
+          </div>
+
+          {/* Product Grid */}
           {loading ? (
-            <div className="flex justify-center items-center h-96">
-              <div className="text-center">
-                <div className="relative mb-6">
-                  <div className="h-20 w-20 border-4 border-red-200 rounded-full mx-auto"></div>
-                  <div className="h-20 w-20 border-4 border-t-red-600 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-md border border-[#E0E0E0] dark:border-[#404040] animate-pulse">
+                  <div className="h-64 bg-[#E0E0E0] dark:bg-[#404040]"></div>
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-[#E0E0E0] dark:bg-[#404040] rounded w-3/4"></div>
+                    <div className="h-6 bg-[#E0E0E0] dark:bg-[#404040] rounded w-1/2"></div>
+                  </div>
                 </div>
-                <p className="text-gray-700 font-semibold text-lg">
-                  Loading {categoryName}...
-                </p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Please wait a moment
-                </p>
-              </div>
+              ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-96 text-center">
-              <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md border border-gray-100">
-                <div className="w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 overflow-visible">
-                  <FontAwesomeIcon icon={categoryIcon} className="text-red-500" style={{ fontSize: '4rem', width: '4rem', height: '4rem' }} />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                  {products.length === 0
-                    ? `No ${categoryName} Available`
-                    : "No Results Found"}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {products.length === 0
-                    ? `Check back later for new ${categoryName.toLowerCase()}.`
-                    : "We couldn't find any products matching your search. Try different keywords."}
-                </p>
-              </div>
+            <div className="bg-white dark:bg-[#2C2C2C] rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] p-12 text-center">
+              <p className="text-[#666666] dark:text-[#a3a3a3] text-lg font-semibold mb-2">No products found</p>
+              <p className="text-[#666666] dark:text-[#a3a3a3] text-sm">Try adjusting your filters</p>
             </div>
           ) : (
             <>
-              <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-bold text-red-600 text-lg">
-                        {filteredProducts.length}
-                      </span>
-                      <span className="ml-2 text-gray-500">
-                        {filteredProducts.length === 1 ? "Product" : "Products"}{" "}
-                        Available
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 bg-white rounded-xl shadow-sm border border-gray-200 p-1">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
-                      viewMode === "grid"
-                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                {paginatedProducts.map((product) => (
+                  <div
+                    key={product.id || product.product_id}
+                    className="group bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-[#E0E0E0] dark:border-[#404040] relative"
                   >
-                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
-                    <span className="hidden xs:inline">Grid</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg transition-all touch-manipulation text-sm sm:text-base ${
-                      viewMode === "list"
-                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
-                    <span className="hidden xs:inline">List</span>
-                  </button>
-                </div>
-              </div>
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 z-10">
+                      {product.stock_quantity > 0 && product.is_available && (
+                        <span className="px-2 py-1 bg-[#FFBF00] text-[#2C2C2C] text-xs font-bold rounded">NEW</span>
+                      )}
+                    </div>
+                    <div className="absolute top-3 right-3 z-10">
+                      <button className="w-8 h-8 bg-white dark:bg-[#404040] rounded-full flex items-center justify-center shadow-md hover:bg-[#E0E0E0] dark:hover:bg-[#505050] transition-colors opacity-0 group-hover:opacity-100 border border-[#E0E0E0] dark:border-[#404040]">
+                        <FontAwesomeIcon icon={faHeart} className="text-[#FFBF00] text-sm" />
+                      </button>
+                    </div>
 
-              {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-                  {productGridItems}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id || product._id || product.product_id}
-                      className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 flex flex-col sm:flex-row"
-                    >
-                      <div className="relative w-full sm:w-48 h-48 overflow-hidden flex-shrink-0">
-                        <ProductImage
-                          src={product.idUrl}
-                          alt={product.productName}
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          sizes="(max-width: 640px) 100vw, 192px"
-                        />
-                      </div>
-
-                      <div className="flex-1 p-6 flex flex-col justify-between">
-                        <div>
-                          <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
-                            {product.productName}
-                          </h2>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
-                            {product.description}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Price</p>
-                            <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                              ₱{formatPrice(product.price)}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => handleView(product)}
-                            className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation text-sm sm:text-base whitespace-nowrap"
-                          >
-                            <FontAwesomeIcon icon={faEye} className="text-base" />
-                            <span className="hidden sm:inline">View Details</span>
-                            <span className="sm:hidden">View</span>
-                          </button>
-                        </div>
+                    {/* Product Image */}
+                    <div className="relative h-64 overflow-hidden bg-white dark:bg-white/5">
+                      <ProductImage
+                        src={product.idUrl || product.id_url}
+                        alt={product.productName || product.product_name}
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <button
+                          onClick={() => handleView(product)}
+                          className="bg-white dark:bg-[#404040] rounded-full p-3 shadow-lg hover:scale-110 transition-transform"
+                        >
+                          <FontAwesomeIcon icon={faEye} className="text-[#FFBF00] text-lg" />
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Product Info */}
+                    <div className="p-4">
+                      <p className="text-xs font-bold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">ACCESSORIES</p>
+                      <h3 className="font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2 line-clamp-1 group-hover:text-[#FFBF00] transition-colors">
+                        {product.productName || product.product_name}
+                      </h3>
+                      <p className="text-lg font-bold text-[#FFBF00] mb-4">
+                        ₱{formatPrice(product.price)}
+                      </p>
+                      <button
+                        onClick={() => handleView(product)}
+                        className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                      >
+                        <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredProducts.length}
+                />
               )}
             </>
           )}
         </div>
-
-        {popupVisible && selectedProduct && (
-          <div 
-            className="fixed inset-0 flex justify-center items-center bg-black/50 backdrop-blur-sm z-50 p-2 sm:p-4 animate-in fade-in duration-200"
-            onClick={closePopup}
-          >
-            <div 
-              className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-[95%] sm:max-w-lg md:max-w-2xl transform transition-all duration-300 animate-in zoom-in-95 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative">
-                <div className="relative w-full h-48 sm:h-72 md:h-96">
-                  <ProductImage
-                    src={selectedProduct.idUrl}
-                    alt={selectedProduct.productName}
-                    className="object-cover rounded-t-xl sm:rounded-t-2xl"
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 90vw, 672px"
-                    priority
-                  />
-                </div>
-                <button
-                  onClick={closePopup}
-                  className="cursor-pointer absolute top-2 right-2 sm:top-4 sm:right-4 bg-white/95 hover:bg-white text-gray-800 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 backdrop-blur-sm touch-manipulation"
-                >
-                  <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
-                </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 md:p-8">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-2xl">
-                    {selectedProduct.productName}
-                  </h2>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-6 md:p-8">
-                <div className="mb-4 sm:mb-6">
-                  <h3 className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
-                    <FontAwesomeIcon icon={faAlignLeft} className="mr-1.5 sm:mr-2 text-xs sm:text-sm" />
-                    Description
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                    {selectedProduct.description || "No description available"}
-                  </p>
-                </div>
-
-                <div className="bg-gradient-to-r from-red-50 via-orange-50 to-red-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-red-100 overflow-hidden">
-                  <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium flex items-center">
-                        <FontAwesomeIcon icon={faTag} className="mr-1.5 sm:mr-2 text-xs sm:text-sm flex-shrink-0" />
-                        <span className="whitespace-nowrap">Price</span>
-                      </p>
-                      <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent break-words overflow-wrap-anywhere">
-                        ₱{formatPrice(selectedProduct.price)}
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
-                      <FontAwesomeIcon icon={faShoppingBag} className="text-white text-lg sm:text-xl md:text-2xl" />
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={cartMessage !== ""}
-                  className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-2.5 sm:py-3 md:py-4 rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-sm sm:text-base md:text-lg active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
-                >
-                  <FontAwesomeIcon icon={faCartPlus} className="text-base sm:text-lg md:text-xl" />
-                  Add to Cart
-                </button>
-
-                {cartMessage && (
-                  <div className="mt-4 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div
-                      className={`flex items-center gap-3 px-6 py-4 rounded-xl font-semibold transition-all shadow-lg ${
-                        cartMessage === "success"
-                          ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                          : cartMessage === "exists"
-                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                          : cartMessage === "login"
-                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                          : "bg-gradient-to-r from-red-500 to-red-600 text-white"
-                      }`}
-                    >
-                      <FontAwesomeIcon
-                        icon={
-                          cartMessage === "success"
-                            ? faCheckCircle
-                            : cartMessage === "exists"
-                            ? faInfoCircle
-                            : cartMessage === "login"
-                            ? faUserLock
-                            : faExclamationCircle
-                        }
-                        className="text-2xl"
-                      />
-                      <span>
-                        {cartMessage === "success" &&
-                          "Product added to cart successfully!"}
-                        {cartMessage === "exists" &&
-                          "This product is already in your cart."}
-                        {cartMessage === "login" &&
-                          "Please log in to add items to your cart."}
-                        {cartMessage === "error" &&
-                          "Failed to add product. Please try again."}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </main>
+
+      {/* Product Modal */}
+      {popupVisible && selectedProduct && (
+        <ProductModal
+          product={{
+            ...selectedProduct,
+            productName: selectedProduct.productName || selectedProduct.product_name,
+            idUrl: selectedProduct.idUrl || selectedProduct.id_url,
+            sellerUsername: selectedProduct.sellerUsername || selectedProduct.seller_username
+          }}
+          onClose={closePopup}
+          onAddToCart={handleAddToCart}
+          isAddingToCart={addingToCart}
+          username={username}
+          initialQuantity={quantity}
+        />
+      )}
+
+      {/* Cart Success Popup */}
+      {cartMessage && (
+        <div className={`fixed top-4 right-4 z-50 max-w-sm animate-in slide-in-from-top-2 fade-in ${
+          cartMessage === "success" ? "bg-[#4CAF50]" : 
+          cartMessage === "exists" ? "bg-[#FFBF00]" : 
+          cartMessage === "login" ? "bg-[#2F79F4]" : 
+          "bg-[#F44336]"
+        } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
+          {cartMessage === "success" && <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />}
+          {cartMessage === "exists" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
+          {cartMessage === "error" && <FontAwesomeIcon icon={faTimes} className="text-lg flex-shrink-0 mt-0.5" />}
+          {cartMessage === "login" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
+          <p className="font-medium text-sm sm:text-base break-words flex-1">
+            {cartMessage === "success" && "Product added to cart successfully!"}
+            {cartMessage === "exists" && "This product is already in your cart"}
+            {cartMessage === "error" && "Failed to add product to cart"}
+            {cartMessage === "login" && "Please sign in to add items to cart"}
+          </p>
+          <button onClick={() => setCartMessage("")} className="text-white/80 hover:text-white">
+            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

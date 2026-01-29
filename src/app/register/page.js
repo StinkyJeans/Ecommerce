@@ -3,244 +3,224 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { createClient } from "@/lib/supabase/client";
 import { authFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faUserPlus,
-  faUser,
-  faLock,
   faEye,
   faEyeSlash,
-  faStore,
   faCheckCircle,
-  faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { AuthHeaderRegister } from "@/app/components/auth/AuthHeader";
+import { AuthFooterRegister } from "@/app/components/auth/AuthFooter";
 
 export default function RegisterPage() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [popupSuccess, setPopupSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
-  useLoadingFavicon(loading, "Register");
+  useLoadingFavicon(loading || googleLoading, "Register");
+
+  const handleGoogleSignUp = async () => {
+    if (!supabase) return;
+    setGoogleLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/auth/callback?next=/dashboard`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: redirectUrl },
+      });
+      if (error) {
+        setPopupMessage(error.message?.includes("provider is not enabled")
+          ? "Google sign up is not enabled. Please use the form below."
+          : `Error: ${error.message}`);
+        setPopupSuccess(false);
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 5000);
+      }
+    } catch (err) {
+      setPopupMessage("Something went wrong. Please try again.");
+      setPopupSuccess(false);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 5000);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const data = await authFunctions.register({ displayName, email, password, role: "user" });
-
-      const isSuccess = data && 
-        data.message && 
-        data.success !== false && 
-        !data.message.toLowerCase().includes('fail') && 
-        !data.message.toLowerCase().includes('error') &&
-        !data.error &&
-        !data.errors;
-
-      if (isSuccess) {
-        setPopupMessage(data.message || "User registered successfully");
+      const data = await authFunctions.register({
+        displayName,
+        email,
+        password,
+        role: "user",
+        contact: phone || undefined,
+      });
+      const ok = data?.message && data.success !== false && !data.error && !data.errors;
+      if (ok) {
+        setPopupMessage(data.message || "Account created successfully.");
+        setPopupSuccess(true);
         setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-          router.push("/");
-        }, 2000);
+        setTimeout(() => { setShowPopup(false); router.push("/"); }, 2000);
       } else {
-
-        const errorMessage = data?.error || data?.message || data?.errors || "Registration failed";
-        setPopupMessage(Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage);
+        setPopupMessage(data?.error || data?.message || (Array.isArray(data?.errors) ? data.errors.join(". ") : "Registration failed."));
+        setPopupSuccess(false);
         setShowPopup(true);
-        setTimeout(() => {
-          setShowPopup(false);
-        }, 3000);
+        setTimeout(() => setShowPopup(false), 4000);
       }
     } catch (error) {
-
-      let errorMessage = "Registration failed. Please try again.";
-
-      if (error.response?.errors && Array.isArray(error.response.errors) && error.response.errors.length > 0) {
-        errorMessage = error.response.errors.join(". ");
-      } else if (error.response?.error) {
-        errorMessage = error.response.error;
-      } else if (error.response?.message) {
-        errorMessage = error.response.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      setPopupMessage(errorMessage);
+      let msg = "Registration failed. Please try again.";
+      if (error.response?.errors && Array.isArray(error.response.errors)) msg = error.response.errors.join(". ");
+      else if (error.response?.message) msg = error.response.message;
+      else if (error.message) msg = error.message;
+      setPopupMessage(msg);
+      setPopupSuccess(false);
       setShowPopup(true);
-      setTimeout(() => {
-        setShowPopup(false);
-      }, 3000);
+      setTimeout(() => setShowPopup(false), 4000);
     } finally {
       setLoading(false);
     }
   };
 
-  const Login = () => {
-    router.push("/");
-  };
-
-  const sellerRegister = () => {
-    router.push("/sellerRegister");
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 p-4 relative">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
-      </div>
+    <div className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col">
+      <AuthHeaderRegister />
 
-      {showPopup && (
-        <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl animate-fade-in z-50 flex items-center gap-2 sm:gap-3 max-w-sm sm:max-w-md mx-auto sm:mx-0">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl flex-shrink-0" />
-          <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
-        </div>
-      )}
-
-      <form
-        onSubmit={handleRegister}
-        className="relative bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:shadow-3xl"
-      >
-        {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-10">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">Creating account...</p>
-            </div>
+      <div className="flex-1 flex items-center justify-center p-4">
+        {showPopup && (
+          <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in ${
+            popupSuccess ? "bg-[#4CAF50]" : "bg-[#F44336]"
+          } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-center gap-3`}>
+            <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0" />
+            <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
           </div>
         )}
 
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <FontAwesomeIcon icon={faUserPlus} className="text-white text-2xl" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Create Account
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Join TotallyNormal Store today
-          </p>
-        </div>
-
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Display Name
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faUser} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type="text"
-              placeholder="Enter your display name"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400 text-sm" />
-            </div>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-base"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 sm:py-3.5 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none touch-manipulation text-base"
+        <form
+          onSubmit={handleRegister}
+          className="relative w-full max-w-md bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-lg border border-[#E0E0E0] dark:border-[#404040] p-6 sm:p-8"
         >
-          <span className="flex items-center justify-center gap-2">
-            <FontAwesomeIcon icon={faUserPlus} className="text-base sm:text-lg" style={{ width: '1em', height: '1em', maxWidth: '100%' }} />
-            Register
-          </span>
-        </button>
+          {loading && (
+            <div className="absolute inset-0 bg-white/95 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#2F79F4] rounded-full animate-spin" />
+                <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">Creating account...</p>
+              </div>
+            </div>
+          )}
 
-        <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-100">
-          <div className="flex items-start gap-3">
-            <FontAwesomeIcon icon={faStore} className="text-red-600 text-lg mt-0.5" />
+          <h1 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-white">Join Totally Normal Store</h1>
+          <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 mb-6">The one-stop shop for your everyday needs.</p>
+
+          <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-gray-800 mb-1">
-                Want to sell on our platform?
-              </p>
-              <button
-                type="button"
-                onClick={sellerRegister}
-                className="cursor-pointer text-red-600 hover:text-red-700 font-semibold text-sm underline underline-offset-2 transition-colors"
-              >
-                Register as a Seller →
-              </button>
+              <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Display Name</label>
+              <input
+                type="text"
+                placeholder="e.g., John Doe"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Gmail Address</label>
+              <input
+                type="email"
+                placeholder="example@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Phone Number</label>
+              <input
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 pr-12 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-lg" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600 text-sm">
+          <button
+            type="submit"
+            disabled={loading || googleLoading}
+            className="w-full mt-6 py-3 px-4 bg-[#2F79F4] hover:bg-[#2563eb] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
+          >
+            Create Account
+          </button>
+
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-[#E0E0E0] dark:bg-[#404040]" />
+            <span className="text-[#666666] dark:text-[#a3a3a3] text-sm">Or continue with</span>
+            <div className="flex-1 h-px bg-[#E0E0E0] dark:bg-[#404040]" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignUp}
+            disabled={loading || googleLoading}
+            className="w-full py-3 px-4 bg-white border border-[#E0E0E0] dark:bg-[#404040] dark:border-[#505050] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-medium flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#505050] transition-colors disabled:opacity-50"
+          >
+            <FontAwesomeIcon icon={faGoogle} className="text-xl" />
+            Sign up with Gmail
+          </button>
+
+          <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
             Already have an account?{" "}
-            <span
-              onClick={Login}
-              className="text-red-600 hover:text-red-700 font-semibold cursor-pointer underline underline-offset-2 transition-colors"
-            >
-              Login here
-            </span>
+            <button type="button" onClick={() => router.push("/")} className="text-[#2F79F4] font-medium hover:underline">
+              Log in
+            </button>
           </p>
-        </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-center text-xs text-gray-500">
-            By registering, you agree to our Terms & Privacy Policy
+          <p className="mt-4 text-center text-xs text-[#666666] dark:text-[#a3a3a3]">
+            By clicking &apos;Create Account&apos;, you agree to our{" "}
+            <button type="button" onClick={() => router.push("/#terms")} className="text-[#2F79F4] hover:underline">Terms of Service</button>
+            {" "}and{" "}
+            <button type="button" onClick={() => router.push("/#privacy")} className="text-[#2F79F4] hover:underline">Privacy Policy</button>.
           </p>
-        </div>
-      </form>
+        </form>
+      </div>
+
+      <AuthFooterRegister />
     </div>
   );
 }

@@ -18,7 +18,7 @@ export async function POST(req) {
     const { userData } = authResult;
     const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
     if (verifyError) return verifyError;
-    const { productName, description, price, category, idUrl, username } = body;
+    const { productName, description, price, category, idUrl, username, stockQuantity, isAvailable } = body;
     const validationErrors = [];
     if (!productName || !productName.trim()) {
       validationErrors.push("Product name is required");
@@ -65,11 +65,26 @@ export async function POST(req) {
     if (!allowedCategories.includes(sanitizedCategory)) {
       validationErrors.push(`Invalid category. Must be one of: ${allowedCategories.join(', ')}`);
     }
+    
+    // Validate stock quantity
+    const stockQty = stockQuantity !== undefined && stockQuantity !== null 
+      ? parseInt(stockQuantity, 10) 
+      : 0;
+    if (isNaN(stockQty) || stockQty < 0) {
+      validationErrors.push("Stock quantity must be a non-negative integer");
+    }
+    
+    const available = isAvailable !== undefined ? Boolean(isAvailable) : (stockQty > 0);
+    
     if (validationErrors.length > 0) {
       return createValidationErrorResponse(validationErrors);
     }
     const supabase = await createClient();
     const productId = generateProductId();
+    
+    // Convert price to numeric
+    const numericPrice = typeof price === 'number' ? price : parseFloat(price);
+    
     const { data: newProduct, error } = await supabase
       .from('products')
       .insert({
@@ -77,9 +92,11 @@ export async function POST(req) {
         seller_username: sanitizedUsername,
         product_name: sanitizedProductName,
         description: sanitizedDescription,
-        price: typeof price === 'number' ? price.toString() : price,
+        price: numericPrice,
         category: sanitizedCategory,
         id_url: idUrl,
+        stock_quantity: stockQty,
+        is_available: available
       })
       .select()
       .single();

@@ -14,22 +14,32 @@ export async function GET(req) {
     const verify = await verifyRequestSignature(req, null, userData.id);
     if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
-    const username = sanitizeString(searchParams.get('username'), 50);
+    let username = sanitizeString(searchParams.get('username'), 50);
+    
+    // If no username in query, use authenticated user's username
+    if (!username) {
+      username = userData.username;
+    }
+    
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
+    
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
+    
     const supabase = await createClient();
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'getShippingAddresses');
     }
+    
+    // Use authenticated user's username to ensure consistency (case-insensitive)
     const { data: addresses, error } = await supabase
       .from('shipping_addresses')
       .select('*')
-      .eq('username', username)
+      .eq('username', userData.username)
       .order('is_default', { ascending: false })
       .order('created_at', { ascending: false });
     if (error) {
@@ -49,8 +59,15 @@ export async function POST(req) {
     if (authResult instanceof NextResponse) {
       return authResult;
     }
+    const { userData } = authResult;
     const body = await req.json();
-    const username = sanitizeString(body.username, 50);
+    let username = sanitizeString(body.username, 50);
+    
+    // Use authenticated user's username to ensure consistency
+    if (!username) {
+      username = userData.username;
+    }
+    
     const fullName = sanitizeString(body.fullName, 100);
     const phoneNumber = sanitizeString(body.phoneNumber, 20);
     const addressLine1 = sanitizeString(body.addressLine1, 200);
@@ -60,9 +77,17 @@ export async function POST(req) {
     const postalCode = sanitizeString(body.postalCode, 20);
     const country = sanitizeString(body.country || 'Philippines', 100);
     const isDefault = body.isDefault === true || body.isDefault === 'true';
+    const addressType = sanitizeString(body.addressType || 'home', 10);
+    
+    // Validate addressType
+    if (addressType && addressType !== 'home' && addressType !== 'work') {
+      return createValidationErrorResponse("Address type must be 'home' or 'work'");
+    }
+    
     if (!username || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
       return createValidationErrorResponse("Missing required fields");
     }
+    
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
@@ -93,11 +118,14 @@ export async function POST(req) {
     if (!supabase) {
       return handleError(new Error("Supabase client not initialized"), 'addShippingAddress');
     }
+    // Use authenticated user's username to ensure consistency
+    const authenticatedUsername = userData.username;
+    
     if (isDefault) {
       const { error: updateError } = await supabase
         .from('shipping_addresses')
         .update({ is_default: false })
-        .eq('username', username)
+        .eq('username', authenticatedUsername)
         .eq('is_default', true);
       if (updateError) {
       }
@@ -105,7 +133,7 @@ export async function POST(req) {
     const { data: newAddress, error: insertError } = await supabase
       .from('shipping_addresses')
       .insert({
-        username,
+        username: authenticatedUsername,
         full_name: fullName,
         phone_number: phoneNumber,
         address_line1: addressLine1,
@@ -114,7 +142,8 @@ export async function POST(req) {
         province,
         postal_code: postalCode,
         country,
-        is_default: isDefault
+        is_default: isDefault,
+        address_type: addressType || 'home'
       })
       .select()
       .single();
@@ -149,6 +178,13 @@ export async function PUT(req) {
     const postalCode = sanitizeString(body.postalCode, 20);
     const country = sanitizeString(body.country || 'Philippines', 100);
     const isDefault = body.isDefault === true || body.isDefault === 'true';
+    const addressType = sanitizeString(body.addressType || 'home', 10);
+    
+    // Validate addressType
+    if (addressType && addressType !== 'home' && addressType !== 'work') {
+      return createValidationErrorResponse("Address type must be 'home' or 'work'");
+    }
+    
     if (!id || !fullName || !phoneNumber || !addressLine1 || !city || !province || !postalCode) {
       return createValidationErrorResponse("Missing required fields");
     }
@@ -213,7 +249,8 @@ export async function PUT(req) {
         province,
         postal_code: postalCode,
         country,
-        is_default: isDefault
+        is_default: isDefault,
+        address_type: addressType || 'home'
       })
       .eq('id', id)
       .select()
