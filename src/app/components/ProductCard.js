@@ -7,7 +7,6 @@ import { formatPrice } from "@/lib/formatPrice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
-// Lazy load heavy components
 const ProductModal = dynamic(() => import("./ProductModal"), {
   loading: () => <div className="animate-pulse bg-[#E0E0E0] dark:bg-[#404040] rounded-lg h-96" />,
   ssr: false

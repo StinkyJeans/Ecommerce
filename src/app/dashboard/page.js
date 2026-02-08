@@ -2,14 +2,11 @@
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
 import dynamic from "next/dynamic";
-import UserSidebar from "../components/UserSidebar";
 import SearchBar from "../components/searchbar";
-import ProductImage from "../components/ProductImage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
@@ -25,7 +22,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { ProductGridSkeleton } from "../components/ProductSkeleton";
 
-// Lazy load heavy components
 const ProductCard = dynamic(() => import("../components/ProductCard"), {
   loading: () => <div className="animate-pulse bg-[#E0E0E0] dark:bg-[#404040] rounded-2xl h-96" />,
   ssr: false
@@ -136,7 +132,6 @@ export default function Dashboard() {
         quantity: qty,
       });
 
-      // Success if: cartItem exists (new item), updated exists (quantity updated), or message contains success/updated
       if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
@@ -178,7 +173,6 @@ export default function Dashboard() {
     setQuantity(1);
   };
 
-  // Get trending and new arrival products
   const trendingProducts = useMemo(() => {
     return filteredProducts.slice(0, 4);
   }, [filteredProducts]);
@@ -188,12 +182,8 @@ export default function Dashboard() {
   }, [filteredProducts]);
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
-      <UserSidebar />
-      
-      <main className="flex-1 ml-64 overflow-auto">
-        {/* Header with Search */}
-        <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
+        <>
+              <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1 max-w-2xl">
@@ -231,10 +221,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              {/* Hero Section */}
               <div className="mb-12 relative rounded-2xl overflow-hidden shadow-xl">
                 <div className="relative h-96 bg-[#5C6F5A]">
-                  <div className="absolute inset-0 bg-[url('/api/placeholder/1200/600')] bg-cover bg-center opacity-30"></div>
                   <div className="relative h-full flex items-center px-12">
                     <div className="max-w-2xl">
                       <h1 className="text-5xl font-bold text-white mb-4">
@@ -244,7 +232,7 @@ export default function Dashboard() {
                         Explore our curated collection of everyday essentials designed for comfort, utility, and understated style.
                       </p>
                       <button
-                        onClick={() => router.push("/dashboard")}
+                        onClick={() => router.push("/search")}
                         className="px-8 py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                       >
                         Shop All Products
@@ -285,35 +273,30 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Category Highlights */}
               <div className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
                   <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="absolute inset-0 bg-[url('/api/placeholder/400/300')] bg-cover bg-center opacity-50"></div>
                   <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">Men's Wardrobe</h3>
-                    <p className="text-white/90">Essential staples for him</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">PC and Laptops</h3>
+                    <p className="text-white/90">Power and portability</p>
                   </div>
                 </div>
                 <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
                   <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="absolute inset-0 bg-[url('/api/placeholder/400/300')] bg-cover bg-center opacity-50"></div>
                   <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">Women's Edit</h3>
-                    <p className="text-white/90">Curated pieces for her</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">Mobile Devices</h3>
+                    <p className="text-white/90">Phones and tablets</p>
                   </div>
                 </div>
                 <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
                   <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="absolute inset-0 bg-[url('/api/placeholder/400/300')] bg-cover bg-center opacity-50"></div>
                   <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">Home Accents</h3>
-                    <p className="text-white/90">Elevate your space</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">Watches</h3>
+                    <p className="text-white/90">Time in style</p>
                   </div>
                 </div>
               </div>
 
-              {/* New Arrivals Section */}
               <div className="mb-12">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -343,7 +326,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Newsletter Section */}
               <div className="bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-2xl shadow-md p-8 mb-12">
                 <div className="max-w-2xl mx-auto text-center">
                   <h2 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">Stay in the Loop</h2>
@@ -388,7 +370,6 @@ export default function Dashboard() {
             </>
           )}
         </div>
-      </main>
 
       {popupVisible && selectedProduct && (
         <Suspense fallback={null}>
@@ -408,7 +389,6 @@ export default function Dashboard() {
         </Suspense>
       )}
 
-      {/* Cart Success Popup */}
       {cartMessage && (
         <div className={`fixed top-4 right-4 z-50 max-w-sm animate-in slide-in-from-top-2 fade-in ${
           cartMessage === "success" ? "bg-[#4CAF50]" : 
@@ -424,13 +404,13 @@ export default function Dashboard() {
             {cartMessage === "success" && "Product added to cart successfully!"}
             {cartMessage === "exists" && "This product is already in your cart"}
             {cartMessage === "error" && "Failed to add product to cart"}
-            {cartMessage === "login" && "Please sign in to add items to cart"}
+            {cartMessage === "login" && "Please Login to add this product to your cart."}
           </p>
           <button onClick={() => setCartMessage("")} className="text-white/80 hover:text-white">
             <FontAwesomeIcon icon={faTimes} className="text-sm" />
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 }

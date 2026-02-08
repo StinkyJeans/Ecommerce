@@ -22,12 +22,26 @@ async function callApi(endpoint, options = {}) {
   }
 
   const response = await fetch(endpoint, fetchOptions);
-  const data = await response.json();
+  const contentType = response.headers.get('content-type') || '';
+  let data;
+  try {
+    data = contentType.includes('application/json')
+      ? await response.json()
+      : null;
+  } catch {
+    if (!response.ok) {
+      const error = new Error(response.status === 404 ? 'API route not found. Try restarting the dev server.' : `Request failed (${response.status})`);
+      error.response = { message: error.message };
+      error.status = response.status;
+      throw error;
+    }
+    data = {};
+  }
   if (!response.ok) {
-    const error = new Error(data.message || data.error || 'Request failed');
-    error.response = data;
+    const error = new Error(data?.message || data?.error || 'Request failed');
+    error.response = data || {};
     error.status = response.status;
-    if (data.errors) {
+    if (data?.errors) {
       error.response.errors = data.errors;
     }
     throw error;
@@ -82,10 +96,10 @@ export const productFunctions = {
   async getProductsByCategory(category) {
     return callApi(`/api/getProductByCategory?category=${encodeURIComponent(category)}`);
   },
-  async addProduct({ productName, description, price, category, idUrl, username }) {
+  async addProduct({ productName, description, price, category, idUrl, username, stockQuantity, isAvailable }) {
     return callApi('/api/goods/addProduct', {
       method: 'POST',
-      body: { productName, description, price, category, idUrl, username },
+      body: { productName, description, price, category, idUrl, username, stockQuantity, isAvailable },
     });
   },
   async updateProduct({ productId, productName, description, price, category, idUrl, username }) {

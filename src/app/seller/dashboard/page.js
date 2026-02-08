@@ -19,7 +19,6 @@ import Header from "@/app/components/header";
 import Navbar from "../components/sellerNavbar";
 import { ProductGridSkeleton } from "@/app/components/ProductSkeleton";
 
-// Lazy load components
 const ProductCard = dynamic(() => import("@/app/components/ProductCard"), {
   loading: () => <div className="animate-pulse bg-gray-200 rounded-2xl h-96" />,
   ssr: false

@@ -30,6 +30,7 @@ export const metadata = {
 };
 
 import VisitTracker from "./components/VisitTracker";
+import StoreLayout from "./components/StoreLayout";
 
 const themeScript = `(function(){
   var d=document.documentElement;
@@ -50,7 +51,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <AuthProvider>
             <VisitTracker />
-            {children}
+            <StoreLayout>{children}</StoreLayout>
           </AuthProvider>
         </ThemeProvider>
       </body>

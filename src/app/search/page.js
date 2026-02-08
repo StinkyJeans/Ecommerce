@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
 import ProductImage from "@/app/components/ProductImage";
-import UserSidebar from "@/app/components/UserSidebar";
 import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -52,7 +51,7 @@ function SearchContent() {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    if (!q.trim()) return [];
+    if (!q.trim()) return products || [];
     const term = q.toLowerCase().trim();
     return (products || []).filter(
       (p) =>
@@ -86,10 +85,7 @@ function SearchContent() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
-      <UserSidebar />
-
-      <main className="flex-1 ml-64 overflow-auto">
+    <>
         <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between gap-4">
@@ -137,12 +133,12 @@ function SearchContent() {
 
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">
-              {q ? `Results for "${q}"` : "Search"}
+              {q ? `Results for "${q}"` : "All Products"}
             </h1>
             <p className="text-[#666666] dark:text-[#a3a3a3]">
               {q
                 ? `${filteredProducts.length} ${filteredProducts.length === 1 ? "product" : "products"} found`
-                : "Enter a search term above to find products."}
+                : `${filteredProducts.length} ${filteredProducts.length === 1 ? "product" : "products"} available`}
             </p>
           </div>
 
@@ -157,19 +153,6 @@ function SearchContent() {
                   </div>
                 </div>
               ))}
-            </div>
-          ) : !q.trim() ? (
-            <div className="bg-white dark:bg-[#2C2C2C] rounded-xl border border-[#E0E0E0] dark:border-[#404040] p-12 text-center">
-              <div className="w-16 h-16 bg-gray-50 dark:bg-[#404040] rounded-full flex items-center justify-center mx-auto mb-4">
-                <FontAwesomeIcon icon={faSearch} className="text-3xl text-[#666666] dark:text-[#a3a3a3]" />
-              </div>
-              <p className="text-[#666666] dark:text-[#a3a3a3] font-medium">Enter a search term to find products.</p>
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="mt-4 px-6 py-2.5 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold"
-              >
-                Browse all products
-              </button>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="bg-white dark:bg-[#2C2C2C] rounded-xl border border-[#E0E0E0] dark:border-[#404040] p-12 text-center">
@@ -254,8 +237,7 @@ function SearchContent() {
             initialQuantity={1}
           />
         )}
-      </main>
-    </div>
+    </>
   );
 }
 

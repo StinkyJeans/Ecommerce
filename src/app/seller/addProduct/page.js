@@ -106,6 +106,8 @@ export default function AddProduct() {
         category,
         idUrl,
         username,
+        stockQuantity: 1,
+        isAvailable: true,
       });
 
       const isSuccess = data && (

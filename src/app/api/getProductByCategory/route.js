@@ -3,61 +3,84 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
 
+function toCanonicalCategory(lower) {
+  if (!lower || typeof lower !== "string") return null;
+  const s = lower.trim().toLowerCase();
+  if (s === "pc" || s === "computers" || s === "computers & laptops" || s === "pc & computers") return "Pc";
+  if (s === "mobile" || s === "mobile devices") return "Mobile";
+  if (s === "watch" || s === "watches") return "Watch";
+  return null;
+}
+
+const CATEGORY_ALIASES = {
+  pc: ["pc", "computers", "pc & computers", "computers & laptops"],
+  mobile: ["mobile", "mobile devices"],
+  watch: ["watch", "watches"],
+};
+
+function getCategoryParam(request) {
+  try {
+    if (request.nextUrl?.searchParams) {
+      return request.nextUrl.searchParams.get("category");
+    }
+    const url = new URL(request.url, "http://localhost");
+    return url.searchParams.get("category");
+  } catch {
+    return null;
+  }
+}
+
+function productMatchesCategory(productCategory, requestedCategoryLower) {
+  const pCat = (productCategory || "").toString().trim().toLowerCase();
+  if (!pCat) return false;
+  if (pCat === requestedCategoryLower) return true;
+  const aliases = CATEGORY_ALIASES[requestedCategoryLower];
+  return Array.isArray(aliases) && aliases.includes(pCat);
+}
+
 export async function GET(request) {
   try {
     const supabase = await createClient();
-    const { searchParams } = new URL(request.url);
-    const category = sanitizeString(searchParams.get('category'), 50);
+    const categoryParam = getCategoryParam(request);
+    const category = sanitizeString(categoryParam, 50);
     if (!category) {
       return createValidationErrorResponse("Category parameter is required");
     }
-    
-    // Simple query first - get products by category
-    const { data: products, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category', category)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      return handleError(error, 'getProductByCategory');
-    }
-    
-    // Get approved sellers (handle gracefully if column doesn't exist)
-    let approvedSellerUsernames = null;
-    try {
-      const { data: approvedSellers, error: sellersError } = await supabase
-        .from('users')
-        .select('username')
-        .eq('role', 'seller')
-        .eq('seller_status', 'approved');
-      
-      if (!sellersError && approvedSellers) {
-        approvedSellerUsernames = new Set(approvedSellers.map(s => s.username));
+
+    const categoryLower = category.toLowerCase();
+    const canonicalCategory = toCanonicalCategory(category) || category;
+
+    let { data: products, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("category", canonicalCategory)
+      .order("created_at", { ascending: false });
+
+    if (error || !products || products.length === 0) {
+      const { data: allProducts, error: allError } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!allError && allProducts && allProducts.length > 0) {
+        products = allProducts.filter((p) =>
+          productMatchesCategory(p.category, categoryLower)
+        );
+      } else {
+        products = products || [];
       }
-    } catch (err) {
-      // seller_status column might not exist, continue without filtering
-      console.log('Could not filter by seller_status:', err.message);
     }
-    
-    // Filter products in memory
-    let filteredProducts = products || [];
-    
-    // Filter by approved sellers if we have the list
-    if (approvedSellerUsernames && approvedSellerUsernames.size > 0) {
-      filteredProducts = filteredProducts.filter(p => approvedSellerUsernames.has(p.seller_username));
+
+    if (error && (!products || products.length === 0)) {
+      return handleError(error, "getProductByCategory");
     }
-    
-    // Filter by is_available if column exists
-    filteredProducts = filteredProducts.filter(p => {
-      if (p.is_available !== undefined) {
-        return p.is_available === true;
-      }
-      return true; // Include if column doesn't exist
+
+    let filteredProducts = (products || []).filter((p) => {
+      if (p.is_available === false) return false;
+      return true;
     });
-    
-    // Transform products
-    const transformedProducts = filteredProducts.map(product => ({
+
+    const transformedProducts = filteredProducts.map((product) => ({
       ...product,
       productId: product.product_id,
       productName: product.product_name,
@@ -66,12 +89,18 @@ export async function GET(request) {
       createdAt: product.created_at,
       updatedAt: product.updated_at,
     }));
-    
-    const response = NextResponse.json({ products: transformedProducts, category });
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+
+    const response = NextResponse.json({
+      products: transformedProducts,
+      category,
+    });
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=300"
+    );
     return response;
   } catch (err) {
-    console.error('Category product fetch error:', err);
-    return handleError(err, 'getProductByCategory');
+    console.error("Category product fetch error:", err);
+    return handleError(err, "getProductByCategory");
   }
 }

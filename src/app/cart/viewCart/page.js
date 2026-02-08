@@ -8,7 +8,6 @@ import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import UserSidebar from "@/app/components/UserSidebar";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import {
   faTrash,
@@ -155,10 +154,7 @@ export default function ViewCart() {
   const total = calculateTotal();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1a1a1a]">
-      <UserSidebar />
-      
-      <main className="flex-1 ml-64 overflow-auto">
+    <>
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
           <div className="px-8 py-4">
@@ -345,7 +341,6 @@ export default function ViewCart() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </>
   );
 }

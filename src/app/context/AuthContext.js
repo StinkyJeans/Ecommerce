@@ -49,8 +49,9 @@ const clearCache = () => {
 };
 
 export function AuthProvider({ children }) {
-  const [role, setRole] = useState(null);
-  const [username, setUsername] = useState(null);
+  // Initialize from cache so first paint shows username when available (no "User" flash)
+  const [role, setRole] = useState(() => getCachedData(CACHE_KEY_ROLE));
+  const [username, setUsername] = useState(() => getCachedData(CACHE_KEY_USERNAME));
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
@@ -61,32 +62,21 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    // Use cached data immediately for instant display
     const cachedUsername = getCachedData(CACHE_KEY_USERNAME);
     const cachedRole = getCachedData(CACHE_KEY_ROLE);
     const cachedEmail = getCachedData(CACHE_KEY_EMAIL);
 
+    // If we have cache, we already initialized state; just ensure loading is false
     if (cachedUsername && cachedRole) {
-      setUsername(cachedUsername);
-      setRole(cachedRole);
-      setLoading(false); // Show cached data immediately
+      setLoading(false);
     }
 
-    // Optimize: Fetch session and signing key in parallel
-    const sessionPromise = supabase.auth.getSession();
-    const signingKeyPromise = getSigningKey() 
-      ? Promise.resolve(null) 
-      : fetch('/api/signing-key', { credentials: 'include' })
-          .then((r) => r.json())
-          .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); return d?.signingKey; })
-          .catch(() => null);
-
-    Promise.all([sessionPromise, signingKeyPromise]).then(([{ data: { session } }]) => {
+    // Don't block username on signing key - get session first, show user immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
         const metadataRole = session.user.user_metadata?.role;
 
-        // Use metadata immediately if available (faster than DB query)
         if (metadataUsername) {
           setUsername(metadataUsername);
           setCachedData(CACHE_KEY_USERNAME, metadataUsername);
@@ -99,33 +89,39 @@ export function AuthProvider({ children }) {
           setCachedData(CACHE_KEY_EMAIL, session.user.email);
         }
 
-        // If we have metadata, show it immediately and fetch fresh data in background
         if (metadataUsername && metadataRole) {
           setLoading(false);
-          // Fetch user data in background without blocking
+          fetchUserData(session.user.email, true);
+        } else if (cachedUsername && cachedRole) {
+          setLoading(false);
           fetchUserData(session.user.email, true);
         } else {
-          // No metadata, need to fetch from DB (but show cached if available)
-          if (!cachedUsername || !cachedRole) {
-            fetchUserData(session.user.email);
-          } else {
-            // We have cached data, just refresh in background
-            setLoading(false);
-            fetchUserData(session.user.email, true);
-          }
+          // No metadata or cache; fetch from DB (fetchUserData will setLoading(false) when done)
+          fetchUserData(session.user.email);
         }
       } else {
         clearCache();
+        setUsername(null);
+        setRole(null);
         setLoading(false);
       }
     }).catch(() => {
-      // If session fetch fails, use cached data if available
+      setLoading(false);
       if (cachedUsername && cachedRole) {
-        setLoading(false);
+        // Keep cached display
       } else {
-        setLoading(false);
+        setUsername(null);
+        setRole(null);
       }
     });
+
+    // Fetch signing key in parallel (do not block UI)
+    if (!getSigningKey()) {
+      fetch('/api/signing-key', { credentials: 'include' })
+        .then((r) => r.json())
+        .then((d) => { if (d?.signingKey) setSigningKey(d.signingKey); })
+        .catch(() => null);
+    }
 
     if (!supabase) {
       return;
