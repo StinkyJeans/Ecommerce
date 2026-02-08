@@ -145,31 +145,33 @@ export default function UserSidebar() {
           </div>
         </div>
 
-        <div>
-          <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase tracking-wider mb-3 px-3">PORTALS</p>
-          <div className="space-y-1">
-            {portalItems.map((item) => {
-              const active = isItemActive(item);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => router.push(item.path)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    active
-                      ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
-                      : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
-                  }`}
-                >
-                  <FontAwesomeIcon
-                    icon={item.icon}
-                    className="text-base"
-                  />
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              );
-            })}
+        {!loading && username && (
+          <div>
+            <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase tracking-wider mb-3 px-3">PORTALS</p>
+            <div className="space-y-1">
+              {portalItems.map((item) => {
+                const active = isItemActive(item);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => router.push(item.path)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      active
+                        ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
+                        : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
+                    }`}
+                  >
+                    <FontAwesomeIcon
+                      icon={item.icon}
+                      className="text-base"
+                    />
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </nav>
 
       <div className="p-4 border-t border-[#E0E0E0] dark:border-white/10">
