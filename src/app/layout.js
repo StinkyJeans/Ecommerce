@@ -31,6 +31,7 @@ export const metadata = {
 
 import VisitTracker from "./components/VisitTracker";
 import StoreLayout from "./components/StoreLayout";
+import QueryProvider from "./components/QueryProvider";
 
 const themeScript = `(function(){
   var d=document.documentElement;
@@ -49,10 +50,12 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
       >
         <ThemeProvider>
-          <AuthProvider>
-            <VisitTracker />
-            <StoreLayout>{children}</StoreLayout>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <VisitTracker />
+              <StoreLayout>{children}</StoreLayout>
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cartFunctions } from "@/lib/supabase/api";
+import { cartQueryKey } from "./useCart";
 
 export function useAddToCartToast(username, onClosePopup) {
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
+  const queryClient = useQueryClient();
 
   const handleAddToCart = useCallback(
     async (product, qty = 1) => {
@@ -37,6 +40,7 @@ export function useAddToCartToast(username, onClosePopup) {
 
         if (success) {
           setCartMessage("success");
+          queryClient.invalidateQueries({ queryKey: cartQueryKey(username) });
           window.dispatchEvent(new Event("cartUpdated"));
           setTimeout(() => {
             setCartMessage("");
@@ -50,6 +54,7 @@ export function useAddToCartToast(username, onClosePopup) {
           setTimeout(() => setCartMessage(""), 3000);
         } else {
           setCartMessage("success");
+          queryClient.invalidateQueries({ queryKey: cartQueryKey(username) });
           window.dispatchEvent(new Event("cartUpdated"));
           setTimeout(() => {
             setCartMessage("");
@@ -65,7 +70,7 @@ export function useAddToCartToast(username, onClosePopup) {
         setAddingToCart(false);
       }
     },
-    [username, onClosePopup]
+    [username, onClosePopup, queryClient]
   );
 
   return { handleAddToCart, addingToCart, cartMessage, setCartMessage };

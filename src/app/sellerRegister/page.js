@@ -142,7 +142,7 @@ export default function SellerRegisterPage() {
           {loading && (
             <div className="absolute inset-0 bg-white/90 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-20">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#FFBF00] rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#FFBF00] rounded-full loading-spinner-animated" />
                 <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">Submitting application...</p>
               </div>
             </div>

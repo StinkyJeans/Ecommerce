@@ -21,6 +21,7 @@ import {
   faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons";
 import { ProductGridSkeleton } from "../components/ProductSkeleton";
+import { getShopCategories } from "@/lib/categories";
 
 const ProductCard = dynamic(() => import("../components/ProductCard"), {
   loading: () => <div className="animate-pulse bg-[#E0E0E0] dark:bg-[#404040] rounded-2xl h-96" />,
@@ -274,27 +275,24 @@ export default function Dashboard() {
               </div>
 
               <div className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
-                  <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">PC and Laptops</h3>
-                    <p className="text-white/90">Power and portability</p>
+                {getShopCategories().map((cat) => (
+                  <div
+                    key={cat.value}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => router.push(cat.path)}
+                    onKeyDown={(e) => e.key === "Enter" && router.push(cat.path)}
+                    className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]"
+                  >
+                    <div className="absolute inset-0 bg-[#5C6F5A]" />
+                    <div className="relative h-full flex flex-col justify-end p-6">
+                      <h3 className="text-2xl font-bold text-white mb-2">{cat.label}</h3>
+                      <p className="text-white/90">
+                        {cat.value === "Pc" ? "Power and portability" : cat.value === "Mobile" ? "Phones and tablets" : "Time in style"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
-                  <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">Mobile Devices</h3>
-                    <p className="text-white/90">Phones and tablets</p>
-                  </div>
-                </div>
-                <div className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]">
-                  <div className="absolute inset-0 bg-[#5C6F5A]"></div>
-                  <div className="relative h-full flex flex-col justify-end p-6">
-                    <h3 className="text-2xl font-bold text-white mb-2">Watches</h3>
-                    <p className="text-white/90">Time in style</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="mb-12">

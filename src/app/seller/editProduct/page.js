@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Navbar from "../components/sellerNavbar";
 import { uploadProductImage } from "@/lib/supabase/storage";
 import { productFunctions } from "@/lib/supabase/api";
+import { getCategoryOptionsForForm } from "@/lib/categories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -190,9 +191,9 @@ function EditProductContent() {
   };
 
   const getCategoryIcon = (cat) => {
-    if (cat === "Pc" || cat === "Computers") return faDesktop;
-    if (cat === "Mobile" || cat === "Mobile Phones") return faMobileAlt;
-    if (cat === "Watch" || cat === "Watches") return faClock;
+    if (cat === "Pc" || (cat && cat.toLowerCase().includes("pc"))) return faDesktop;
+    if (cat === "Mobile" || (cat && cat.toLowerCase().includes("mobile"))) return faMobileAlt;
+    if (cat === "Watch" || (cat && cat.toLowerCase().includes("watch"))) return faClock;
     return faTag;
   };
 
@@ -207,7 +208,7 @@ function EditProductContent() {
         {authLoading || fetching ? (
           <div className="flex-1 flex items-center justify-center min-h-[60vh]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full animate-spin"></div>
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full loading-spinner-animated" />
               <p className="text-gray-600 dark:text-gray-400 font-medium">Loading product...</p>
             </div>
           </div>
@@ -347,9 +348,9 @@ function EditProductContent() {
                     className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all outline-none text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Select category</option>
-                    <option value="Pc">Computers & Laptops</option>
-                    <option value="Mobile">Mobile Devices</option>
-                    <option value="Watch">Watches</option>
+                    {getCategoryOptionsForForm().map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -416,7 +417,7 @@ export default function EditProduct() {
         <main className="flex-1 relative mt-16 md:mt-0 flex flex-col overflow-auto">
           <div className="flex-1 flex items-center justify-center min-h-[60vh]">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full animate-spin"></div>
+              <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full loading-spinner-animated" />
               <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
             </div>
           </div>

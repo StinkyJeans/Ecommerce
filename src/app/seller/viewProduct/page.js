@@ -179,7 +179,7 @@ export default function ViewProduct() {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-24">
-              <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin mb-4" />
+              <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full loading-spinner-animated mb-4" />
               <p className="text-gray-600 dark:text-gray-400 font-medium">Loading products...</p>
             </div>
           ) : products.length === 0 ? (

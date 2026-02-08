@@ -5,6 +5,8 @@ import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPrice, isValidQuantity, isValidImageUrl } from "@/lib/validation";
 import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 import { createErrorResponse, createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
+import { addItem } from "@/lib/services/cartService";
+
 export async function POST(req) {
   try {
     const authResult = await requireAuth();
@@ -14,7 +16,7 @@ export async function POST(req) {
     const { userData } = authResult;
     const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
     if (verifyError) return verifyError;
-    const rateLimitResult = checkRateLimit(req, 'addToCart', userData.username);
+    const rateLimitResult = checkRateLimit(req, "addToCart", userData.username);
     if (rateLimitResult && !rateLimitResult.allowed) {
       return createRateLimitResponse(rateLimitResult.resetTime);
     }
@@ -51,104 +53,49 @@ export async function POST(req) {
       return createValidationErrorResponse("Quantity must be a positive integer");
     }
     const supabase = await createClient();
-    
-    // Check product exists and stock availability
-    const { data: product, error: productError } = await supabase
-      .from('products')
-      .select('stock_quantity, is_available, price')
-      .eq('product_id', product_id)
-      .single();
-    
-    if (productError || !product) {
-      return NextResponse.json({
-        message: "Product not found or no longer available",
-        success: false
-      }, { status: 404 });
-    }
-    
-    if (!product.is_available) {
-      return NextResponse.json({
-        message: "Product is currently unavailable",
-        success: false
-      }, { status: 400 });
-    }
-    
-    const requestedQuantity = quantity || 1;
-    const availableStock = product.stock_quantity || 0;
-    
-    // Check existing cart quantity
-    const { data: existing, error: fetchError } = await supabase
-      .from('cart_items')
-      .select('*')
-      .eq('username', username)
-      .eq('product_id', product_id)
-      .single();
-    
-    const currentCartQuantity = existing && !fetchError ? existing.quantity : 0;
-    const totalRequestedQuantity = currentCartQuantity + requestedQuantity;
-    
-    if (availableStock < totalRequestedQuantity) {
-      return NextResponse.json({
-        message: `Insufficient stock. Available: ${availableStock}, Requested: ${totalRequestedQuantity}`,
-        success: false,
-        available_stock: availableStock
-      }, { status: 400 });
-    }
-    
-    if (existing && !fetchError) {
-      const newQuantity = existing.quantity + requestedQuantity;
-      const { data: updated, error: updateError } = await supabase
-        .from('cart_items')
-        .update({ quantity: newQuantity })
-        .eq('id', existing.id)
-        .select()
-        .single();
-      if (updateError) {
-        throw updateError;
+    const result = await addItem(supabase, {
+      username,
+      product_id,
+      product_name,
+      description,
+      price,
+      id_url,
+      quantity,
+    });
+    if (result.success === false) {
+      if (result.code === "PRODUCT_NOT_FOUND") {
+        return NextResponse.json({ message: "Product not found or no longer available", success: false }, { status: 404 });
       }
-      return NextResponse.json({ 
-        message: "Product quantity updated in cart!", 
-        updated: true,
-        quantity: updated.quantity
-      }, { status: 200 });
-    }
-    // Use current product price from database
-    const currentPrice = parseFloat(product.price) || parseFloat(price);
-    const priceString = typeof currentPrice === 'number' ? currentPrice.toString() : currentPrice;
-    const { data: cartItem, error: insertError } = await supabase
-      .from('cart_items')
-      .insert({
-        username,
-        product_id: product_id,
-        product_name: product_name,
-        description: description,
-        price: priceString,
-        id_url: id_url,
-        quantity: quantity || 1
-      })
-      .select()
-      .single();
-    if (insertError) {
-      if (insertError.message && insertError.message.includes('row-level security')) {
+      if (result.code === "PRODUCT_UNAVAILABLE") {
+        return NextResponse.json({ message: "Product is currently unavailable", success: false }, { status: 400 });
+      }
+      if (result.code === "INSUFFICIENT_STOCK") {
+        return NextResponse.json({
+          message: `Insufficient stock. Available: ${result.available_stock}, Requested: ${result.requested}`,
+          success: false,
+          available_stock: result.available_stock,
+        }, { status: 400 });
+      }
+      if (result.code === "ALREADY_IN_CART") {
+        return NextResponse.json({ message: "Product already in cart." }, { status: 409 });
+      }
+      if (result.error?.message?.includes("row-level security")) {
         return createForbiddenResponse("Permission denied");
       }
-      if (insertError.code === '23505') {
-        return NextResponse.json(
-          { message: "Product already in cart." },
-          { status: 409 }
-        );
-      }
-      return createErrorResponse("Failed to add to cart", 500, insertError);
+      return createErrorResponse("Failed to add to cart", 500, result.error);
     }
-    return NextResponse.json({ 
+    if (result.updated) {
+      return NextResponse.json({
+        message: "Product quantity updated in cart!",
+        updated: true,
+        quantity: result.quantity,
+      }, { status: 200 });
+    }
+    return NextResponse.json({
       message: "Product added to cart successfully!",
-      cartItem: {
-        productId: cartItem.product_id,
-        productName: cartItem.product_name,
-        quantity: cartItem.quantity
-      }
+      cartItem: result.cartItem,
     }, { status: 201 });
   } catch (err) {
-    return handleError(err, 'addToCart');
+    return handleError(err, "addToCart");
   }
 }

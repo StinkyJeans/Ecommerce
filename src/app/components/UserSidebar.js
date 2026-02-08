@@ -14,14 +14,10 @@ import {
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "@/app/context/AuthContext";
-
-const SHOP_CATEGORIES = [
-  { label: "PC & Computers", path: "/product/category/computers" },
-  { label: "Mobile Devices", path: "/product/category/mobilephones" },
-  { label: "Watches", path: "/product/category/watches" },
-];
+import { getShopCategories } from "@/lib/categories";
 
 export default function UserSidebar() {
+  const SHOP_CATEGORIES = getShopCategories();
   const router = useRouter();
   const pathname = usePathname();
   const { logout, username, loading } = useAuth();

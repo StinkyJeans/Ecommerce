@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/sellerNavbar";
 import { uploadProductImage } from "@/lib/supabase/storage";
 import { productFunctions } from "@/lib/supabase/api";
+import { getCategoryOptionsForForm } from "@/lib/categories";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -176,11 +177,10 @@ export default function AddProduct() {
     }
   };
 
-  const categories = [
-    { value: "Pc", icon: "fa-desktop", label: "PC & Computers" },
-    { value: "Mobile", icon: "fa-mobile-alt", label: "Mobile Devices" },
-    { value: "Watch", icon: "fa-watch", label: "Watches" },
-  ];
+  const categories = getCategoryOptionsForForm().map((opt) => ({
+    ...opt,
+    icon: opt.value === "Pc" ? "fa-desktop" : opt.value === "Mobile" ? "fa-mobile-alt" : "fa-watch",
+  }));
 
   return (
     <div className="flex min-h-screen bg-white dark:bg-[#1a1a1a]">
@@ -370,7 +370,7 @@ export default function AddProduct() {
               >
                 {loading ? (
                   <>
-                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full loading-spinner-animated" />
                     <span>Adding Product...</span>
                   </>
                 ) : (
@@ -455,7 +455,7 @@ export default function AddProduct() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl text-center">
             <div className="relative mb-4">
               <div className="h-16 w-16 border-4 border-red-200 dark:border-red-800 rounded-full mx-auto"></div>
-              <div className="h-16 w-16 border-4 border-t-red-600 dark:border-t-red-400 rounded-full animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
+              <div className="h-16 w-16 border-4 border-t-red-600 dark:border-t-red-400 rounded-full loading-spinner-animated absolute top-0 left-1/2 -translate-x-1/2" />
             </div>
             <p className="text-gray-700 dark:text-gray-300 font-semibold text-lg">
               Adding Product

@@ -1,9 +1,10 @@
 import CategoryPage from "@/app/components/CategoryPage";
+import { getCategoryLabel } from "@/lib/categories";
 
 export default function MobilePhonesPage() {
   return (
     <CategoryPage
-      categoryName="Mobile Devices"
+      categoryName={getCategoryLabel("Mobile")}
       categoryValue="Mobile"
     />
   );

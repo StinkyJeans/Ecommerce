@@ -130,7 +130,7 @@ function AccountSettingsContent() {
           {authLoading || loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
-                <div className="h-12 w-12 border-4 border-t-transparent border-blue-500 dark:border-blue-400 rounded-full animate-spin" />
+                <div className="h-12 w-12 border-4 border-t-transparent border-blue-500 dark:border-blue-400 rounded-full loading-spinner-animated" />
                 <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
               </div>
             </div>
@@ -269,7 +269,7 @@ export default function AccountSettingsPage() {
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-12 w-12 border-4 border-t-transparent border-blue-500 rounded-full animate-spin" />
+          <div className="h-12 w-12 border-4 border-t-transparent border-blue-500 rounded-full loading-spinner-animated" />
           <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
         </div>
       </div>

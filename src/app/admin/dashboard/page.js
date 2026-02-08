@@ -304,17 +304,17 @@ export default function AdminDashboard() {
                         <h3 className="font-bold text-lg text-[#2C2C2C] dark:text-[#e5e5e5] mb-1 truncate">{seller.username}</h3>
                         <div className="space-y-1 text-sm text-[#666666] dark:text-[#a3a3a3]">
                           <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 flex-shrink-0" />
+                            <FontAwesomeIcon icon={faEnvelope} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                             <span className="truncate">{seller.email}</span>
                           </div>
                           {seller.contact && (
                             <div className="flex items-center gap-2">
-                              <FontAwesomeIcon icon={faPhone} className="text-gray-400 flex-shrink-0" />
+                              <FontAwesomeIcon icon={faPhone} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                               <span className="truncate">{seller.contact}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faCalendar} className="text-gray-400 flex-shrink-0" />
+                            <FontAwesomeIcon icon={faCalendar} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                             <span>{new Date(seller.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
                           onClick={() => viewIdPicture(seller)}
                           className="w-full relative group"
                         >
-                          <div className="w-full h-24 sm:h-28 md:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-red-400 transition-colors">
+                          <div className="w-full h-24 sm:h-28 md:h-32 bg-[#E0E0E0] dark:bg-[#404040] rounded-lg overflow-hidden border-2 border-dashed border-[#E0E0E0] dark:border-[#404040] group-hover:border-[#FFBF00] transition-colors">
                             <img
                               src={getImageUrl(seller.id_url, 'seller-ids')}
                               alt="ID Preview"
@@ -385,38 +385,38 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Visit Statistics (Last 30 Days)</h2>
+          <div className="bg-white dark:bg-[#2C2C2C] rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-4 sm:mb-6">Visit Statistics (Last 30 Days)</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+              <div className="p-4 bg-[#E0E0E0]/30 dark:bg-[#404040]/50 rounded-lg border border-[#E0E0E0] dark:border-[#404040]">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <FontAwesomeIcon icon={faUserCheck} className="text-blue-600 text-lg sm:text-xl" />
-                  <h3 className="font-semibold text-sm sm:text-base text-gray-800">Unique Visitors</h3>
+                  <FontAwesomeIcon icon={faUserCheck} className="text-[#FFBF00] text-lg sm:text-xl" />
+                  <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5]">Unique Visitors</h3>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.visits.uniqueLast30Days}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.visits.uniqueLast30Days}</p>
               </div>
 
-              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+              <div className="p-4 bg-[#E0E0E0]/30 dark:bg-[#404040]/50 rounded-lg border border-[#E0E0E0] dark:border-[#404040]">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <FontAwesomeIcon icon={faChartLine} className="text-green-600 text-lg sm:text-xl" />
-                  <h3 className="font-semibold text-sm sm:text-base text-gray-800">Total Visits</h3>
+                  <FontAwesomeIcon icon={faChartLine} className="text-[#FFBF00] text-lg sm:text-xl" />
+                  <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5]">Total Visits</h3>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.visits.total}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.visits.total}</p>
               </div>
             </div>
 
             {stats.visits.dailyLast30Days.length > 0 && (
               <div className="mt-4 sm:mt-6">
-                <h3 className="font-semibold text-sm sm:text-base text-gray-800 mb-3 sm:mb-4">Daily Visits Trend</h3>
+                <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5] mb-3 sm:mb-4">Daily Visits Trend</h3>
                 <div className="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
                   {stats.visits.dailyLast30Days.map((day, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg">
-                      <span className="text-xs sm:text-sm text-gray-600 truncate flex-1 mr-2">{day.date}</span>
+                    <div key={index} className="flex items-center justify-between p-2 sm:p-3 bg-[#E0E0E0]/20 dark:bg-[#404040]/30 rounded-lg border border-[#E0E0E0] dark:border-[#404040]">
+                      <span className="text-xs sm:text-sm text-[#666666] dark:text-[#a3a3a3] truncate flex-1 mr-2">{day.date}</span>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="w-20 sm:w-32 bg-gray-200 rounded-full h-2">
+                        <div className="w-20 sm:w-32 bg-[#E0E0E0] dark:bg-[#404040] rounded-full h-2">
                           <div
-                            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                            className="bg-[#FFBF00] h-2 rounded-full"
                             style={{ width: `${Math.min((day.count / Math.max(...stats.visits.dailyLast30Days.map(d => d.count))) * 100, 100)}%` }}
                           ></div>
                         </div>
@@ -424,25 +424,6 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {Object.keys(stats.visits.pageViews).length > 0 && (
-              <div className="mt-4 sm:mt-6">
-                <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5] mb-3 sm:mb-4">Page Views</h3>
-                <div className="space-y-2">
-                  {Object.entries(stats.visits.pageViews)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 10)
-                    .map(([page, count]) => (
-                      <div key={page} className="flex items-center justify-between p-2 sm:p-3 bg-white dark:bg-white/5 rounded-lg border border-[#E0E0E0] dark:border-[#404040] gap-2">
-                        <span className="text-xs sm:text-sm text-[#2C2C2C] dark:text-[#e5e5e5] font-mono truncate flex-1">{page}</span>
-                        <span className="px-2 sm:px-3 py-1 bg-[#FFF8E1] text-[#2C2C2C] dark:text-[#e5e5e5] rounded-full text-xs sm:text-sm font-semibold flex-shrink-0 border border-[#FFDA6A]">
-                          {count} views
-                        </span>
-                      </div>
-                    ))}
                 </div>
               </div>
             )}
@@ -454,19 +435,19 @@ export default function AdminDashboard() {
 
       {showIdModal && selectedSeller && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] overflow-auto relative m-2 sm:m-0 shadow-2xl">
+          <div className="bg-white dark:bg-[#2C2C2C] rounded-xl max-w-2xl w-full max-h-[85vh] overflow-auto relative m-2 sm:m-0 shadow-2xl border border-[#E0E0E0] dark:border-[#404040]">
             <button
               onClick={() => {
                 setShowIdModal(false);
                 setSelectedSeller(null);
               }}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-[#E0E0E0] dark:bg-[#404040] hover:bg-[#E0E0E0]/80 dark:hover:bg-[#505050] rounded-full flex items-center justify-center transition-colors z-10"
             >
-              <FontAwesomeIcon icon={faTimes} className="text-gray-600 text-sm sm:text-base" />
+              <FontAwesomeIcon icon={faTimes} className="text-[#2C2C2C] dark:text-[#e5e5e5] text-sm sm:text-base" />
             </button>
             <div className="p-4 sm:p-5">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3">ID Verification - {selectedSeller.username}</h3>
-              <div className="mb-3 space-y-1.5 text-xs sm:text-sm text-gray-600">
+              <h3 className="text-lg sm:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">ID Verification - {selectedSeller.username}</h3>
+              <div className="mb-3 space-y-1.5 text-xs sm:text-sm text-[#666666] dark:text-[#a3a3a3]">
                 <p><strong>Email:</strong> <span className="break-words">{selectedSeller.email}</span></p>
                 {selectedSeller.contact && <p><strong>Contact:</strong> {selectedSeller.contact}</p>}
                 <p><strong>Registered:</strong> {new Date(selectedSeller.created_at).toLocaleString()}</p>
@@ -490,7 +471,7 @@ export default function AdminDashboard() {
                     setShowIdModal(false);
                   }}
                   disabled={processingSeller === selectedSeller.id}
-                  className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-2.5 px-3 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base shadow-sm hover:shadow-md"
+                  className="flex-1 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] font-semibold py-2.5 px-3 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base shadow-sm hover:shadow-md"
                 >
                   {processingSeller === selectedSeller.id ? (
                     <FontAwesomeIcon icon={faSpinner} className="animate-spin" />

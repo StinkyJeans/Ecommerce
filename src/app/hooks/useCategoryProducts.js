@@ -1,42 +1,36 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { productFunctions } from "@/lib/supabase/api";
 
 const ITEMS_PER_PAGE = 16;
 
+export const categoryProductsQueryKey = (categoryValue) => ["categoryProducts", categoryValue];
+
+async function fetchCategoryProducts(categoryValue) {
+  const data = await productFunctions.getProductsByCategory(categoryValue);
+  return Array.isArray(data?.products) ? data.products : [];
+}
+
 export function useCategoryProducts(categoryValue) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: products = [],
+    isLoading: loading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: categoryProductsQueryKey(categoryValue),
+    queryFn: () => fetchCategoryProducts(categoryValue),
+    enabled: Boolean(categoryValue),
+    staleTime: 60 * 1000,
+  });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState([0, 999999999]);
   const [ratingFilter, setRatingFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    if (!categoryValue) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    productFunctions
-      .getProductsByCategory(categoryValue)
-      .then((data) => {
-        const list = Array.isArray(data?.products) ? data.products : [];
-        setProducts(list);
-      })
-      .catch((err) => {
-        console.error("Error fetching category products:", err);
-        setProducts([]);
-      })
-      .finally(() => setLoading(false));
-  }, [categoryValue]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, priceRange, ratingFilter, sortBy]);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -83,6 +77,10 @@ export function useCategoryProducts(categoryValue) {
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
   const setPage = (p) => setCurrentPage(p);
+
+  if (isError && error) {
+    console.error("Error fetching category products:", error);
+  }
 
   return {
     products: filteredProducts,

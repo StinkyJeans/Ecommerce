@@ -8,7 +8,9 @@ import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
+import { useCart } from "@/app/hooks/useCart";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 import {
   faTrash,
   faPlus,
@@ -21,35 +23,24 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function ViewCart() {
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [clearingCart, setClearingCart] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const { username } = useAuth();
+  const { cartItems, loading, invalidateCart, isError } = useCart(username);
+  useEffect(() => {
+    if (isError) setErrorMessage("Failed to load cart");
+  }, [isError]);
 
   useLoadingFavicon(loading, "Shopping Cart");
 
   useEffect(() => {
     if (!username) {
       router.push("/");
-      return;
     }
-    fetchCart();
   }, [username, router]);
-
-  const fetchCart = async () => {
-    try {
-      const data = await cartFunctions.getCart(username);
-      setCartItems(data.cart || []);
-    } catch (e) {
-      setErrorMessage("Failed to load cart");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleQuantityChange = async (itemId, action) => {
     setUpdatingId(itemId);
@@ -59,19 +50,7 @@ export default function ViewCart() {
       const data = await cartFunctions.updateCartQuantity(itemId, action, username);
 
       if (data.success) {
-        if (data.removed) {
-          setCartItems((prevItems) =>
-            prevItems.filter((item) => item.id !== itemId)
-          );
-        } else {
-          setCartItems((prevItems) =>
-            prevItems.map((item) =>
-              item.id === itemId
-                ? { ...item, quantity: data.cartItem.quantity }
-                : item
-            )
-          );
-        }
+        invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
       } else {
         setErrorMessage(data.message || "Failed to update quantity");
@@ -91,9 +70,7 @@ export default function ViewCart() {
       const data = await cartFunctions.removeFromCart(itemId, username);
 
       if (data.success) {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item.id !== itemId)
-        );
+        invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
       } else {
         setErrorMessage(data.message || "Failed to remove item");
@@ -137,7 +114,7 @@ export default function ViewCart() {
     try {
       const data = await cartFunctions.clearCart();
       if (data?.success) {
-        setCartItems([]);
+        invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
       } else {
         setErrorMessage(data?.message || "Failed to clear cart");
@@ -195,7 +172,7 @@ export default function ViewCart() {
           {loading ? (
             <div className="flex items-center justify-center min-h-[60vh]">
               <div className="flex flex-col items-center gap-3">
-                <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
+                <LoadingSpinner size="md" color="orange" />
                 <p className="text-gray-600 dark:text-gray-400 font-medium">Loading your cart...</p>
               </div>
             </div>

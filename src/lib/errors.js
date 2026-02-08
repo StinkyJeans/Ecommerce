@@ -1,5 +1,12 @@
-
 import { NextResponse } from "next/server";
+
+export function createSuccessResponse(payload, status = 200, headers = {}) {
+  const body = typeof payload === "object" && payload !== null ? { success: true, ...payload } : { success: true, data: payload };
+  const res = NextResponse.json(body, { status });
+  Object.entries(headers).forEach(([key, value]) => res.headers.set(key, value));
+  return res;
+}
+
 export function sanitizeError(error, isProduction = null) {
   const production = isProduction !== null ? isProduction : process.env.NODE_ENV === 'production';
   if (!error) {

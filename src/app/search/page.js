@@ -246,7 +246,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
-          <div className="h-12 w-12 border-4 border-t-transparent border-[#FFBF00] rounded-full animate-spin" />
+          <div className="h-12 w-12 border-4 border-t-transparent border-[#FFBF00] rounded-full loading-spinner-animated" />
         </div>
       }
     >

@@ -4,6 +4,8 @@ import { requireAuth, verifyOwnership } from "@/lib/auth";
 import { verifyRequestSignature } from "@/lib/signing";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
+import { getCart as getCartService } from "@/lib/services/cartService";
+
 export async function GET(req) {
   try {
     const authResult = await requireAuth();
@@ -14,52 +16,26 @@ export async function GET(req) {
     const verify = await verifyRequestSignature(req, null, userData.id);
     if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
-    let username = sanitizeString(searchParams.get('username'), 50);
-    
-    // If no username in query, use authenticated user's username
-    if (!username) {
-      username = userData.username;
-    }
-    
+    let username = sanitizeString(searchParams.get("username"), 50);
+    if (!username) username = userData.username;
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }
-    
     const ownershipCheck = await verifyOwnership(username);
     if (ownershipCheck instanceof NextResponse) {
       return ownershipCheck;
     }
-    
     const supabase = await createClient();
-    // Use authenticated user's username to ensure consistency
-    const { data: cart, error } = await supabase
-      .from('cart_items')
-      .select('*')
-      .eq('username', userData.username)
-      .order('created_at', { ascending: false });
+    const { cart: cartWithSellers, error } = await getCartService(supabase, userData.username);
     if (error) {
-      return handleError(error, 'getCart');
+      return handleError(error, "getCart");
     }
-    const cartWithSellers = await Promise.all(
-      (cart || []).map(async (item) => {
-        const { data: product } = await supabase
-          .from('products')
-          .select('seller_username')
-          .eq('product_id', item.product_id)
-          .single();
-        return {
-          ...item,
-          idUrl: item.id_url,
-          productName: item.product_name,
-          seller_username: product?.seller_username || 'Unknown',
-        };
-      })
+    return createSuccessResponse(
+      { cart: cartWithSellers, count: cartWithSellers.length },
+      200,
+      { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" }
     );
-    return NextResponse.json({ 
-      cart: cartWithSellers,
-      count: cartWithSellers.length 
-    }, { status: 200 });
   } catch (err) {
-    return handleError(err, 'getCart');
+    return handleError(err, "getCart");
   }
 }

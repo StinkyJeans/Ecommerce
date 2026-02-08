@@ -4,6 +4,7 @@ import { requireRole, verifyOwnership } from "@/lib/auth";
 import { parseAndVerifyBody } from "@/lib/signing";
 import { sanitizeString, validateLength, isValidPrice, isValidImageUrl } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createForbiddenResponse } from "@/lib/errors";
+import { CANONICAL_CATEGORIES, isAllowedCategory } from "@/lib/categories";
 function generateProductId() {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -61,9 +62,8 @@ export async function POST(req) {
     if (!isValidImageUrl(idUrl)) {
       validationErrors.push("Invalid image URL format. Please upload a valid image");
     }
-    const allowedCategories = ['Pc', 'Mobile', 'Watch'];
-    if (!allowedCategories.includes(sanitizedCategory)) {
-      validationErrors.push(`Invalid category. Must be one of: ${allowedCategories.join(', ')}`);
+    if (!isAllowedCategory(sanitizedCategory)) {
+      validationErrors.push(`Invalid category. Must be one of: ${CANONICAL_CATEGORIES.join(", ")}`);
     }
     
     // Validate stock quantity

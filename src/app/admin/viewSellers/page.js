@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
 import Pagination from "@/app/components/Pagination";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
 import { getImageUrl } from "@/lib/supabase/storage";
@@ -34,6 +35,7 @@ export default function AdminViewSellers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [documentImageLoading, setDocumentImageLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("pending");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -112,12 +114,14 @@ export default function AdminViewSellers() {
 
   const openApplicationDetails = (seller) => {
     setSelectedSeller(seller);
+    setDocumentImageLoading(!!seller.id_url);
     setShowDetailsModal(true);
   };
 
   const closeDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedSeller(null);
+    setDocumentImageLoading(false);
   };
 
   if (role !== "admin" && !authLoading) {
@@ -139,7 +143,7 @@ export default function AdminViewSellers() {
         {authLoading || loading ? (
           <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-12 w-12 border-4 border-t-transparent border-orange-500 dark:border-orange-400 rounded-full animate-spin"></div>
+              <LoadingSpinner size="md" color="orange" />
               <p className="text-gray-600 dark:text-gray-400 font-medium">Loading sellers...</p>
             </div>
           </div>
@@ -436,12 +440,18 @@ export default function AdminViewSellers() {
                   ID / Business Document
                 </h3>
                 {selectedSeller.id_url ? (
-                  <div className="border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900/50">
+                  <div className="border-2 border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900/50 relative min-h-[240px]">
+                    {documentImageLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900/50 document-loading-in animate-shimmer">
+                        <LoadingSpinner size="md" color="orange" className="border-orange-500/30 border-t-orange-500 drop-shadow-sm" />
+                      </div>
+                    )}
                     <img
                       src={getImageUrl(selectedSeller.id_url, 'seller-ids') || selectedSeller.id_url}
                       alt="ID Document"
-                      className="w-full h-auto max-h-[40vh] object-contain"
-                      onError={(e) => { e.target.src = '/placeholder-image.jpg'; }}
+                      className={`w-full h-auto max-h-[40vh] object-contain transition-opacity duration-200 ${documentImageLoading ? 'opacity-0 absolute' : 'opacity-100'}`}
+                      onLoad={() => setDocumentImageLoading(false)}
+                      onError={(e) => { e.target.src = '/placeholder-image.jpg'; setDocumentImageLoading(false); }}
                     />
                   </div>
                 ) : (

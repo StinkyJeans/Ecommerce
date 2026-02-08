@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#1a1a1a]">
       <div className="text-center">
-        <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="h-12 w-12 border-4 border-t-transparent border-red-600 dark:border-red-400 rounded-full loading-spinner-animated mx-auto mb-4" />
         <p className="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
       </div>
     </div>
