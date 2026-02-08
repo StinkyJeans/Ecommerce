@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeString } from "@/lib/validation";
-import { createValidationErrorResponse, handleError } from "@/lib/errors";
+import { createValidationErrorResponse, handleError, createSuccessResponse } from "@/lib/errors";
 import { getByCategory } from "@/lib/services/productService";
 
 function getCategoryParam(request) {

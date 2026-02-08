@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth, verifyOwnership } from "@/lib/auth";
 import { verifyRequestSignature } from "@/lib/signing";
 import { sanitizeString } from "@/lib/validation";
-import { createValidationErrorResponse, handleError } from "@/lib/errors";
+import { createValidationErrorResponse, handleError, createSuccessResponse } from "@/lib/errors";
 import { getCart as getCartService } from "@/lib/services/cartService";
 
 export async function GET(req) {
