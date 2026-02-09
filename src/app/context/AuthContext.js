@@ -49,9 +49,10 @@ const clearCache = () => {
 };
 
 export function AuthProvider({ children }) {
-  // Initialize from cache so first paint shows username when available (no "User" flash)
-  const [role, setRole] = useState(() => getCachedData(CACHE_KEY_ROLE));
-  const [username, setUsername] = useState(() => getCachedData(CACHE_KEY_USERNAME));
+  // Always start with null – never show cached user until session is verified.
+  // This prevents a previous user (e.g. admin) from appearing logged in for other visitors or after session expiry.
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
@@ -62,16 +63,7 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    const cachedUsername = getCachedData(CACHE_KEY_USERNAME);
-    const cachedRole = getCachedData(CACHE_KEY_ROLE);
-    const cachedEmail = getCachedData(CACHE_KEY_EMAIL);
-
-    // If we have cache, we already initialized state; just ensure loading is false
-    if (cachedUsername && cachedRole) {
-      setLoading(false);
-    }
-
-    // Don't block username on signing key - get session first, show user immediately
+    // Verify session first; only then show user or use cache. Prevents stale cache showing wrong user on deploy/shared devices.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const metadataUsername = session.user.user_metadata?.display_name || session.user.user_metadata?.username;
@@ -92,11 +84,7 @@ export function AuthProvider({ children }) {
         if (metadataUsername && metadataRole) {
           setLoading(false);
           fetchUserData(session.user.email, true);
-        } else if (cachedUsername && cachedRole) {
-          setLoading(false);
-          fetchUserData(session.user.email, true);
         } else {
-          // No metadata or cache; fetch from DB (fetchUserData will setLoading(false) when done)
           fetchUserData(session.user.email);
         }
       } else {
@@ -106,13 +94,10 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     }).catch(() => {
+      clearCache();
+      setUsername(null);
+      setRole(null);
       setLoading(false);
-      if (cachedUsername && cachedRole) {
-        // Keep cached display
-      } else {
-        setUsername(null);
-        setRole(null);
-      }
     });
 
     // Fetch signing key in parallel (do not block UI)
