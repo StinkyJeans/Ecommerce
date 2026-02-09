@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useSidebar } from "../context/SidebarContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
@@ -18,7 +19,8 @@ import {
   faArrowRight,
   faCheckCircle,
   faTimes,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faBars
 } from "@fortawesome/free-solid-svg-icons";
 import { ProductGridSkeleton } from "../components/ProductSkeleton";
 import { getShopCategories } from "@/lib/categories";
@@ -45,6 +47,7 @@ export default function Dashboard() {
   const [cartCount, setCartCount] = useState(0);
   const router = useRouter();
   const { username } = useAuth();
+  const { setSidebarOpen } = useSidebar();
 
   useLoadingFavicon(loading, "Totally Normal Store");
 
@@ -184,27 +187,34 @@ export default function Dashboard() {
 
   return (
         <>
-              <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
-          <div className="px-8 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 max-w-2xl">
+              <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-20">
+          <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-4">
+              <div className="flex-1 max-w-2xl min-w-0 flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="md:hidden p-2 sm:p-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors flex-shrink-0"
+                  aria-label="Open menu"
+                >
+                  <FontAwesomeIcon icon={faBars} className="text-[#2C2C2C] dark:text-white text-base sm:text-lg" />
+                </button>
                 <SearchBar
                   placeholder="Search products..."
                   onSearch={handleSearch}
                   className="w-full"
                 />
               </div>
-              <div className="flex items-center gap-4">
-                <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
-                  <FontAwesomeIcon icon={faHeart} className="text-xl" />
+              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
+                <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors p-2">
+                  <FontAwesomeIcon icon={faHeart} className="text-lg sm:text-xl" />
                 </button>
                 <button 
                   onClick={() => router.push("/cart/viewCart")}
-                  className="relative text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                  className="relative text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors p-2"
                 >
-                  <FontAwesomeIcon icon={faShoppingCart} className="text-xl" />
+                  <FontAwesomeIcon icon={faShoppingCart} className="text-lg sm:text-xl" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[20px] h-5 px-1 bg-orange-500 text-white rounded-full text-xs flex items-center justify-center font-semibold">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-5 px-1 bg-orange-500 text-white rounded-full text-[10px] sm:text-xs flex items-center justify-center font-semibold">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
                   )}
@@ -215,29 +225,29 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           {loading ? (
             <div className="space-y-8">
               <ProductGridSkeleton count={12} />
             </div>
           ) : (
             <>
-              <div className="mb-12 relative rounded-2xl overflow-hidden shadow-xl">
-                <div className="relative h-96 bg-[#5C6F5A]">
-                  <div className="relative h-full flex items-center px-12">
+              <div className="mb-8 sm:mb-10 md:mb-12 relative rounded-xl sm:rounded-2xl overflow-hidden shadow-xl">
+                <div className="relative h-64 sm:h-80 md:h-96 bg-[#5C6F5A]">
+                  <div className="relative h-full flex items-center px-4 sm:px-6 md:px-8 lg:px-12">
                     <div className="max-w-2xl">
-                      <h1 className="text-5xl font-bold text-white mb-4">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
                         Quality Goods for <span className="text-[#FFBF00]">Totally Normal</span> People.
                       </h1>
-                      <p className="text-xl text-white/90 mb-6">
+                      <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-4 sm:mb-6">
                         Explore our curated collection of everyday essentials designed for comfort, utility, and understated style.
                       </p>
                       <button
                         onClick={() => router.push("/search")}
-                        className="px-8 py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                        className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                       >
                         Shop All Products
-                        <FontAwesomeIcon icon={faArrowRight} />
+                        <FontAwesomeIcon icon={faArrowRight} className="text-xs sm:text-sm" />
                       </button>
                     </div>
                   </div>
@@ -245,15 +255,15 @@ export default function Dashboard() {
               </div>
 
               {/* Trending Now Section */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
+              <div className="mb-8 sm:mb-10 md:mb-12">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Trending Now</h2>
-                    <p className="text-[#666666] dark:text-[#a3a3a3]">The items everyone is talking about this week.</p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-1 sm:mb-2">Trending Now</h2>
+                    <p className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3]">The items everyone is talking about this week.</p>
                   </div>
-                  <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2">
+                  <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2 text-sm sm:text-base self-start sm:self-auto">
                     View all
-                    <FontAwesomeIcon icon={faChevronRight} />
+                    <FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" />
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -274,7 +284,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="mb-8 sm:mb-10 md:mb-12 hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {getShopCategories().map((cat) => (
                   <div
                     key={cat.value}
@@ -282,12 +292,12 @@ export default function Dashboard() {
                     tabIndex={0}
                     onClick={() => router.push(cat.path)}
                     onKeyDown={(e) => e.key === "Enter" && router.push(cat.path)}
-                    className="relative rounded-2xl overflow-hidden shadow-lg h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]"
+                    className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg h-48 sm:h-56 md:h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]"
                   >
                     <div className="absolute inset-0 bg-[#5C6F5A]" />
-                    <div className="relative h-full flex flex-col justify-end p-6">
-                      <h3 className="text-2xl font-bold text-white mb-2">{cat.label}</h3>
-                      <p className="text-white/90">
+                    <div className="relative h-full flex flex-col justify-end p-4 sm:p-5 md:p-6">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">{cat.label}</h3>
+                      <p className="text-sm sm:text-base text-white/90">
                         {cat.value === "Pc" ? "Power and portability" : cat.value === "Mobile" ? "Phones and tablets" : "Time in style"}
                       </p>
                     </div>
@@ -295,15 +305,15 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
+              <div className="mb-8 sm:mb-10 md:mb-12">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div>
-                    <h2 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">New Arrivals</h2>
-                    <p className="text-[#666666] dark:text-[#a3a3a3]">Fresh items added to our store this week.</p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-1 sm:mb-2">New Arrivals</h2>
+                    <p className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3]">Fresh items added to our store this week.</p>
                   </div>
-                  <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2">
+                  <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2 text-sm sm:text-base self-start sm:self-auto">
                     Shop New
-                    <FontAwesomeIcon icon={faChevronRight} />
+                    <FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" />
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

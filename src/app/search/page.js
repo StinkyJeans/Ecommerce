@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
+import { useEffect, useState, useMemo, useCallback, Suspense, useRef } from "react";
 import ProductImage from "@/app/components/ProductImage";
 import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -28,6 +28,7 @@ function SearchContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 16;
   const { username } = useAuth();
+  const debounceTimerRef = useRef(null);
 
   useLoadingFavicon(loading, "Search");
 
@@ -50,15 +51,35 @@ function SearchContent() {
     fetchProducts();
   }, []);
 
+  // Update URL with debouncing when localQuery changes
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      const trimmedQuery = localQuery.trim();
+      if (trimmedQuery !== q) {
+        router.push(trimmedQuery ? `/search?q=${encodeURIComponent(trimmedQuery)}` : "/search");
+      }
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [localQuery, q, router]);
+
   const filteredProducts = useMemo(() => {
-    if (!q.trim()) return products || [];
-    const term = q.toLowerCase().trim();
+    if (!localQuery.trim()) return products || [];
+    const term = localQuery.toLowerCase().trim();
     return (products || []).filter(
       (p) =>
         (p.product_name || p.productName || "").toLowerCase().includes(term) ||
         (p.description || "").toLowerCase().includes(term)
     );
-  }, [products, q]);
+  }, [products, localQuery]);
 
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -67,11 +88,9 @@ function SearchContent() {
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-  const handleSearch = (e) => {
-    e?.preventDefault();
-    const v = (e?.target?.elements?.q?.value ?? localQuery)?.trim() || "";
-    setLocalQuery(v);
-    router.push(v ? `/search?q=${encodeURIComponent(v)}` : "/search");
+  const handleSearchChange = (value) => {
+    setLocalQuery(value);
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
   const handleView = useCallback((product) => {
@@ -87,63 +106,47 @@ function SearchContent() {
   return (
     <>
         <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-30">
-          <div className="px-8 py-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
-                <span className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">Totally Normal</span>
-                <span className="w-2 h-2 bg-[#FFBF00] rounded-full" />
-                <span className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">Store</span>
+          <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="flex items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0" onClick={() => router.push("/dashboard")}>
+                  <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Totally Normal</span>
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FFBF00] rounded-full flex-shrink-0" />
+                  <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Store</span>
+                </div>
+                <div className="flex-shrink-0">
+                  <ThemeToggle />
+                </div>
               </div>
-              <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+              <div className="flex-1 w-full sm:max-w-2xl min-w-0">
                 <div className="relative">
-                  <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3]" />
+                  <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3] text-sm sm:text-base" />
                   <input
-                    name="q"
                     type="text"
                     placeholder="Search products..."
                     value={localQuery}
-                    onChange={(e) => setLocalQuery(e.target.value)}
-                    onBlur={() => {
-                      const v = localQuery.trim();
-                      if (v && v !== q) router.push(`/search?q=${encodeURIComponent(v)}`);
-                    }}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#E0E0E0] dark:border-[#404040] rounded-xl focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#666666] dark:placeholder-[#a3a3a3]"
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 text-sm sm:text-base bg-white dark:bg-[#1a1a1a] border border-[#E0E0E0] dark:border-[#404040] rounded-lg sm:rounded-xl focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#666666] dark:placeholder-[#a3a3a3]"
                   />
                 </div>
-              </form>
-              <div className="flex items-center gap-4">
-                <button type="button" onClick={() => router.push("/dashboard")} className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00]">
-                  All Products
-                </button>
-                <ThemeToggle />
               </div>
             </div>
           </div>
         </header>
 
-        <div className="p-8">
-          <div className="mb-4">
-            <nav className="text-sm text-[#666666] dark:text-[#a3a3a3]">
-              <span className="hover:text-[#FFBF00] cursor-pointer" onClick={() => router.push("/dashboard")}>Home</span>
-              <span className="mx-2">/</span>
-              <span className="text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold">Search</span>
-              {q && <span className="text-[#666666] dark:text-[#a3a3a3]"> &quot;{q}&quot;</span>}
-            </nav>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">
-              {q ? `Results for "${q}"` : "All Products"}
-            </h1>
-            <p className="text-[#666666] dark:text-[#a3a3a3]">
-              {q
-                ? `${filteredProducts.length} ${filteredProducts.length === 1 ? "product" : "products"} found`
-                : `${filteredProducts.length} ${filteredProducts.length === 1 ? "product" : "products"} available`}
-            </p>
-          </div>
+        <div className="p-4 sm:p-6 md:p-8">
+          {!localQuery.trim() && (
+            <div className="mb-3 sm:mb-4">
+              <nav className="text-xs sm:text-sm text-[#666666] dark:text-[#a3a3a3]">
+                <span className="hover:text-[#FFBF00] cursor-pointer" onClick={() => router.push("/dashboard")}>Home</span>
+                <span className="mx-1 sm:mx-2">/</span>
+                <span className="text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold">All Products</span>
+              </nav>
+            </div>
+          )}
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="bg-white dark:bg-[#2C2C2C] rounded-2xl border border-[#E0E0E0] dark:border-[#404040] animate-pulse">
                   <div className="h-64 bg-[#E0E0E0] dark:bg-[#404040]" />
@@ -155,21 +158,21 @@ function SearchContent() {
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="bg-white dark:bg-[#2C2C2C] rounded-xl border border-[#E0E0E0] dark:border-[#404040] p-12 text-center">
-              <div className="w-16 h-16 bg-gray-50 dark:bg-[#404040] rounded-full flex items-center justify-center mx-auto mb-4">
-                <FontAwesomeIcon icon={faSearch} className="text-3xl text-[#666666] dark:text-[#a3a3a3]" />
+            <div className="bg-white dark:bg-[#2C2C2C] rounded-xl border border-[#E0E0E0] dark:border-[#404040] p-6 sm:p-8 md:p-12 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 dark:bg-[#404040] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <FontAwesomeIcon icon={faSearch} className="text-2xl sm:text-3xl text-[#666666] dark:text-[#a3a3a3]" />
               </div>
-              <p className="text-[#666666] dark:text-[#a3a3a3] font-medium">No products match &quot;{q}&quot;</p>
+              <p className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3] font-medium">No products match &quot;{localQuery.trim()}&quot;</p>
               <button
                 onClick={() => router.push("/dashboard")}
-                className="mt-4 px-6 py-2.5 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold"
+                className="mt-3 sm:mt-4 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-lg sm:rounded-xl font-semibold"
               >
                 Browse all products
               </button>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {paginated.map((p) => (
                   <div
                     key={p.product_id || p.productId || p.id}

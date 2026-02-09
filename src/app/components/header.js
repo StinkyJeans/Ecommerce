@@ -155,7 +155,7 @@ export default function Header() {
                 </button>
 
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-xl border border-[#E0E0E0] dark:border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-xl border border-[#E0E0E0] dark:border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-120px)] overflow-y-auto">
                     <button onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#FFF8E1] dark:hover:bg-[#404040] transition-colors group">
                       <FontAwesomeIcon icon={faUserCircle} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                       <span className="font-medium text-sm">Manage My Account</span>

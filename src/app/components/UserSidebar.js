@@ -16,18 +16,34 @@ import {
 import { useAuth } from "@/app/context/AuthContext";
 import { getShopCategories } from "@/lib/categories";
 
-export default function UserSidebar() {
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
+}
+
+export default function UserSidebar({ isOpen, onClose }) {
   const SHOP_CATEGORIES = getShopCategories();
   const router = useRouter();
   const pathname = usePathname();
   const { logout, username, loading } = useAuth();
   const [shopOpen, setShopOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const menuItems = [
     { id: "home", label: "Home", icon: faHome, path: "/" },
     { id: "shop", label: "Shop All", icon: faShoppingBag, path: null, hasDropdown: true },
     { id: "collections", label: "Collections", icon: faBox, path: "/dashboard" },
-    { id: "about", label: "About Us", icon: faUser, path: "/dashboard" },
+    { id: "about", label: "About Us", icon: faUser, path: "/about" },
   ];
 
   const portalItems = [
@@ -58,10 +74,30 @@ export default function UserSidebar() {
 
   const handleShopCategory = (path) => {
     router.push(path);
+    onClose?.();
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#2C2C2C] border-r border-[#E0E0E0] dark:border-[#404040] flex flex-col z-40">
+    <>
+      <div
+        className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        onClick={onClose}
+        aria-hidden="true"
+        style={{ 
+          cursor: isOpen ? 'pointer' : 'default',
+          opacity: isOpen ? 1 : 0,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+      />
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#2C2C2C] border-r border-[#E0E0E0] dark:border-[#404040] flex flex-col z-50 md:translate-x-0 md:shadow-none`}
+        style={{
+          transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+          boxShadow: isMobile ? (isOpen ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none') : 'none',
+          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
       <div className="p-6 border-b border-[#E0E0E0] dark:border-[#404040]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow">
@@ -126,7 +162,10 @@ export default function UserSidebar() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => router.push(item.path)}
+                  onClick={() => {
+                    router.push(item.path);
+                    onClose?.();
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     active
                       ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
@@ -150,7 +189,10 @@ export default function UserSidebar() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => router.push(item.path)}
+                    onClick={() => {
+                      router.push(item.path);
+                      onClose?.();
+                    }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                       active
                         ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
@@ -173,7 +215,10 @@ export default function UserSidebar() {
       <div className="p-4 border-t border-[#E0E0E0] dark:border-white/10">
         {showLogin ? (
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => {
+              router.push("/login");
+              onClose?.();
+            }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl transition-colors"
           >
             <FontAwesomeIcon icon={faSignInAlt} className="text-sm" />
@@ -205,5 +250,6 @@ export default function UserSidebar() {
         )}
       </div>
     </aside>
+    </>
   );
 }

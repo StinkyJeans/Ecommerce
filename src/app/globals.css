@@ -165,6 +165,59 @@ svg {
     loading-spinner-pulse 1.4s ease-in-out infinite;
 }
 
+/* Sidebar animations */
+@keyframes sidebar-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes sidebar-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.sidebar-open {
+  animation: sidebar-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-close {
+  animation: sidebar-slide-out 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.overlay-fade-in {
+  animation: overlay-fade-in 0.3s ease-out;
+}
+
+.overlay-fade-out {
+  animation: overlay-fade-out 0.25s ease-in;
+}
+
 /* Optimize animations for performance */
 @media (prefers-reduced-motion: reduce) {
   *,
