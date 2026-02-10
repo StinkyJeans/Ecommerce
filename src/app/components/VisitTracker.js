@@ -10,7 +10,9 @@ export default function VisitTracker() {
   const { role } = useAuth();
 
   useEffect(() => {
-    if (pathname.startsWith('/admin') || role === 'admin') {
+    // Only track visits for authenticated, non-admin users.
+    // When role is null, the user is not logged in yet.
+    if (!role || pathname.startsWith('/admin') || role === 'admin') {
       return;
     }
 

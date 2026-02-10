@@ -15,10 +15,18 @@ export function AuthHeaderLogin() {
         <span className="text-lg font-bold text-[#2C2C2C] dark:text-white">Totally Normal Store</span>
       </button>
       <div className="flex items-center gap-4">
-        <button type="button" onClick={() => router.push("/#help")} className="text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white text-sm font-medium">
+        <button
+          type="button"
+          onClick={() => router.push("/help")}
+          className="text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white text-sm font-medium"
+        >
           Help
         </button>
-        <button type="button" onClick={() => router.push("/#contact")} className="px-4 py-2 bg-[#2F79F4] hover:bg-[#2563eb] text-white text-sm font-medium rounded-lg shadow">
+        <button
+          type="button"
+          onClick={() => router.push("/contact")}
+          className="px-4 py-2 bg-[#2F79F4] hover:bg-[#2563eb] text-white text-sm font-medium rounded-lg shadow"
+        >
           Contact Us
         </button>
       </div>

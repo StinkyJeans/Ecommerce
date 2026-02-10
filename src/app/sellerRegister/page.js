@@ -283,7 +283,7 @@ export default function SellerRegisterPage() {
 
               <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
                 Already have a seller account?{" "}
-                <button type="button" onClick={() => router.push("/")} className="text-[#FFBF00] font-medium hover:underline">
+                <button type="button" onClick={() => router.push("/login")} className="text-[#FFBF00] font-medium hover:underline">
                   Log in
                 </button>
               </p>

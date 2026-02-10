@@ -206,7 +206,7 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
             Already have an account?{" "}
-            <button type="button" onClick={() => router.push("/")} className="text-[#2F79F4] font-medium hover:underline">
+            <button type="button" onClick={() => router.push("/login")} className="text-[#2F79F4] font-medium hover:underline">
               Log in
             </button>
           </p>
