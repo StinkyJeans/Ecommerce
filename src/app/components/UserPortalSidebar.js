@@ -11,12 +11,16 @@ import {
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "@/app/context/AuthContext";
+import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
 
 export default function UserPortalSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { logout } = useAuth();
+  const portalContext = usePortalSidebar();
+  const isOpen = portalContext ? portalContext.portalSidebarOpen : true;
+  const onClose = portalContext ? () => portalContext.setPortalSidebarOpen(false) : () => {};
 
   const menuItems = [
     { id: "home", label: "Home", icon: faHome, path: "/dashboard" },
@@ -27,6 +31,7 @@ export default function UserPortalSidebar() {
   ];
 
   const handleLogout = async () => {
+    onClose();
     await logout();
     router.push("/");
   };
@@ -34,6 +39,7 @@ export default function UserPortalSidebar() {
   const isActive = (item) => {
     if (item.path === "/account/settings") return pathname === "/account/settings";
     if (item.path === "/account" && item.tab) {
+      if (pathname !== "/account") return false;
       const tab = searchParams.get("tab");
       if (item.tab === "orders") return tab === "orders";
       if (item.tab === "addresses") return tab === "addresses" || !tab;
@@ -44,10 +50,22 @@ export default function UserPortalSidebar() {
   const handleNav = (item) => {
     if (item.tab) router.push(`${item.path}?tab=${item.tab}`);
     else router.push(item.path);
+    onClose();
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700 flex flex-col z-40">
+    <>
+      {portalContext && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={onClose}
+          className={`fixed inset-0 z-30 bg-black/50 transition-opacity md:hidden ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        />
+      )}
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700 flex flex-col z-40 transition-transform duration-200 ease-out md:translate-x-0 ${portalContext ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}`}
+      >
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">User Portal</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your preferences</p>
@@ -85,5 +103,6 @@ export default function UserPortalSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

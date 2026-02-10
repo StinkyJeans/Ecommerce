@@ -334,7 +334,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-2xl shadow-md p-8 mb-12">
+              <div className="hidden md:block bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-2xl shadow-md p-8 mb-12">
                 <div className="max-w-2xl mx-auto text-center">
                   <h2 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">Stay in the Loop</h2>
                   <p className="text-[#666666] dark:text-[#a3a3a3] mb-6">

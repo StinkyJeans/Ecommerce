@@ -5,12 +5,13 @@ import ProductImage from "@/app/components/ProductImage";
 import Pagination from "@/app/components/Pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { useSidebar } from "@/app/context/SidebarContext";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faEye, faHeart, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faEye, faHeart, faShoppingCart, faBars } from "@fortawesome/free-solid-svg-icons";
 import dynamic from "next/dynamic";
 
 const ProductModal = dynamic(() => import("@/app/components/ProductModal"), { loading: () => null, ssr: false });
@@ -28,6 +29,7 @@ function SearchContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 16;
   const { username } = useAuth();
+  const { setSidebarOpen } = useSidebar();
   const debounceTimerRef = useRef(null);
 
   useLoadingFavicon(loading, "Search");
@@ -109,10 +111,19 @@ function SearchContent() {
           <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4">
             <div className="flex flex-col gap-3 sm:gap-4">
               <div className="flex items-center justify-between gap-3 sm:gap-4">
-                <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0" onClick={() => router.push("/dashboard")}>
-                  <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Totally Normal</span>
-                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FFBF00] rounded-full flex-shrink-0" />
-                  <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Store</span>
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="md:hidden p-2 sm:p-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors flex-shrink-0"
+                    aria-label="Open menu"
+                  >
+                    <FontAwesomeIcon icon={faBars} className="text-[#2C2C2C] dark:text-white text-base sm:text-lg" />
+                  </button>
+                  <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0 min-w-0" onClick={() => router.push("/dashboard")}>
+                    <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Totally Normal</span>
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#FFBF00] rounded-full flex-shrink-0" />
+                    <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Store</span>
+                  </div>
                 </div>
                 <div className="flex-shrink-0">
                   <ThemeToggle />

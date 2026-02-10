@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
   faShoppingBag,
-  faBox,
   faChevronDown,
   faSignOutAlt,
   faSignInAlt,
@@ -42,7 +41,6 @@ export default function UserSidebar({ isOpen, onClose }) {
   const menuItems = [
     { id: "home", label: "Home", icon: faHome, path: "/" },
     { id: "shop", label: "Shop All", icon: faShoppingBag, path: null, hasDropdown: true },
-    { id: "collections", label: "Collections", icon: faBox, path: "/dashboard" },
     { id: "about", label: "About Us", icon: faUser, path: "/about" },
   ];
 
@@ -53,7 +51,6 @@ export default function UserSidebar({ isOpen, onClose }) {
   const isItemActive = (item) => {
     if (item.id === "home") return pathname === "/" || pathname === "/dashboard";
     if (item.id === "shop") return pathname?.startsWith("/product/category");
-    if (item.id === "collections") return pathname === "/collections";
     if (item.id === "about") return pathname === "/about";
     if (item.path) return pathname === item.path || pathname?.startsWith(item.path + "/");
     return false;

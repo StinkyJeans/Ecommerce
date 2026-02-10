@@ -69,29 +69,29 @@ export default function AccountOrdersSection({ username, setMessage }) {
         My Orders
       </h2>
       {orders.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FontAwesomeIcon icon={faBox} className="text-5xl text-gray-400 dark:text-gray-500" />
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6 sm:p-12 text-center">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <FontAwesomeIcon icon={faBox} className="text-4xl sm:text-5xl text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">No orders yet</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Start shopping to see your orders here</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">No orders yet</h3>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Start shopping to see your orders here</p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="px-8 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+            className="px-5 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold text-sm sm:text-base transition-all shadow-md hover:shadow-lg"
           >
             Start Shopping
           </button>
         </div>
       ) : (
         <>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {paginatedOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 sm:p-6 hover:shadow-lg transition-all"
               >
-                <div className="flex items-start gap-6">
-                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                     {order.id_url ? (
                       <img
                         src={order.id_url || "/placeholder-image.jpg"}
@@ -106,9 +106,9 @@ export default function AccountOrdersSection({ username, setMessage }) {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-2">{order.product_name}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg sm:text-xl text-gray-900 dark:text-gray-100 mb-1 sm:mb-2 break-words">{order.product_name}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                           Seller: <span className="font-medium">{order.seller_username}</span>
                         </p>
@@ -117,7 +117,7 @@ export default function AccountOrdersSection({ username, setMessage }) {
                         </p>
                       </div>
                       <div
-                        className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap ${
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap self-start ${
                           order.status === "pending"
                             ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
                             : order.status === "shipped"
@@ -132,14 +132,14 @@ export default function AccountOrdersSection({ username, setMessage }) {
                         {order.status.toUpperCase()}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                         <span>Quantity: <span className="font-semibold text-gray-900 dark:text-gray-100">{order.quantity}</span></span>
                         <span>Unit Price: <span className="font-semibold text-gray-900 dark:text-gray-100">₱{formatPrice(order.price)}</span></span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Amount</p>
-                        <p className="text-2xl font-bold text-orange-500">₱{formatPrice(order.total_amount)}</p>
+                      <div className="text-left sm:text-right">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Total Amount</p>
+                        <p className="text-xl sm:text-2xl font-bold text-orange-500">₱{formatPrice(order.total_amount)}</p>
                       </div>
                     </div>
                     {order.status === "pending" && (

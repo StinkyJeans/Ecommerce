@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { shippingFunctions } from "@/lib/supabase/api";
+import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
 import UserPortalSidebar from "@/app/components/UserPortalSidebar";
 import Pagination from "@/app/components/Pagination";
 import ThemeToggle from "@/app/components/ThemeToggle";
@@ -29,13 +30,15 @@ import {
   faGlobe,
   faCog,
   faUndo,
-  faBriefcase
+  faBriefcase,
+  faBars
 } from "@fortawesome/free-solid-svg-icons";
 
 function AccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { username, role, loading: authLoading } = useAuth();
+  const { setPortalSidebarOpen } = usePortalSidebar();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("addresses");
   const [addresses, setAddresses] = useState([]);
@@ -357,38 +360,48 @@ function AccountPageContent() {
         <UserPortalSidebar />
       </Suspense>
 
-      <main className="flex-1 ml-64 overflow-auto">
+      <main className="flex-1 md:ml-64 overflow-auto">
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
-          <div className="px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
-                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Totally Normal</span>
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Store</span>
+          <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  onClick={() => setPortalSidebarOpen(true)}
+                  className="md:hidden p-2 -ml-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <FontAwesomeIcon icon={faBars} className="text-lg" />
+                </button>
+                <div className="flex items-center gap-2 cursor-pointer truncate" onClick={() => router.push("/dashboard")}>
+                  <span className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">Totally Normal</span>
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full flex-shrink-0"></span>
+                  <span className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">Store</span>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 <ThemeToggle />
               </div>
             </div>
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-6 md:p-8">
           {/* Breadcrumbs */}
-          <div className="mb-4">
-            <nav className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="mb-3 sm:mb-4">
+            <nav className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
               <span className="hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer" onClick={() => router.push("/dashboard")}>Home</span>
-              <span className="mx-2">/</span>
+              <span className="mx-1 sm:mx-2">/</span>
               <span className="text-gray-900 dark:text-gray-100 font-semibold">My Account</span>
             </nav>
           </div>
 
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">
               My Account
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               Manage your shipping addresses and order history
             </p>
           </div>
@@ -423,41 +436,41 @@ function AccountPageContent() {
           )}
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => {
                 setActiveTab("addresses");
                 router.push("/account?tab=addresses");
               }}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+              className={`px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all flex items-center gap-1.5 sm:gap-2 ${
                 activeTab === "addresses"
                   ? "bg-orange-500 text-white shadow-md"
                   : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
               }`}
             >
-              <FontAwesomeIcon icon={faMapMarkerAlt} />
-              <span>Shipping Addresses</span>
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm sm:text-base" />
+              <span>Addresses</span>
             </button>
             <button
               onClick={() => {
                 setActiveTab("orders");
                 router.push("/account?tab=orders");
               }}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+              className={`px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all flex items-center gap-1.5 sm:gap-2 ${
                 activeTab === "orders"
                   ? "bg-orange-500 text-white shadow-md"
                   : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
               }`}
             >
-              <FontAwesomeIcon icon={faBox} />
+              <FontAwesomeIcon icon={faBox} className="text-sm sm:text-base" />
               <span>My Orders</span>
             </button>
             <button
               onClick={() => router.push("/account/settings")}
-              className="px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+              className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all flex items-center gap-1.5 sm:gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
             >
-              <FontAwesomeIcon icon={faCog} />
-              <span>Account Settings</span>
+              <FontAwesomeIcon icon={faCog} className="text-sm sm:text-base" />
+              <span>Settings</span>
             </button>
           </div>
 

@@ -36,28 +36,26 @@ export default function Pagination({
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-      <div className="text-sm text-gray-600 dark:text-gray-400">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left order-2 sm:order-1">
         Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{startItem}</span> to{" "}
         <span className="font-semibold text-gray-800 dark:text-gray-200">{endItem}</span> of{" "}
         <span className="font-semibold text-gray-800 dark:text-gray-200">{totalItems}</span> results
       </div>
-      <div className="flex items-center gap-2">
-        {}
+      <div className="flex items-center justify-center sm:justify-end gap-1.5 sm:gap-2 flex-wrap order-1 sm:order-2">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+          className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm"
         >
           <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
           <span className="hidden sm:inline">Previous</span>
         </button>
-        {}
         <div className="flex items-center gap-1">
           {getPageNumbers().map((page, index) => {
             if (page === '...') {
               return (
-                <span key={`ellipsis-${index}`} className="px-2 text-gray-400 dark:text-gray-500">
+                <span key={`ellipsis-${index}`} className="px-1.5 sm:px-2 text-gray-400 dark:text-gray-500 text-sm">
                   ...
                 </span>
               );
@@ -66,7 +64,7 @@ export default function Pagination({
               <button
                 key={page}
                 onClick={() => onPageChange(page)}
-                className={`px-3 py-2 rounded-xl border transition-all min-w-[40px] ${
+                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border transition-all min-w-[32px] sm:min-w-[40px] text-sm ${
                   currentPage === page
                     ? "bg-orange-500 text-white border-transparent shadow-md"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -77,11 +75,10 @@ export default function Pagination({
             );
           })}
         </div>
-        {}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+          className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm"
         >
           <span className="hidden sm:inline">Next</span>
           <FontAwesomeIcon icon={faChevronRight} className="text-sm" />
@@ -89,4 +86,4 @@ export default function Pagination({
       </div>
     </div>
   );
-}
+}
