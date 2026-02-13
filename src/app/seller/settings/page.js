@@ -28,7 +28,7 @@ const initialForm = {
 };
 
 const inputBase =
-  "w-full px-4 py-2.5 rounded-xl border border-[#E0E0E0] dark:border-[#404040] bg-white dark:bg-[#2C2C2C] text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none disabled:opacity-60 disabled:bg-[#F5F5F5] dark:disabled:bg-[#404040]/50 disabled:cursor-not-allowed";
+  "w-full px-4 py-2.5 rounded-xl border border-[#E0E0E0] dark:border-[#404040] bg-white dark:bg-[#2C2C2C] text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none disabled:opacity-60 disabled:bg-[#F5F5F5] dark:disabled:bg-[#404040]/50 disabled:cursor-not-allowed";
 
 export default function SellerSettingsPage() {
   const router = useRouter();
@@ -98,7 +98,7 @@ export default function SellerSettingsPage() {
               <button
                 onClick={handleSave}
                 disabled={!hasChanges || saving}
-                className="px-4 py-2.5 rounded-xl bg-[#2F79F4] hover:bg-[#2563eb] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-[#FFBF00] hover:bg-[#e6ac00] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? "Saving…" : "Save Changes"}
               </button>
@@ -186,11 +186,11 @@ export default function SellerSettingsPage() {
               </span>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-[#EFF6FF] dark:bg-[#2F79F4]/15 border border-[#BFDBFE] dark:border-[#2F79F4]/40 mb-6">
-              <FontAwesomeIcon icon={faLock} className="text-[#2F79F4] mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-[#EFF6FF] dark:bg-[#FFBF00]/15 border border-[#BFDBFE] dark:border-[#FFBF00]/40 mb-6">
+              <FontAwesomeIcon icon={faLock} className="text-[#FFBF00] mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="font-semibold text-[#2F79F4]">Secure Banking</p>
-                <p className="text-[#2F79F4]/90 dark:text-[#93C5FD] mt-1">
+                <p className="font-semibold text-[#FFBF00]">Secure Banking</p>
+                <p className="text-[#FFBF00]/90 dark:text-[#93C5FD] mt-1">
                   Your payout information is encrypted and securely managed by our payment processor.
                 </p>
               </div>
@@ -290,7 +290,7 @@ export default function SellerSettingsPage() {
                 type="checkbox"
                 checked={form.useBusinessAddressForReturns}
                 onChange={(e) => update("useBusinessAddressForReturns", e.target.checked)}
-                className="w-5 h-5 rounded border-[#E0E0E0] dark:border-[#404040] text-[#2F79F4] focus:ring-[#2F79F4] accent-[#2F79F4]"
+                className="w-5 h-5 rounded border-[#E0E0E0] dark:border-[#404040] text-[#FFBF00] focus:ring-[#FFBF00] accent-[#FFBF00]"
               />
               <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5]">
                 Use business address for returns
@@ -332,7 +332,7 @@ export default function SellerSettingsPage() {
             <button
               onClick={handleSave}
               disabled={!hasChanges || saving}
-              className="px-5 py-2.5 rounded-xl bg-[#2F79F4] hover:bg-[#2563eb] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-[#FFBF00] hover:bg-[#e6ac00] text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Save and Finish
             </button>

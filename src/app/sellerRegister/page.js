@@ -140,9 +140,9 @@ export default function SellerRegisterPage() {
           className="relative w-full max-w-4xl bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-lg border border-[#E0E0E0] dark:border-[#404040] overflow-hidden"
         >
           {loading && (
-            <div className="absolute inset-0 bg-white/90 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-20">
+          <div className="absolute inset-0 bg-white/90 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-20">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#FFBF00] rounded-full loading-spinner-animated" />
+                <div className="w-12 h-12 border-4 border-[#E0E0E0] dark:border-[#404040] border-t-[#2F79F4] rounded-full loading-spinner-animated" />
                 <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">Submitting application...</p>
               </div>
             </div>
@@ -158,13 +158,13 @@ export default function SellerRegisterPage() {
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#E0E0E0] dark:border-[#404040] rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center min-h-[180px] cursor-pointer bg-gray-50 dark:bg-[#404040]/30 hover:border-[#FFBF00] transition-colors"
+                className="border-2 border-dashed border-[#E0E0E0] dark:border-[#404040] rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center min-h-[180px] cursor-pointer bg-gray-50 dark:bg-[#404040]/30 hover:border-[#2F79F4] transition-colors"
               >
                 {idPreview ? (
                   <img src={idPreview} alt="ID preview" className="max-h-32 rounded-lg object-contain mx-auto mb-2" />
                 ) : (
                   <>
-                    <FontAwesomeIcon icon={faIdCard} className="text-4xl text-[#FFBF00] mb-3" />
+                    <FontAwesomeIcon icon={faIdCard} className="text-4xl text-[#2F79F4] mb-3" />
                     <p className="text-[#666666] dark:text-[#a3a3a3] text-sm text-center mb-2">
                       Drag and drop your ID card image here, or click to browse.
                     </p>
@@ -174,7 +174,7 @@ export default function SellerRegisterPage() {
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                  className="px-4 py-2 bg-[#FFF8E1] border border-[#FFDA6A] text-[#2C2C2C] dark:text-[#FFBF00] rounded-lg text-sm font-medium hover:bg-[#FFDA6A]/30"
+                  className="px-4 py-2 bg-[#e0edff] border border-[#bfdbfe] text-[#1f2937] dark:text-[#bfdbfe] rounded-lg text-sm font-medium hover:bg-[#d0e2ff]"
                 >
                   Select File
                 </button>
@@ -186,8 +186,8 @@ export default function SellerRegisterPage() {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="mt-4 p-3 rounded-xl bg-[#FFF8E1] dark:bg-[#FFF8E1]/10 border border-[#FFDA6A] dark:border-[#FFDA6A]/50 flex gap-3">
-                <FontAwesomeIcon icon={faShieldAlt} className="text-[#FFBF00] mt-0.5 flex-shrink-0" />
+              <div className="mt-4 p-3 rounded-xl bg-[#e0edff] dark:bg-[#1e293b] border border-[#bfdbfe] dark:border-[#1d4ed8] flex gap-3">
+                <FontAwesomeIcon icon={faShieldAlt} className="text-[#2F79F4] mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-[#2C2C2C] dark:text-[#e5e5e5]">
                   Your data is protected by industry-standard encryption. We only use your ID for merchant verification purposes and do not share it with third parties.
                 </p>
@@ -211,7 +211,7 @@ export default function SellerRegisterPage() {
                       placeholder="Totally Awesome Goods"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
                       required
                     />
                   </div>
@@ -227,7 +227,7 @@ export default function SellerRegisterPage() {
                       placeholder="seller@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
                       required
                     />
                   </div>
@@ -243,7 +243,7 @@ export default function SellerRegisterPage() {
                       placeholder="+1 (555) 000-0000"
                       value={contact}
                       onChange={(e) => setContact(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
                       required
                     />
                   </div>
@@ -259,7 +259,7 @@ export default function SellerRegisterPage() {
                       placeholder="Create a secure password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-12 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none"
+                      className="w-full pl-10 pr-12 py-3 rounded-xl border border-[#E0E0E0] dark:border-[#404040] dark:bg-[#404040] bg-white text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#999999] focus:ring-2 focus:ring-[#2F79F4] focus:border-transparent outline-none"
                       required
                     />
                     <button
@@ -276,14 +276,14 @@ export default function SellerRegisterPage() {
               <button
                 type="submit"
                 disabled={loading || !idFile}
-                className="w-full mt-6 py-3 px-4 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
+                className="w-full mt-6 py-3 px-4 bg-[#2F79F4] hover:bg-[#2563eb] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
               >
                 Submit Application
               </button>
 
               <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
                 Already have a seller account?{" "}
-                <button type="button" onClick={() => router.push("/login")} className="text-[#FFBF00] font-medium hover:underline">
+                <button type="button" onClick={() => router.push("/login")} className="text-[#2F79F4] font-medium hover:underline">
                   Log in
                 </button>
               </p>

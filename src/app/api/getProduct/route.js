@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { handleError } from "@/lib/errors";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(request) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'publicRead');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
     const supabase = await createClient();
     
     // Start with simple query - get all products first

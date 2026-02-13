@@ -86,8 +86,8 @@ export default function AdminNavbar() {
       <div className="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] shadow-sm z-30">
         <div className="flex justify-between items-center px-4 py-3">
           <div onClick={dashboard} className="flex items-center gap-2 cursor-pointer group">
-            <div className="w-10 h-10 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faChartLine} className="text-[#2C2C2C] text-lg" />
+          <div className="w-10 h-10 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+              <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">TotallyNormal</h1>
@@ -107,7 +107,7 @@ export default function AdminNavbar() {
         <div className="flex flex-col h-full">
           <div onClick={dashboard} className="hidden md:flex items-center gap-3 p-6 border-b border-[#E0E0E0] dark:border-[#404040] cursor-pointer group">
             <div className="w-12 h-12 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faChartLine} className="text-[#2C2C2C] text-xl" />
+              <FontAwesomeIcon icon={faChartLine} className="text-white text-xl" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">TotallyNormal</h1>
@@ -130,11 +130,11 @@ export default function AdminNavbar() {
                       key={item.id}
                       onClick={() => { item.action(); setOpen(false); }}
                       className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group ${
-                        isActive ? "bg-[#FFBF00] text-[#2C2C2C] shadow-md" : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5]"
+                        isActive ? "bg-[#FFBF00] text-white shadow-md" : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5]"
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isActive ? "bg-[#2C2C2C]/20" : "bg-[#E0E0E0] dark:bg-[#404040]/50"}`}>
-                        <FontAwesomeIcon icon={item.icon} className={`text-lg ${isActive ? "text-[#2C2C2C]" : "text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} />
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isActive ? "bg-white/20" : "bg-[#E0E0E0] dark:bg-[#404040]/50"}`}>
+                        <FontAwesomeIcon icon={item.icon} className={`text-lg ${isActive ? "text-white" : "text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} />
                       </div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold">{item.label}</span>
@@ -154,7 +154,7 @@ export default function AdminNavbar() {
                 className={`w-full flex items-center gap-3 px-2 py-3 rounded-lg transition-colors group ${showDropdown ? "bg-[#E0E0E0] dark:bg-[#404040]" : ""}`}
               >
                 <div className="w-11 h-11 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md">
-                  <FontAwesomeIcon icon={faChartLine} className="text-[#2C2C2C] text-lg" />
+                  <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <p className="font-semibold text-sm truncate text-[#2C2C2C] dark:text-[#e5e5e5]">{username ? `${username.toUpperCase()}'S ACCOUNT` : "Admin Account"}</p>
@@ -163,7 +163,7 @@ export default function AdminNavbar() {
                 <FontAwesomeIcon icon={faBars} className="cursor-pointer text-sm text-[#666666] dark:text-[#a3a3a3]" />
               </button>
 
-              {showDropdown && (
+                {showDropdown && (
                 <div className="absolute bottom-0 left-full ml-2 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-xl border border-[#E0E0E0] dark:border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-left-2 duration-200 w-64">
                   <button onClick={() => handleMenuClick(() => router.push("/admin/dashboard"))} className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors group">
                     <FontAwesomeIcon icon={faChartLine} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />

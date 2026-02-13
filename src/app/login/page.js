@@ -32,7 +32,7 @@ export default function LoginPage() {
   const [popupType, setPopupType] = useState("error");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [passwordChangedMessage, setPasswordChangedMessage] = useState("");
-  const { setRole } = useAuth();
+  const { setRole, setUsername } = useAuth();
   const router = useRouter();
   const supabase = createClient();
 
@@ -83,7 +83,8 @@ export default function LoginPage() {
       const data = await authFunctions.login({ email, password });
       setPasswordChangedMessage("");
       if (data.signingKey) setSigningKey(data.signingKey);
-      setRole(data.role);
+      if (data.role) setRole(data.role);
+      if (data.username) setUsername(data.username);
       if (data.role === "admin") router.push("/admin/dashboard");
       else if (data.role === "seller") router.push("/seller/dashboard");
       else router.push("/");
@@ -116,12 +117,11 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-4">
         {showPopup && (
-          <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in ${
-            popupType === "error" ? "bg-red-500" : popupType === "warning" ? "bg-amber-500" : "bg-green-500"
-          } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
-            {popupType === "error" && <FontAwesomeIcon icon={faTimes} className="text-lg flex-shrink-0 mt-0.5" />}
-            {popupType === "warning" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
-            {popupType === "success" && <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />}
+          <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
+            <FontAwesomeIcon
+              icon={popupType === "success" ? faCheckCircle : popupType === "warning" ? faExclamationTriangle : faTimes}
+              className="text-lg flex-shrink-0 mt-0.5"
+            />
             <p className="font-medium text-sm sm:text-base break-words flex-1">{popupMessage}</p>
             <button onClick={() => setShowPopup(false)} className="text-white/80 hover:text-white">
               <FontAwesomeIcon icon={faTimes} className="text-sm" />

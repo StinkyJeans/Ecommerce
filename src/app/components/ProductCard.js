@@ -90,7 +90,7 @@ const ProductCard = memo(({ product, onView, onAddToCart, isAddingToCart = false
           <button
             onClick={handleView}
             disabled={isAddingToCart}
-            className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-white py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isAddingToCart ? (
               <>

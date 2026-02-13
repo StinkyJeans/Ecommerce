@@ -176,7 +176,7 @@ function SearchContent() {
               <p className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3] font-medium">No products match &quot;{localQuery.trim()}&quot;</p>
               <button
                 onClick={() => router.push("/dashboard")}
-                className="mt-3 sm:mt-4 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-lg sm:rounded-xl font-semibold"
+                className="mt-3 sm:mt-4 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-lg sm:rounded-xl font-semibold"
               >
                 Browse all products
               </button>
@@ -212,7 +212,7 @@ function SearchContent() {
                       <p className="text-lg font-bold text-[#FFBF00] mb-4">₱{formatPrice(p.price)}</p>
                       <button
                         onClick={() => handleView(p)}
-                        className="w-full py-2.5 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+                        className="w-full py-2.5 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                       >
                         <FontAwesomeIcon icon={faShoppingCart} />
                         Add to Cart

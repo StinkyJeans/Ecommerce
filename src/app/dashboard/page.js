@@ -189,8 +189,8 @@ export default function Dashboard() {
         <>
               <header className="bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] sticky top-0 z-20">
           <div className="px-4 sm:px-6 md:px-8 py-3 sm:py-4">
-            <div className="flex items-center justify-between gap-2 sm:gap-4">
-              <div className="flex-1 max-w-2xl min-w-0 flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex-1 flex items-center min-w-0">
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="md:hidden p-2 sm:p-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors flex-shrink-0"
@@ -198,13 +198,15 @@ export default function Dashboard() {
                 >
                   <FontAwesomeIcon icon={faBars} className="text-[#2C2C2C] dark:text-white text-base sm:text-lg" />
                 </button>
+              </div>
+              <div className="flex-1 flex justify-center min-w-0 max-w-2xl shrink-0">
                 <SearchBar
                   placeholder="Search products..."
                   onSearch={handleSearch}
                   className="w-full"
                 />
               </div>
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
+              <div className="flex-1 flex items-center justify-end gap-2 sm:gap-3 md:gap-4 min-w-0">
                 <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors p-2">
                   <FontAwesomeIcon icon={faHeart} className="text-lg sm:text-xl" />
                 </button>
@@ -244,7 +246,7 @@ export default function Dashboard() {
                       </p>
                       <button
                         onClick={() => router.push("/search")}
-                        className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                        className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                       >
                         Shop All Products
                         <FontAwesomeIcon icon={faArrowRight} className="text-xs sm:text-sm" />
@@ -346,7 +348,7 @@ export default function Dashboard() {
                       placeholder="Enter your email"
                       className="flex-1 px-4 py-3 border border-[#E0E0E0] dark:border-[#404040] rounded-xl focus:ring-2 focus:ring-[#FFBF00] focus:border-transparent outline-none bg-white dark:bg-[#1a1a1a] text-[#2C2C2C] dark:text-[#e5e5e5]"
                     />
-                    <button className="px-6 py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl font-semibold transition-colors">
+                    <button className="px-6 py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl font-semibold transition-colors">
                       Join Now
                     </button>
                   </div>
@@ -401,7 +403,7 @@ export default function Dashboard() {
         <div className={`fixed top-4 right-4 z-50 max-w-sm animate-in slide-in-from-top-2 fade-in ${
           cartMessage === "success" ? "bg-[#4CAF50]" : 
           cartMessage === "exists" ? "bg-[#FFBF00]" : 
-          cartMessage === "login" ? "bg-[#2F79F4]" : 
+          cartMessage === "login" ? "bg-[#e6ac00]" : 
           "bg-[#F44336]"
         } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
           {cartMessage === "success" && <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />}

@@ -311,7 +311,7 @@ function CheckoutContent() {
                 </div>
                 <button
                   onClick={() => setShowAddressModal(true)}
-                  className="px-4 py-2 text-sm font-medium text-[#2F79F4] hover:text-[#2563eb] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex items-center gap-2"
+                  className="px-4 py-2 text-sm font-medium text-[#FFBF00] hover:text-[#e6ac00] hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors flex items-center gap-2"
                 >
                   <FontAwesomeIcon icon={faEdit} className="text-sm" />
                   Edit
@@ -590,7 +590,7 @@ function CheckoutContent() {
                       setShowAddressModal(false);
                       router.push("/account?tab=addresses");
                     }}
-                    className="px-6 py-3 bg-[#2F79F4] hover:bg-[#2563eb] text-white rounded-xl font-semibold transition-colors"
+                    className="px-6 py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl font-semibold transition-colors"
                   >
                     Go to Addresses
                   </button>
@@ -606,8 +606,8 @@ function CheckoutContent() {
                       }}
                       className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
                         selectedAddress?.id === address.id
-                          ? "border-[#2F79F4] bg-blue-50 dark:bg-blue-900/20"
-                          : "border-[#E0E0E0] dark:border-[#404040] hover:border-[#2F79F4] bg-white dark:bg-[#1a1a1a]"
+                          ? "border-[#FFBF00] bg-amber-50 dark:bg-amber-900/20"
+                          : "border-[#E0E0E0] dark:border-[#404040] hover:border-[#FFBF00] bg-white dark:bg-[#1a1a1a]"
                       }`}
                     >
                       {address.is_default && (
@@ -652,7 +652,7 @@ function CheckoutContent() {
                         </div>
                       </div>
                       {selectedAddress?.id === address.id && (
-                        <div className="mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#404040] flex items-center gap-2 text-[#2F79F4]">
+                        <div className="mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#404040] flex items-center gap-2 text-[#FFBF00]">
                           <FontAwesomeIcon icon={faCheckCircle} className="text-sm" />
                           <span className="text-sm font-medium">Selected</span>
                         </div>
@@ -677,7 +677,7 @@ function CheckoutContent() {
                 </button>
                 <button
                   onClick={() => setShowAddressModal(false)}
-                  className="px-6 py-2 bg-[#2F79F4] hover:bg-[#2563eb] text-white rounded-lg font-semibold transition-colors"
+                  className="px-6 py-2 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-lg font-semibold transition-colors"
                 >
                   Done
                 </button>

@@ -121,27 +121,13 @@ function ResetPasswordContent() {
 
       {showPopup && (
         <div
-          className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in ${
-            popupType === "error"
-              ? "bg-gradient-to-r from-red-500 to-red-600"
-              : popupType === "warning"
-              ? "bg-gradient-to-r from-yellow-500 to-orange-500"
-              : "bg-gradient-to-r from-green-500 to-green-600"
-          } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3`}
+          className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3"
         >
           <div className="flex-shrink-0 mt-0.5">
-            {popupType === "error" && (
-              <FontAwesomeIcon icon={faTimes} className="text-lg sm:text-xl" />
-            )}
-            {popupType === "warning" && (
-              <FontAwesomeIcon
-                icon={faExclamationTriangle}
-                className="text-lg sm:text-xl"
-              />
-            )}
-            {popupType === "success" && (
-              <FontAwesomeIcon icon={faCheckCircle} className="text-lg sm:text-xl" />
-            )}
+            <FontAwesomeIcon
+              icon={popupType === "success" ? faCheckCircle : popupType === "warning" ? faExclamationTriangle : faTimes}
+              className="text-lg sm:text-xl"
+            />
           </div>
           <div className="flex-1">
             <p className="font-medium text-sm sm:text-base break-words">

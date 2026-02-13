@@ -13,7 +13,7 @@ export default function CategoryProductCard({ product, onView }) {
     <div className="group bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden border border-[#E0E0E0] dark:border-[#404040] relative">
       <div className="absolute top-3 left-3 z-10">
         {product.stock_quantity > 0 && product.is_available && (
-          <span className="px-2 py-1 bg-[#FFBF00] text-[#2C2C2C] text-xs font-bold rounded">NEW</span>
+          <span className="px-2 py-1 bg-[#FFBF00] text-white text-xs font-bold rounded">NEW</span>
         )}
       </div>
       <div className="absolute top-3 right-3 z-10">
@@ -52,7 +52,7 @@ export default function CategoryProductCard({ product, onView }) {
         <button
           type="button"
           onClick={() => onView(product)}
-          className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-white py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
           <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
           Add to Cart

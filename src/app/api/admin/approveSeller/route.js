@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parseAndVerifyBody } from "@/lib/signing";
-import { handleError } from "@/lib/errors";
+import { handleError, createValidationErrorResponse } from "@/lib/errors";
 import { sendSellerApprovalEmail } from "@/lib/email/service";
+import { sanitizeString } from "@/lib/validation";
 export async function POST(req) {
   try {
     const supabase = await createClient();
@@ -47,16 +48,15 @@ export async function POST(req) {
     }
     const { body, verifyError } = await parseAndVerifyBody(req, userData.id);
     if (verifyError) return verifyError;
-    const { sellerId, action } = body;
+    
+    const sellerId = body.sellerId ? sanitizeString(String(body.sellerId), 100) : null;
+    const action = body.action ? sanitizeString(body.action, 20) : null;
+    
     if (!sellerId || !action) {
-      return NextResponse.json({ 
-        message: "sellerId and action are required" 
-      }, { status: 400 });
+      return createValidationErrorResponse("sellerId and action are required");
     }
     if (action !== 'approve' && action !== 'reject') {
-      return NextResponse.json({ 
-        message: "action must be 'approve' or 'reject'" 
-      }, { status: 400 });
+      return createValidationErrorResponse("action must be 'approve' or 'reject'");
     }
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     const { data: updatedSeller, error: updateError } = await supabase

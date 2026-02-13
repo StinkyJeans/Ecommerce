@@ -30,7 +30,7 @@ export async function POST(req) {
 
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('id, role, email, seller_status, password_changed_at')
+      .select('id, username, role, email, seller_status, password_changed_at')
       .eq('email', sanitizedEmail)
       .single();
 
@@ -116,6 +116,7 @@ export async function POST(req) {
     return NextResponse.json({
       message: "Login successful",
       role: userData.role || "user",
+      username: userData.username || null,
       user: authData.user,
       signingKey,
     });

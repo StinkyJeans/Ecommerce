@@ -122,7 +122,7 @@ export default function Header() {
           >
             <FontAwesomeIcon icon={faShoppingCart} className="text-[#2C2C2C] dark:text-[#e5e5e5] text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform cursor-pointer" />
             {cartCount > 0 && (
-              <div className="absolute -top-1 -right-1 bg-[#FFBF00] text-[#2C2C2C] text-[10px] sm:text-xs font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-5 flex items-center justify-center px-1 sm:px-1.5 shadow ring-2 ring-white dark:ring-[#2C2C2C] animate-in zoom-in-50 duration-200">
+              <div className="absolute -top-1 -right-1 bg-[#FFBF00] text-white text-[10px] sm:text-xs font-bold rounded-full min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-5 flex items-center justify-center px-1 sm:px-1.5 shadow ring-2 ring-white dark:ring-[#2C2C2C] animate-in zoom-in-50 duration-200">
                 {cartCount > 99 ? "99+" : cartCount}
               </div>
             )}
@@ -132,7 +132,7 @@ export default function Header() {
             {!username && !loading ? (
               <button
                 onClick={() => router.push("/login")}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto min-w-0 border bg-[#FFBF00] hover:bg-[#e6ac00] border-[#FFBF00] text-[#2C2C2C] font-semibold"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto min-w-0 border bg-[#FFBF00] hover:bg-[#e6ac00] border-[#FFBF00] text-white font-semibold"
               >
                 <FontAwesomeIcon icon={faUser} className="text-[10px] sm:text-xs md:text-sm" />
                 <span className="text-[11px] sm:text-xs md:text-sm lg:text-base truncate">Login</span>
@@ -142,11 +142,11 @@ export default function Header() {
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
                   className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 md:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl md:rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation w-full sm:w-auto min-w-0 border ${
-                    showDropdown ? "bg-[#FFF8E1] border-[#FFDA6A]" : "bg-white dark:bg-[#2C2C2C] border-[#E0E0E0] dark:border-[#404040] hover:bg-gray-50 dark:hover:bg-[#404040]"
+                    showDropdown ? "bg-amber-50 dark:bg-amber-900/20 border-[#FFBF00]" : "bg-white dark:bg-[#2C2C2C] border-[#E0E0E0] dark:border-[#404040] hover:bg-gray-50 dark:hover:bg-[#404040]"
                   }`}
                 >
                   <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#FFBF00] rounded-lg sm:rounded-xl flex items-center justify-center shadow flex-shrink-0">
-                    <FontAwesomeIcon icon={faUser} className="text-[#2C2C2C] text-[10px] sm:text-xs md:text-sm" />
+                    <FontAwesomeIcon icon={faUser} className="text-white text-[10px] sm:text-xs md:text-sm" />
                   </div>
                   <span className={`font-semibold text-[11px] sm:text-xs md:text-sm lg:text-base truncate min-w-0 flex-1 text-[#2C2C2C] dark:text-[#e5e5e5]`}>
                     {loading ? "Loading..." : `${username.toUpperCase()}'S ACCOUNT`}
@@ -156,15 +156,15 @@ export default function Header() {
 
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-xl border border-[#E0E0E0] dark:border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-120px)] overflow-y-auto">
-                    <button onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#FFF8E1] dark:hover:bg-[#404040] transition-colors group">
+                    <button onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-amber-50 dark:hover:bg-[#404040] transition-colors group">
                       <FontAwesomeIcon icon={faUserCircle} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                       <span className="font-medium text-sm">Manage My Account</span>
                     </button>
-                    <button onClick={() => handleMenuClick(() => router.push("/account/settings"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#FFF8E1] dark:hover:bg-[#404040] transition-colors group">
+                    <button onClick={() => handleMenuClick(() => router.push("/account/settings"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-amber-50 dark:hover:bg-[#404040] transition-colors group">
                       <FontAwesomeIcon icon={faCog} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                       <span className="font-medium text-sm">Account Settings</span>
                     </button>
-                    <button onClick={() => handleMenuClick(() => router.push("/account?tab=orders"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#FFF8E1] dark:hover:bg-[#404040] transition-colors group">
+                    <button onClick={() => handleMenuClick(() => router.push("/account?tab=orders"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-amber-50 dark:hover:bg-[#404040] transition-colors group">
                       <FontAwesomeIcon icon={faBox} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                       <span className="font-medium text-sm">My Orders</span>
                     </button>

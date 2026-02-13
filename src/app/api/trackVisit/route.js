@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeString, validateLength } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
+
 export async function POST(req) {
   try {
+    const rateLimitResult = checkRateLimit(req, 'publicRead');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
     const { pagePath, visitorId, userAgent, ipAddress } = await req.json();
     if (!pagePath) {
       return createValidationErrorResponse("pagePath is required");

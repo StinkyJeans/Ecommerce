@@ -57,8 +57,8 @@ export function AuthHeaderSeller() {
   return (
     <header className="w-full px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040]">
       <button type="button" onClick={() => router.push("/")} className="flex items-center gap-2">
-        <div className="w-9 h-9 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow">
-          <FontAwesomeIcon icon={faShoppingBag} className="text-[#2C2C2C] text-sm" />
+        <div className="w-9 h-9 bg-[#2F79F4] rounded-lg flex items-center justify-center shadow">
+          <FontAwesomeIcon icon={faShoppingBag} className="text-white text-sm" />
         </div>
         <span className="text-lg font-bold text-[#2C2C2C] dark:text-white">Totally Normal Store</span>
       </button>

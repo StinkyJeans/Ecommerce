@@ -6,7 +6,7 @@ import { faCheckCircle, faTimes, faExclamationTriangle } from "@fortawesome/free
 const STYLES = {
   success: "bg-[#4CAF50]",
   exists: "bg-[#FFBF00]",
-  login: "bg-[#2F79F4]",
+  login: "bg-[#e6ac00]",
   error: "bg-[#F44336]",
 };
 

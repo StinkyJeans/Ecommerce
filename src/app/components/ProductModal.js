@@ -194,7 +194,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             <button
               onClick={handleAddToCart}
               disabled={isAddingToCart || !username}
-              className="w-full py-4 rounded-xl font-semibold text-base sm:text-lg bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
+              className="w-full py-4 rounded-xl font-semibold text-base sm:text-lg bg-[#FFBF00] hover:bg-[#e6ac00] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
             >
               {isAddingToCart ? (
                 <>

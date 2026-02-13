@@ -17,9 +17,9 @@ export async function POST(req) {
     if (verifyError) return verifyError;
     const username = sanitizeString(body.username, 50);
     const items = body.items;
-    const shipping_address_id = body.shipping_address_id;
-    const payment_method = body.payment_method;
-    const delivery_option = body.delivery_option;
+    const shipping_address_id = body.shipping_address_id ? sanitizeString(String(body.shipping_address_id), 100) : null;
+    const payment_method = body.payment_method ? sanitizeString(body.payment_method, 50) : null;
+    const delivery_option = body.delivery_option ? sanitizeString(body.delivery_option, 50) : null;
     
     if (!username || !items || !Array.isArray(items) || items.length === 0) {
       return createValidationErrorResponse("Username and items are required");
@@ -35,6 +35,21 @@ export async function POST(req) {
       if (!item.product_id || !item.product_name || item.price === null || item.price === undefined) {
         return createValidationErrorResponse("Invalid item data");
       }
+      
+      // Sanitize item fields
+      const sanitizedProductId = sanitizeString(String(item.product_id), 100);
+      const sanitizedProductName = sanitizeString(item.product_name, 200);
+      const sanitizedIdUrl = item.id_url ? sanitizeString(item.id_url, 500) : null;
+      
+      if (!sanitizedProductId || !sanitizedProductName) {
+        return createValidationErrorResponse("Invalid item data");
+      }
+      
+      // Update item with sanitized values
+      item.product_id = sanitizedProductId;
+      item.product_name = sanitizedProductName;
+      if (sanitizedIdUrl) item.id_url = sanitizedIdUrl;
+      
       if (!isValidPrice(item.price)) {
         return createValidationErrorResponse("Invalid price in item");
       }
@@ -131,7 +146,7 @@ export async function POST(req) {
           total_amount: totalAmount,
           status: 'pending',
           id_url: item.id_url || null,
-          shipping_address_id: shipping_address_id || null,
+          shipping_address_id: shipping_address_id,
           order_group_id: orderGroupId
         })
         .select()
@@ -180,4 +195,4 @@ export async function POST(req) {
   } catch (err) {
     return handleError(err, 'checkout');
   }
-}
+}

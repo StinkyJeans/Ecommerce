@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError } from "@/lib/errors";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(request) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'publicRead');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
     const { searchParams } = new URL(request.url);
     const placeId = sanitizeString(searchParams.get("place_id"), 200);
     const lat = sanitizeString(searchParams.get("lat"), 50);

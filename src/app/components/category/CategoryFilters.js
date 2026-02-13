@@ -53,7 +53,7 @@ export default function CategoryFilters({
     "w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg sm:rounded-xl text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5] font-semibold flex items-center justify-between sm:justify-center gap-2 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors";
   const dropdownClass =
     "absolute left-0 right-0 sm:right-auto top-full mt-1 py-1 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg sm:rounded-xl shadow-lg z-50 sm:min-w-[200px]";
-  const itemActive = "bg-[#FFBF00] text-[#2C2C2C] font-semibold";
+  const itemActive = "bg-[#FFBF00] text-white font-semibold";
   const itemInactive = "text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-gray-100 dark:hover:bg-[#404040]";
 
   return (

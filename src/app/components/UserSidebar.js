@@ -97,7 +97,7 @@ export default function UserSidebar({ isOpen, onClose }) {
       >
       <div className="p-6 border-b border-[#E0E0E0] dark:border-[#404040]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow">
+        <div className="w-10 h-10 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow">
             <span className="text-[#2C2C2C] font-bold text-lg">T</span>
           </div>
           <div>
@@ -121,7 +121,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                       onClick={() => setShopOpen((o) => !o)}
                       className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                         active
-                          ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
+                          ? "bg-[#FFBF00] text-white font-semibold"
                           : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                       }`}
                     >
@@ -142,7 +142,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                               onClick={() => handleShopCategory(c.path)}
                               className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                                 isCategoryActive
-                                  ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
+                                  ? "bg-[#FFBF00] text-white font-semibold"
                                   : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                               }`}
                             >
@@ -165,7 +165,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                     active
-                      ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
+                      ? "bg-[#FFBF00] text-white font-semibold"
                       : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                   }`}
                 >
@@ -192,7 +192,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                       active
-                        ? "bg-[#FFBF00] text-[#2C2C2C] font-semibold"
+                        ? "bg-[#FFBF00] text-white font-semibold"
                         : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                     }`}
                   >
@@ -216,7 +216,7 @@ export default function UserSidebar({ isOpen, onClose }) {
               router.push("/login");
               onClose?.();
             }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] rounded-xl transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl transition-colors"
           >
             <FontAwesomeIcon icon={faSignInAlt} className="text-sm" />
             <span>Login</span>

@@ -4,10 +4,10 @@
 @custom-variant dark (&&:where(.dark, .dark *));
 
 /*
- * Design palette: white page, white cards, dark charcoal sidebar/text,
- * golden orange (#FFBF00) accent for CTAs/active/highlights,
- * light gray borders (#E0E0E0), blue (#2F79F4) for secondary links.
- */
+* Design palette: white page, white cards, dark charcoal sidebar/text,
+* yellow (#FFBF00) accent for store/dashboard; blue (#2F79F4) for login/register/contact/help/sellerRegister.
+* light gray borders (#E0E0E0).
+*/
 :root {
   --page: #FFFFFF;
   --card: #FFFFFF;
@@ -44,6 +44,8 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   background: #FFFFFF;
+  /* Reserve space for vertical scrollbar to prevent layout shift when it appears */
+  scrollbar-gutter: stable;
 }
 
 html.dark {

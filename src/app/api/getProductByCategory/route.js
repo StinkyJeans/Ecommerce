@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizeString } from "@/lib/validation";
 import { createValidationErrorResponse, handleError, createSuccessResponse } from "@/lib/errors";
 import { getByCategory } from "@/lib/services/productService";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/rateLimit";
 
 function getCategoryParam(request) {
   try {
@@ -18,6 +19,10 @@ function getCategoryParam(request) {
 
 export async function GET(request) {
   try {
+    const rateLimitResult = checkRateLimit(request, 'publicRead');
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return createRateLimitResponse(rateLimitResult.resetTime);
+    }
     const supabase = await createClient();
     const categoryParam = getCategoryParam(request);
     const category = sanitizeString(categoryParam, 50);
