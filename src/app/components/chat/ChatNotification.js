@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Close, ChatBubble } from "griddy-icons";
+import { useChatModal } from "@/app/context/ChatModalContext";
 
 export default function ChatNotification({ notification, onDismiss }) {
-  const router = useRouter();
+  const { openChat } = useChatModal();
   if (!notification) return null;
 
   const { senderName, preview, conversationId } = notification;
@@ -13,11 +13,9 @@ export default function ChatNotification({ notification, onDismiss }) {
 
   const handleClick = () => {
     onDismiss?.();
-    if (conversationId) {
-      router.push(`/chat?conversation=${conversationId}`);
-    } else {
-      router.push("/chat");
-    }
+    openChat({
+      conversation: conversationId,
+    });
   };
 
   return (

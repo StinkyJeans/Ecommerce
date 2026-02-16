@@ -1,16 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { ChatBubble } from "griddy-icons";
+import { useChatModal } from "@/app/context/ChatModalContext";
 
 export default function StartChatButton({ sellerUsername, productId, className = "", children }) {
-  const router = useRouter();
+  const { openChat } = useChatModal();
 
   const handleClick = () => {
-    const params = new URLSearchParams();
-    if (sellerUsername) params.set("seller", sellerUsername);
-    if (productId) params.set("product", productId);
-    router.push(`/chat?${params.toString()}`);
+    openChat({
+      seller: sellerUsername,
+      product: productId,
+    });
   };
 
   return (

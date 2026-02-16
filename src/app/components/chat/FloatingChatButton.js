@@ -1,15 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Chat } from "griddy-icons";
+import { useChatModal } from "@/app/context/ChatModalContext";
 
 export default function FloatingChatButton({ unreadCount = 0 }) {
-  const router = useRouter();
+  const { openChat } = useChatModal();
 
   return (
     <button
       type="button"
-      onClick={() => router.push("/chat")}
+      onClick={() => openChat()}
       className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#2F79F4] hover:bg-[#2563eb] text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#2F79F4] focus:ring-offset-2 dark:focus:ring-offset-[#1a1a1a]"
       aria-label={unreadCount > 0 ? `${unreadCount} unread messages` : "Open messages"}
     >

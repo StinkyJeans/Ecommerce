@@ -21,12 +21,14 @@ import {
   Chat,
 } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
+import { useChatModal } from "@/app/context/ChatModalContext";
 import { chatFunctions } from "@/lib/supabase/api";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { logout, username } = useAuth();
+  const { openChat } = useChatModal();
   const [open, setOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -37,7 +39,7 @@ export default function Navbar() {
   const orders = () => router.push("/seller/orders");
   const customers = () => router.push("/seller/customers");
   const settings = () => router.push("/seller/settings");
-  const messages = () => router.push("/chat");
+  const messages = () => openChat();
   const [unreadTotal, setUnreadTotal] = useState(0);
 
   useEffect(() => {
@@ -122,7 +124,7 @@ export default function Navbar() {
       id: "messages",
       label: "Messages",
       icon: Chat,
-      path: "/chat",
+      path: null,
       action: messages,
       badge: unreadTotal,
     },

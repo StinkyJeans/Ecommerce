@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Package, Settings, Heart, Home, LocationPin, LogOut, Chat } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
+import { useChatModal } from "@/app/context/ChatModalContext";
 import { chatFunctions } from "@/lib/supabase/api";
 
 export default function UserPortalSidebar() {
@@ -12,6 +13,7 @@ export default function UserPortalSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { logout, username } = useAuth();
+  const { openChat } = useChatModal();
   const portalContext = usePortalSidebar();
   const isOpen = portalContext ? portalContext.portalSidebarOpen : true;
   const onClose = portalContext ? () => portalContext.setPortalSidebarOpen(false) : () => {};
@@ -31,7 +33,7 @@ export default function UserPortalSidebar() {
 
   const menuItems = [
     { id: "home", label: "Home", icon: Home, path: "/dashboard" },
-    { id: "messages", label: "Messages", icon: Chat, path: "/chat", badge: unreadTotal },
+    { id: "messages", label: "Messages", icon: Chat, path: null, badge: unreadTotal, isModal: true },
     { id: "addresses", label: "Addresses", icon: LocationPin, path: "/account", tab: "addresses" },
     { id: "orders", label: "Order History", icon: Package, path: "/account", tab: "orders" },
     { id: "settings", label: "Account Settings", icon: Settings, path: "/account/settings" },
@@ -45,7 +47,7 @@ export default function UserPortalSidebar() {
   };
 
   const isActive = (item) => {
-    if (item.path === "/chat") return pathname === "/chat";
+    if (item.isModal) return false; // Modal items are never "active" in the sidebar sense
     if (item.path === "/account/settings") return pathname === "/account/settings";
     if (item.path === "/account" && item.tab) {
       if (pathname !== "/account") return false;
@@ -57,9 +59,16 @@ export default function UserPortalSidebar() {
   };
 
   const handleNav = (item) => {
-    if (item.tab) router.push(`${item.path}?tab=${item.tab}`);
-    else router.push(item.path);
-    onClose();
+    if (item.isModal) {
+      openChat();
+      onClose();
+    } else if (item.tab) {
+      router.push(`${item.path}?tab=${item.tab}`);
+      onClose();
+    } else {
+      router.push(item.path);
+      onClose();
+    }
   };
 
   return (

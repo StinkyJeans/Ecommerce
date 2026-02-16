@@ -29,6 +29,7 @@ import VisitTracker from "./components/VisitTracker";
 import StoreLayout from "./components/StoreLayout";
 import QueryProvider from "./components/QueryProvider";
 import ChatGlobalUI from "./components/chat/ChatGlobalUI";
+import { ChatModalProvider } from "./context/ChatModalContext";
 
 const themeScript = `(function(){
   var d=document.documentElement;
@@ -49,9 +50,11 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
-              <VisitTracker />
-              <StoreLayout>{children}</StoreLayout>
-              <ChatGlobalUI />
+              <ChatModalProvider>
+                <VisitTracker />
+                <StoreLayout>{children}</StoreLayout>
+                <ChatGlobalUI />
+              </ChatModalProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
