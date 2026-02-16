@@ -48,6 +48,29 @@ export default function ChatModal() {
     fetchConversations();
   }, [isOpen, authLoading, username, role, fetchConversations, closeChat]);
 
+  // Listen for cart updates to refresh conversations
+  useEffect(() => {
+    if (!isOpen || !username) return;
+    
+    const handleCartUpdate = () => {
+      // Refresh conversations when cart is updated (product added)
+      fetchConversations();
+    };
+    
+    const handleChatUpdate = () => {
+      // Refresh conversations when chat conversations are updated
+      fetchConversations();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    window.addEventListener("chatConversationsUpdated", handleChatUpdate);
+    
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+      window.removeEventListener("chatConversationsUpdated", handleChatUpdate);
+    };
+  }, [isOpen, username, fetchConversations]);
+
   useEffect(() => {
     if (!isOpen || !username || !conversations.length) return;
 

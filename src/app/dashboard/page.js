@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useSidebar } from "../context/SidebarContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { productFunctions, cartFunctions } from "@/lib/supabase/api";
+import { productFunctions, cartFunctions, chatFunctions } from "@/lib/supabase/api";
 import { Heart, ShoppingBasket, ChevronRight, ArrowRight, CheckCircle, Close, AlertTriangle, Menu } from "griddy-icons";
 import { ProductGridSkeleton } from "../components/ProductSkeleton";
 import { getShopCategories } from "@/lib/categories";
@@ -127,6 +127,23 @@ export default function Dashboard() {
       if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
+        
+        // Automatically create conversation with seller and product
+        const sellerUsername = product.sellerUsername || product.seller_username;
+        const productId = product.product_id || product.productId;
+        if (sellerUsername && productId) {
+          try {
+            await chatFunctions.getOrCreateConversation({
+              seller_username: sellerUsername,
+              product_id: productId,
+            });
+            window.dispatchEvent(new Event("chatConversationsUpdated"));
+          } catch (err) {
+            // Silently fail - conversation creation is optional
+            console.error("Failed to create conversation:", err);
+          }
+        }
+        
         setTimeout(() => {
           setCartMessage("");
           closePopup();
@@ -141,6 +158,23 @@ export default function Dashboard() {
         // Default to success if we got here without error
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
+        
+        // Automatically create conversation with seller and product
+        const sellerUsername = product.sellerUsername || product.seller_username;
+        const productId = product.product_id || product.productId;
+        if (sellerUsername && productId) {
+          try {
+            await chatFunctions.getOrCreateConversation({
+              seller_username: sellerUsername,
+              product_id: productId,
+            });
+            window.dispatchEvent(new Event("chatConversationsUpdated"));
+          } catch (err) {
+            // Silently fail - conversation creation is optional
+            console.error("Failed to create conversation:", err);
+          }
+        }
+        
         setTimeout(() => {
           setCartMessage("");
           closePopup();

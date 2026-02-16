@@ -9,7 +9,7 @@ import { useSidebar } from "@/app/context/SidebarContext";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
-import { productFunctions, cartFunctions } from "@/lib/supabase/api";
+import { productFunctions, cartFunctions, chatFunctions } from "@/lib/supabase/api";
 import { Search, Eye, Heart, ShoppingBasket, Menu } from "griddy-icons";
 import dynamic from "next/dynamic";
 
@@ -242,8 +242,41 @@ function SearchContent() {
               sellerUsername: selectedProduct.seller_username || selectedProduct.sellerUsername,
             }}
             onClose={closePopup}
-            onAddToCart={(prod, qty) => {
-              if (username) cartFunctions.addToCart({ username, productId: prod.product_id || prod.productId, productName: prod.product_name || prod.productName, description: prod.description, price: prod.price, idUrl: prod.id_url || prod.idUrl, quantity: qty }).then(() => window.dispatchEvent(new Event("cartUpdated")));
+            onAddToCart={async (prod, qty) => {
+              if (username) {
+                try {
+                  const data = await cartFunctions.addToCart({ 
+                    username, 
+                    productId: prod.product_id || prod.productId, 
+                    productName: prod.product_name || prod.productName, 
+                    description: prod.description, 
+                    price: prod.price, 
+                    idUrl: prod.id_url || prod.idUrl, 
+                    quantity: qty 
+                  });
+                  
+                  if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
+                    window.dispatchEvent(new Event("cartUpdated"));
+                    
+                    // Automatically create conversation with seller and product
+                    const sellerUsername = prod.sellerUsername || prod.seller_username;
+                    const productId = prod.product_id || prod.productId;
+                    if (sellerUsername && productId) {
+                      try {
+                        await chatFunctions.getOrCreateConversation({
+                          seller_username: sellerUsername,
+                          product_id: productId,
+                        });
+                        window.dispatchEvent(new Event("chatConversationsUpdated"));
+                      } catch (err) {
+                        console.error("Failed to create conversation:", err);
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.error("Failed to add to cart:", err);
+                }
+              }
             }}
             isAddingToCart={false}
             username={username}
