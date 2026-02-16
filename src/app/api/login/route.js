@@ -7,16 +7,7 @@ import { generateAndSaveSigningKey } from "@/lib/signing";
 
 export async function POST(req) {
   try {
-
-    const rateLimitResult = checkRateLimit(req, 'login');
-    if (rateLimitResult && !rateLimitResult.allowed) {
-      return createRateLimitResponse(rateLimitResult.resetTime);
-    }
-
     const { email, password } = await req.json();
-    
-    // Store rate limit info for later use in error responses
-    const remainingAttempts = rateLimitResult?.remaining ?? null;
 
     if (!email || !password) {
       return createValidationErrorResponse("Email and password are required");
@@ -31,20 +22,41 @@ export async function POST(req) {
 
     const supabase = await createClient();
 
+    // Check if user exists and if they're an admin BEFORE applying rate limiting
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('id, username, role, email, seller_status, password_changed_at')
       .eq('email', sanitizedEmail)
       .single();
 
-    if (userError || !userData) {
-      // Check rate limit again after failed attempt to get accurate remaining count
-      const updatedRateLimit = checkRateLimit(req, 'login');
-      const response = { message: "Invalid Email or Password" };
-      if (updatedRateLimit && updatedRateLimit.remaining !== undefined) {
-        response.remainingAttempts = updatedRateLimit.remaining;
+    // Determine if this is an admin account (only if user exists)
+    const isAdmin = userData && userData.role === 'admin';
+    
+    // Only apply rate limiting for non-admin accounts (or if user doesn't exist)
+    let remainingAttempts = null;
+    if (!isAdmin) {
+      const rateLimitResult = checkRateLimit(req, 'login');
+      if (rateLimitResult && !rateLimitResult.allowed) {
+        return createRateLimitResponse(rateLimitResult.resetTime);
       }
-      return NextResponse.json(response, { status: 401 });
+      // Store rate limit info for later use in error responses (non-admin only)
+      remainingAttempts = rateLimitResult?.remaining ?? null;
+    }
+    // Admin accounts bypass rate limiting completely
+
+    if (userError || !userData) {
+      // User doesn't exist - apply rate limiting (unless it was already checked above)
+      if (!isAdmin) {
+        // Rate limit was already checked above, use stored remainingAttempts
+        const response = { message: "Invalid Email or Password" };
+        if (remainingAttempts !== null && remainingAttempts >= 0) {
+          response.remainingAttempts = remainingAttempts;
+        }
+        return NextResponse.json(response, { status: 401 });
+      } else {
+        // This shouldn't happen (admin check would have passed), but handle it
+        return NextResponse.json({ message: "Invalid Email or Password" }, { status: 401 });
+      }
     }
 
     if (!userData.email) {
@@ -94,8 +106,6 @@ export async function POST(req) {
       }
 
       if (authError.message.includes('Invalid login credentials')) {
-        // Check rate limit again after failed attempt to get accurate remaining count
-        const updatedRateLimit = checkRateLimit(req, 'login');
         const response = {
           message: "Invalid Email or Password"
         };
@@ -104,10 +114,16 @@ export async function POST(req) {
           response.passwordChangedAt = userData.password_changed_at;
         }
         
-        // Add remaining attempts if available
-        if (updatedRateLimit && updatedRateLimit.remaining !== undefined) {
-          response.remainingAttempts = updatedRateLimit.remaining;
+        // Only add remaining attempts for non-admin accounts
+        // For admin accounts, rate limiting was already bypassed, so no attempts tracking
+        if (!isAdmin) {
+          // Check rate limit again after failed attempt to get accurate remaining count
+          const updatedRateLimit = checkRateLimit(req, 'login');
+          if (updatedRateLimit && updatedRateLimit.remaining !== undefined) {
+            response.remainingAttempts = updatedRateLimit.remaining;
+          }
         }
+        // Admin accounts: no remainingAttempts field (unlimited attempts)
 
         return NextResponse.json(
           response,
