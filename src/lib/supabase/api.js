@@ -222,4 +222,40 @@ export const utilityFunctions = {
       body: { pagePath, visitorId, userAgent },
     });
   },
+};
+
+export const chatFunctions = {
+  async getConversations() {
+    return callApi('/api/chat/conversations');
+  },
+  async createConversation({ seller_username, product_id }) {
+    return callApi('/api/chat/conversations', {
+      method: 'POST',
+      body: { seller_username, product_id: product_id || undefined },
+    });
+  },
+  async getOrCreateConversation({ seller_username, product_id }) {
+    const res = await callApi('/api/chat/conversations', {
+      method: 'POST',
+      body: { seller_username, product_id: product_id || undefined },
+    });
+    return res.conversation;
+  },
+  async getMessages(conversationId, { page = 1, limit = 50 } = {}) {
+    return callApi(
+      `/api/chat/messages?conversation_id=${encodeURIComponent(conversationId)}&page=${page}&limit=${limit}`
+    );
+  },
+  async sendMessage(conversationId, content) {
+    const res = await callApi('/api/chat/messages', {
+      method: 'POST',
+      body: { conversation_id: conversationId, content },
+    });
+    return res.message;
+  },
+  async markAsRead(conversationId) {
+    return callApi(`/api/chat/messages/${encodeURIComponent(conversationId)}/read`, {
+      method: 'PUT',
+    });
+  },
 };

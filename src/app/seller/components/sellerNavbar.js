@@ -18,8 +18,10 @@ import {
   Package,
   Settings,
   Users,
+  Chat,
 } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
+import { chatFunctions } from "@/lib/supabase/api";
 
 export default function Navbar() {
   const router = useRouter();
@@ -35,6 +37,20 @@ export default function Navbar() {
   const orders = () => router.push("/seller/orders");
   const customers = () => router.push("/seller/customers");
   const settings = () => router.push("/seller/settings");
+  const messages = () => router.push("/chat");
+  const [unreadTotal, setUnreadTotal] = useState(0);
+
+  useEffect(() => {
+    if (!username) {
+      setUnreadTotal(0);
+      return;
+    }
+    let cancelled = false;
+    chatFunctions.getConversations().then((data) => {
+      if (!cancelled) setUnreadTotal(data?.unreadTotal ?? 0);
+    }).catch(() => { if (!cancelled) setUnreadTotal(0); });
+    return () => { cancelled = true; };
+  }, [username]);
 
   const handleLogout = async () => {
     setShowDropdown(false);
@@ -101,6 +117,14 @@ export default function Navbar() {
       icon: Users,
       path: "/seller/customers",
       action: customers,
+    },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: Chat,
+      path: "/chat",
+      action: messages,
+      badge: unreadTotal,
     },
     {
       id: "settings",
@@ -175,8 +199,13 @@ export default function Navbar() {
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isActive ? "bg-[#2C2C2C]/20" : "bg-[#404040]/50 group-hover:bg-[#505050]"}`}>
                         {(() => { const Icon = item.icon; return Icon ? <Icon size={20} className={`text-lg ${isActive ? "text-[#2C2C2C]" : "text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} /> : null; })()}
                       </div>
-                      <div className="flex-1 text-left">
+                      <div className="flex-1 text-left flex items-center gap-2">
                         <span className="font-semibold">{item.label}</span>
+                        {item.badge > 0 && (
+                          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                            {item.badge > 99 ? "99+" : item.badge}
+                          </span>
+                        )}
                       </div>
                       {isActive && <ChevronRight size={16} className="text-sm" />}
                     </button>

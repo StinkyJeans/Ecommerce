@@ -1,21 +1,37 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Package, Settings, Heart, Home, LocationPin, LogOut } from "griddy-icons";
+import { Package, Settings, Heart, Home, LocationPin, LogOut, Chat } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
+import { chatFunctions } from "@/lib/supabase/api";
 
 export default function UserPortalSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { logout } = useAuth();
+  const { logout, username } = useAuth();
   const portalContext = usePortalSidebar();
   const isOpen = portalContext ? portalContext.portalSidebarOpen : true;
   const onClose = portalContext ? () => portalContext.setPortalSidebarOpen(false) : () => {};
+  const [unreadTotal, setUnreadTotal] = useState(0);
+
+  useEffect(() => {
+    if (!username) {
+      setUnreadTotal(0);
+      return;
+    }
+    let cancelled = false;
+    chatFunctions.getConversations().then((data) => {
+      if (!cancelled) setUnreadTotal(data?.unreadTotal ?? 0);
+    }).catch(() => { if (!cancelled) setUnreadTotal(0); });
+    return () => { cancelled = true; };
+  }, [username]);
 
   const menuItems = [
     { id: "home", label: "Home", icon: Home, path: "/dashboard" },
+    { id: "messages", label: "Messages", icon: Chat, path: "/chat", badge: unreadTotal },
     { id: "addresses", label: "Addresses", icon: LocationPin, path: "/account", tab: "addresses" },
     { id: "orders", label: "Order History", icon: Package, path: "/account", tab: "orders" },
     { id: "settings", label: "Account Settings", icon: Settings, path: "/account/settings" },
@@ -29,6 +45,7 @@ export default function UserPortalSidebar() {
   };
 
   const isActive = (item) => {
+    if (item.path === "/chat") return pathname === "/chat";
     if (item.path === "/account/settings") return pathname === "/account/settings";
     if (item.path === "/account" && item.tab) {
       if (pathname !== "/account") return false;
@@ -80,6 +97,11 @@ export default function UserPortalSidebar() {
               >
                 {Icon && <Icon size={18} className="text-base" />}
                 <span className="text-sm">{item.label}</span>
+                {item.badge > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
               </button>
             );
           })}

@@ -28,6 +28,7 @@ export const metadata = {
 import VisitTracker from "./components/VisitTracker";
 import StoreLayout from "./components/StoreLayout";
 import QueryProvider from "./components/QueryProvider";
+import ChatGlobalUI from "./components/chat/ChatGlobalUI";
 
 const themeScript = `(function(){
   var d=document.documentElement;
@@ -50,6 +51,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <VisitTracker />
               <StoreLayout>{children}</StoreLayout>
+              <ChatGlobalUI />
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

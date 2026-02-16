@@ -4,6 +4,7 @@ import { memo, useState, useCallback } from "react";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
 import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp } from "griddy-icons";
+import StartChatButton from "./chat/StartChatButton";
 
 const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = false, username, initialQuantity = 1 }) => {
   const [quantity, setQuantity] = useState(initialQuantity);
@@ -79,9 +80,14 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             </h2>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-[#666666] dark:text-[#a3a3a3]">
               {seller && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 flex-wrap">
                   <Store size={18} className="text-[#FFBF00]" />
                   Sold by <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5]">{seller}</span>
+                  <StartChatButton
+                    sellerUsername={seller}
+                    productId={product.product_id || product.productId}
+                    className="ml-2 text-[#2F79F4] hover:underline text-sm"
+                  />
                 </span>
               )}
               {category && !seller && <span>{category}</span>}
