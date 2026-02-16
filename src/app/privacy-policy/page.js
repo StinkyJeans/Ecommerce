@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
               1. Introduction
             </h2>
             <p className="text-base text-[#666666] dark:text-[#a3a3a3] leading-relaxed mb-4">
-              Welcome to {siteName} ("we," "our," or "us"). We are committed to protecting your privacy and ensuring you have a positive experience on our website and in using our products and services. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website {siteUrl}.
+              Welcome to Totally Normal Store. We are committed to protecting your privacy and ensuring you have a positive experience on our website and in using our products and services. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website totallynormalstore.vercel.app.
             </p>
             <p className="text-base text-[#666666] dark:text-[#a3a3a3] leading-relaxed">
               Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.

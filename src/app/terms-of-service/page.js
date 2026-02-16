@@ -32,7 +32,7 @@ export default function TermsOfServicePage() {
               1. Agreement to Terms
             </h2>
             <p className="text-base text-[#666666] dark:text-[#a3a3a3] leading-relaxed mb-4">
-              By accessing or using TotallyNormalStore ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, then you may not access the Service.
+              By accessing or using TotallyNormalStore, you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, then you may not access the Service.
             </p>
             <p className="text-base text-[#666666] dark:text-[#a3a3a3] leading-relaxed">
               These Terms apply to all visitors, users, and others who access or use the Service.
