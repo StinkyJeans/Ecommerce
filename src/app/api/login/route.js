@@ -38,9 +38,11 @@ export async function POST(req) {
       .single();
 
     if (userError || !userData) {
+      // Check rate limit again after failed attempt to get accurate remaining count
+      const updatedRateLimit = checkRateLimit(req, 'login');
       const response = { message: "Invalid Email or Password" };
-      if (remainingAttempts !== null && remainingAttempts > 0) {
-        response.remainingAttempts = remainingAttempts;
+      if (updatedRateLimit && updatedRateLimit.remaining !== undefined) {
+        response.remainingAttempts = updatedRateLimit.remaining;
       }
       return NextResponse.json(response, { status: 401 });
     }
@@ -92,6 +94,8 @@ export async function POST(req) {
       }
 
       if (authError.message.includes('Invalid login credentials')) {
+        // Check rate limit again after failed attempt to get accurate remaining count
+        const updatedRateLimit = checkRateLimit(req, 'login');
         const response = {
           message: "Invalid Email or Password"
         };
@@ -101,8 +105,8 @@ export async function POST(req) {
         }
         
         // Add remaining attempts if available
-        if (remainingAttempts !== null && remainingAttempts > 0) {
-          response.remainingAttempts = remainingAttempts;
+        if (updatedRateLimit && updatedRateLimit.remaining !== undefined) {
+          response.remainingAttempts = updatedRateLimit.remaining;
         }
 
         return NextResponse.json(

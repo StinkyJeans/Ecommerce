@@ -23,7 +23,6 @@ export default function LoginPage() {
   const [popupType, setPopupType] = useState("error");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [passwordChangedMessage, setPasswordChangedMessage] = useState("");
-  const [remainingAttempts, setRemainingAttempts] = useState(null);
   const { setRole, setUsername } = useAuth();
   const router = useRouter();
   const supabase = createClient();
@@ -71,11 +70,9 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setRemainingAttempts(null); // Clear previous attempts warning
     try {
       const data = await authFunctions.login({ email, password });
       setPasswordChangedMessage("");
-      setRemainingAttempts(null); // Clear attempts warning on successful login
       if (data.signingKey) setSigningKey(data.signingKey);
       if (data.role) setRole(data.role);
       if (data.username) setUsername(data.username);
@@ -87,28 +84,23 @@ export default function LoginPage() {
       const err = error.response || {};
       const status = error.status || 500;
       
-      // Check for remaining attempts
-      if (err.remainingAttempts !== undefined && err.remainingAttempts !== null) {
-        setRemainingAttempts(err.remainingAttempts);
-      } else {
-        setRemainingAttempts(null);
-      }
-      
       if (status === 403 && err.sellerStatus === "pending") {
         setPopupMessage(err.details || "Waiting for admin approval. Please wait before logging in.");
         setPopupType("warning");
-        setRemainingAttempts(null); // Don't show attempts warning for pending sellers
       } else if (status === 403 && err.sellerStatus === "rejected") {
         setPopupMessage(err.details || "Your seller account has been rejected. Please contact support.");
         setPopupType("error");
-        setRemainingAttempts(null);
       } else if (status === 429) {
         // Rate limit exceeded
-        setPopupMessage(err.message || "Too many login attempts. Please wait a few minutes before trying again.");
+        setPopupMessage(err.message || err.error || "Too many login attempts. Please wait a few minutes before trying again.");
         setPopupType("error");
-        setRemainingAttempts(null);
       } else {
-        setPopupMessage(err.message || error.message || "Invalid Email or Password");
+        // Combine invalid password message with remaining attempts
+        let message = err.message || error.message || "Invalid Email or Password";
+        if (err.remainingAttempts !== undefined && err.remainingAttempts !== null && err.remainingAttempts > 0) {
+          message += `, You have ${err.remainingAttempts} ${err.remainingAttempts === 1 ? 'attempt' : 'attempts'} left before waiting a few minutes to log in again.`;
+        }
+        setPopupMessage(message);
         setPopupType("error");
         if (err.passwordChangedAt)
           setPasswordChangedMessage(`You have changed your password ${formatRelativeTime(err.passwordChangedAt)}`);
@@ -139,17 +131,6 @@ export default function LoginPage() {
           </div>
         )}
         
-        {remainingAttempts !== null && remainingAttempts > 0 && (
-          <div className="fixed top-20 right-4 left-4 sm:left-auto sm:right-5 z-40 max-w-sm sm:max-w-md animate-fade-in bg-orange-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3">
-            <AlertTriangle size={20} className="flex-shrink-0 mt-0.5 text-white" />
-            <p className="font-medium text-sm sm:text-base break-words flex-1">
-              You have {remainingAttempts} {remainingAttempts === 1 ? 'attempt' : 'attempts'} left before waiting a few minutes to log in again.
-            </p>
-            <button onClick={() => setRemainingAttempts(null)} className="text-white/80 hover:text-white">
-              <Close size={16} className="text-white" />
-            </button>
-          </div>
-        )}
 
         <form
           onSubmit={handleLogin}

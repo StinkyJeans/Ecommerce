@@ -126,9 +126,10 @@ export function checkRateLimit(request, endpoint = 'default', identifier = null)
 export function createRateLimitResponse(resetTime) {
   const resetDate = new Date(resetTime);
   const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
+  const minutes = Math.ceil(retryAfter / 60);
   const response = NextResponse.json(
     {
-      message: 'Too many requests',
+      message: `Too many login attempts. Please wait ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} before trying again.`,
       error: 'Rate limit exceeded. Please try again later.',
       retryAfter,
     },
