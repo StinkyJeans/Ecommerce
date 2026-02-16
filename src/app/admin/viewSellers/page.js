@@ -9,22 +9,21 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
 import { getImageUrl } from "@/lib/supabase/storage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faStore,
-  faEnvelope,
-  faPhone,
-  faCalendar,
-  faSpinner,
-  faSearch,
-  faFileAlt,
-  faEye,
-  faCheckCircle,
-  faTimes,
-  faFilter,
-  faChevronLeft,
-  faChevronRight
-} from "@fortawesome/free-solid-svg-icons";
+  Store,
+  At,
+  Phone,
+  Calendar,
+  Timer,
+  Search,
+  FileText,
+  Eye,
+  CheckCircle,
+  Close,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "griddy-icons";
 
 export default function AdminViewSellers() {
   const router = useRouter();
@@ -175,7 +174,7 @@ export default function AdminViewSellers() {
               {/* Search Bar */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FontAwesomeIcon icon={faSearch} className="text-gray-400 dark:text-gray-500" />
+                  <Search size={18} className="text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
@@ -221,7 +220,7 @@ export default function AdminViewSellers() {
                 <button
                   className="px-5 py-2.5 rounded-xl font-semibold transition-all bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faFilter} className="text-sm" />
+                  <Filter size={16} className="text-sm" />
                   More Filters
                 </button>
               </div>
@@ -230,7 +229,7 @@ export default function AdminViewSellers() {
             {/* Table */}
             {filteredSellers.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <FontAwesomeIcon icon={faStore} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
+                <Store size={52} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
                 <p className="text-gray-600 dark:text-gray-300 text-lg font-semibold">
                   {searchTerm || statusFilter !== "all" ? "No sellers found" : "No sellers registered yet"}
                 </p>
@@ -286,7 +285,7 @@ export default function AdminViewSellers() {
                               onClick={() => openApplicationDetails(seller)}
                               className="flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors font-medium"
                             >
-                              <FontAwesomeIcon icon={faFileAlt} />
+                              <FileText size={18} />
                               <span className="text-sm">View Docs</span>
                             </button>
                           ) : (
@@ -300,7 +299,7 @@ export default function AdminViewSellers() {
                             onClick={() => openApplicationDetails(seller)}
                             className="px-3 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                           >
-                            <FontAwesomeIcon icon={faEye} />
+                            <Eye size={18} />
                             View Details
                           </button>
                           <button
@@ -336,7 +335,7 @@ export default function AdminViewSellers() {
                     disabled={currentPage === 1}
                     className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
+                    <ChevronLeft size={16} className="text-sm" />
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
@@ -356,7 +355,7 @@ export default function AdminViewSellers() {
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <FontAwesomeIcon icon={faChevronRight} className="text-sm" />
+                    <ChevronRight size={16} className="text-sm" />
                   </button>
                 </div>
               </div>
@@ -376,7 +375,7 @@ export default function AdminViewSellers() {
                 className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors"
                 aria-label="Close"
               >
-                <FontAwesomeIcon icon={faTimes} className="text-gray-600 dark:text-gray-300" />
+                <Close size={20} className="text-gray-600 dark:text-gray-300" />
               </button>
             </div>
 
@@ -391,12 +390,12 @@ export default function AdminViewSellers() {
                   <div className="space-y-1">
                     <p className="font-bold text-gray-900 dark:text-gray-100 text-lg">{selectedSeller.username}</p>
                     <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                      <FontAwesomeIcon icon={faEnvelope} className="text-orange-500 w-4" />
+                      <At size={18} className="text-orange-500 w-4" />
                       {selectedSeller.email}
                     </p>
                     {selectedSeller.contact && (
                       <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                        <FontAwesomeIcon icon={faPhone} className="text-orange-500 w-4" />
+                        <Phone size={18} className="text-orange-500 w-4" />
                         {selectedSeller.contact}
                       </p>
                     )}
@@ -413,7 +412,7 @@ export default function AdminViewSellers() {
                 <div>
                   <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Application Date</h3>
                   <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCalendar} className="text-orange-500" />
+                    <Calendar size={20} className="text-orange-500" />
                     {new Date(selectedSeller.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
@@ -436,7 +435,7 @@ export default function AdminViewSellers() {
               {/* Documents */}
               <div>
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faFileAlt} className="text-orange-500" />
+                  <FileText size={20} className="text-orange-500" />
                   ID / Business Document
                 </h3>
                 {selectedSeller.id_url ? (
@@ -466,14 +465,14 @@ export default function AdminViewSellers() {
                     onClick={() => { handleApprove(selectedSeller.id); closeDetailsModal(); }}
                     className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-md"
                   >
-                    <FontAwesomeIcon icon={faCheckCircle} />
+                    <CheckCircle size={20} />
                     Approve
                   </button>
                   <button
                     onClick={() => { handleReject(selectedSeller.id); closeDetailsModal(); }}
                     className="flex-1 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <FontAwesomeIcon icon={faTimes} />
+                    <Close size={20} />
                     Reject
                   </button>
                 </div>

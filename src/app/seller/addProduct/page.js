@@ -8,27 +8,26 @@ import { getCategoryOptionsForForm } from "@/lib/categories";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faPlus,
-  faImage,
-  faSyncAlt,
-  faCloudUploadAlt,
-  faCheckCircle,
-  faInfoCircle,
-  faEdit,
-  faTag,
-  faAlignLeft,
-  faDollarSign,
-  faFolder,
-  faPlusCircle,
-  faLightbulb,
-  faStar,
-  faTimes,
-  faDesktop,
-  faMobileAlt,
-  faClock
-} from "@fortawesome/free-solid-svg-icons";
+  Plus,
+  Image,
+  RefreshCw,
+  Upload,
+  CheckCircle,
+  InfoCircle,
+  Edit,
+  Tag,
+  AlignTextLeft,
+  BanknoteDollar,
+  Folder,
+  PlusCircle,
+  LightbulbOn,
+  Star,
+  Close,
+  Monitor,
+  Mobile,
+  SmartWatch,
+} from "griddy-icons";
 
 export default function AddProduct() {
   const [image, setImage] = useState(null);
@@ -195,7 +194,7 @@ export default function AddProduct() {
         <div className="max-w-5xl mx-auto mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-2">
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <FontAwesomeIcon icon={faPlus} className="text-white text-lg" />
+              <Plus size={20} className="text-white text-lg" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-400 dark:to-orange-400 bg-clip-text text-transparent">
@@ -214,7 +213,7 @@ export default function AddProduct() {
         >
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-3">
-              <FontAwesomeIcon icon={faImage} className="text-red-600 dark:text-red-400" />
+              <Image size={24} className="text-red-600 dark:text-red-400" />
               <label className="text-gray-800 dark:text-gray-200 font-semibold text-base">
                 Product Image
               </label>
@@ -234,7 +233,7 @@ export default function AddProduct() {
                   />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center rounded-xl z-10">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                        <FontAwesomeIcon icon={faSyncAlt} className="text-white text-4xl mb-2" />
+                        <RefreshCw size={40} className="text-white text-4xl mb-2" />
                         <p className="text-white font-semibold">Change Image</p>
                       </div>
                     </div>
@@ -242,7 +241,7 @@ export default function AddProduct() {
               ) : (
                 <div className="text-center p-8">
                   <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FontAwesomeIcon icon={faCloudUploadAlt} className="text-4xl text-red-600 dark:text-red-400" />
+                    <Upload size={40} className="text-4xl text-red-600 dark:text-red-400" />
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 font-semibold mb-2 text-lg">
                     Upload Product Image
@@ -251,7 +250,7 @@ export default function AddProduct() {
                     Click to browse or drag and drop
                   </p>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                    <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 dark:text-green-400" />
+                    <CheckCircle size={24} className="text-green-500 dark:text-green-400" />
                     <span>JPG, PNG, GIF supported</span>
                   </div>
                 </div>
@@ -268,14 +267,14 @@ export default function AddProduct() {
             />
 
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <FontAwesomeIcon icon={faInfoCircle} className="text-blue-500 dark:text-blue-400" />
+              <InfoCircle size={24} className="text-blue-500 dark:text-blue-400" />
               Recommended: High-quality images with 1:1 aspect ratio
             </p>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-4">
-              <FontAwesomeIcon icon={faEdit} className="text-red-600 dark:text-red-400" />
+              <Edit size={24} className="text-red-600 dark:text-red-400" />
               <h2 className="text-gray-800 dark:text-gray-200 font-semibold text-base">
                 Product Details
               </h2>
@@ -284,7 +283,7 @@ export default function AddProduct() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FontAwesomeIcon icon={faTag} className="mr-2 text-gray-400 dark:text-gray-500" />
+                  <Tag size={18} className="mr-2 text-gray-400 dark:text-gray-500" />
                   Product Name
                 </label>
                 <input
@@ -299,7 +298,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FontAwesomeIcon icon={faAlignLeft} className="mr-2 text-gray-400 dark:text-gray-500" />
+                  <AlignTextLeft size={18} className="mr-2 text-gray-400 dark:text-gray-500" />
                   Description
                 </label>
                 <textarea
@@ -316,7 +315,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FontAwesomeIcon icon={faDollarSign} className="mr-2 text-gray-400 dark:text-gray-500" />
+                  <BanknoteDollar size={18} className="mr-2 text-gray-400 dark:text-gray-500" />
                   Price
                 </label>
                 <div className="relative">
@@ -338,7 +337,7 @@ export default function AddProduct() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  <FontAwesomeIcon icon={faFolder} className="mr-2 text-gray-400 dark:text-gray-500" />
+                  <Folder size={18} className="mr-2 text-gray-400 dark:text-gray-500" />
                   Category
                 </label>
                 <select
@@ -375,7 +374,7 @@ export default function AddProduct() {
                   </>
                 ) : (
                   <>
-                    <FontAwesomeIcon icon={faPlusCircle} />
+                    <PlusCircle size={20} />
                     <span>Add Product</span>
                   </>
                 )}
@@ -387,7 +386,7 @@ export default function AddProduct() {
         <div className="max-w-5xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <FontAwesomeIcon icon={faLightbulb} className="text-blue-600 dark:text-blue-400 text-xl mt-1" />
+              <LightbulbOn size={22} className="text-blue-600 dark:text-blue-400 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 dark:text-gray-200 text-sm mb-1">
                   Pro Tip
@@ -401,7 +400,7 @@ export default function AddProduct() {
 
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 dark:text-green-400 text-xl mt-1" />
+              <CheckCircle size={22} className="text-green-600 dark:text-green-400 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 dark:text-gray-200 text-sm mb-1">
                   Best Practice
@@ -415,7 +414,7 @@ export default function AddProduct() {
 
           <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <FontAwesomeIcon icon={faStar} className="text-purple-600 dark:text-purple-400 text-xl mt-1" />
+              <Star size={22} className="text-purple-600 dark:text-purple-400 text-xl mt-1" />
               <div>
                 <p className="font-semibold text-gray-800 dark:text-gray-200 text-sm mb-1">
                   Pricing Tip
@@ -435,10 +434,7 @@ export default function AddProduct() {
             ? 'bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white'
             : 'bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white'
         }`}>
-          <FontAwesomeIcon 
-            icon={popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error') ? faInfoCircle : faCheckCircle} 
-            className="text-2xl flex-shrink-0"
-          />
+          {popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error') ? <InfoCircle size={28} className="text-2xl flex-shrink-0" /> : <CheckCircle size={28} className="text-2xl flex-shrink-0" />}
           <div className="flex-1 min-w-0">
             <p className="font-semibold break-words">{popupMessage}</p>
             {!popupMessage.toLowerCase().includes('fail') && !popupMessage.toLowerCase().includes('error') && (

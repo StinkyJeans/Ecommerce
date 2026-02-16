@@ -3,21 +3,7 @@
 import { memo, useState, useCallback } from "react";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTimes,
-  faPlus,
-  faMinus,
-  faShoppingCart,
-  faSpinner,
-  faTag,
-  faStore,
-  faTruck,
-  faShieldHalved,
-  faBox,
-  faChevronDown,
-  faChevronUp,
-} from "@fortawesome/free-solid-svg-icons";
+import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp } from "griddy-icons";
 
 const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = false, username, initialQuantity = 1 }) => {
   const [quantity, setQuantity] = useState(initialQuantity);
@@ -80,7 +66,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white dark:bg-[#404040] shadow-lg flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#505050] transition-colors border border-[#E0E0E0] dark:border-[#404040]"
             aria-label="Close"
           >
-            <FontAwesomeIcon icon={faTimes} className="text-lg" />
+            <Close size={20} className="text-current" />
           </button>
         </div>
 
@@ -94,7 +80,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-[#666666] dark:text-[#a3a3a3]">
               {seller && (
                 <span className="flex items-center gap-1.5">
-                  <FontAwesomeIcon icon={faStore} className="text-[#FFBF00]" />
+                  <Store size={18} className="text-[#FFBF00]" />
                   Sold by <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5]">{seller}</span>
                 </span>
               )}
@@ -114,7 +100,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             {/* Overview / Description */}
             <section className="mb-5 sm:mb-6">
               <h3 className="text-xs uppercase tracking-wider text-[#666666] dark:text-[#a3a3a3] mb-2 flex items-center gap-2">
-                <FontAwesomeIcon icon={faBox} className="opacity-70" />
+                <Package size={18} className="opacity-70 text-current" />
                 Overview
               </h3>
               <p className="text-[#2C2C2C] dark:text-[#e5e5e5] text-sm sm:text-base leading-relaxed">
@@ -126,7 +112,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                   className="mt-2 text-sm font-medium text-[#FFBF00] hover:text-[#e6ac00] flex items-center gap-1"
                 >
                   {descExpanded ? "Show less" : "Read more"}
-                  <FontAwesomeIcon icon={descExpanded ? faChevronUp : faChevronDown} className="text-xs" />
+                  {descExpanded ? <ChevronUp size={14} className="text-current" /> : <ChevronDown size={14} className="text-current" />}
                 </button>
               )}
             </section>
@@ -154,7 +140,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                     className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors"
                     aria-label="Decrease"
                   >
-                    <FontAwesomeIcon icon={faMinus} className="text-sm" />
+                    <Minus size={16} className="text-current" />
                   </button>
                   <span className="w-14 text-center font-semibold text-[#2C2C2C] dark:text-[#e5e5e5] text-lg">{quantity}</span>
                   <button
@@ -162,14 +148,14 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                     className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors"
                     aria-label="Increase"
                   >
-                    <FontAwesomeIcon icon={faPlus} className="text-sm" />
+                    <Plus size={16} className="text-current" />
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-[#666666] dark:text-[#a3a3a3]">In stock</span>
                   <span className="text-[#E0E0E0] dark:text-[#404040]">·</span>
                   <span className="text-[#4CAF50] font-medium flex items-center gap-1.5">
-                    <FontAwesomeIcon icon={faTruck} className="text-xs" />
+                    <Truck size={14} className="text-current" />
                     Ready to ship
                   </span>
                 </div>
@@ -180,7 +166,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             <div className="rounded-xl bg-white dark:bg-white/5 p-4 sm:p-5 mb-6 border border-[#E0E0E0] dark:border-[#404040]">
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <span className="flex items-center gap-2 text-[#666666] dark:text-[#a3a3a3]">
-                  <FontAwesomeIcon icon={faTag} className="text-[#FFBF00]" />
+                  <Tag size={18} className="text-[#FFBF00]" />
                   ₱{formatPrice(product.price)} × {quantity}
                 </span>
                 <span className="font-bold text-[#2C2C2C] dark:text-[#e5e5e5] text-lg">
@@ -198,14 +184,14 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             >
               {isAddingToCart ? (
                 <>
-                  <FontAwesomeIcon icon={faSpinner} className="text-xl animate-spin" />
+                  <Timer size={24} className="animate-spin text-current" />
                   Adding…
                 </>
               ) : !username ? (
                 "Sign in to add to cart"
               ) : (
                 <>
-                  <FontAwesomeIcon icon={faShoppingCart} className="text-xl" />
+                  <ShoppingBasket size={24} className="text-current" />
                   Add {quantity} {quantity === 1 ? "item" : "items"} to cart
                 </>
               )}
@@ -213,7 +199,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
 
             {/* Trust */}
             <p className="mt-4 text-center text-xs text-[#666666] dark:text-[#a3a3a3] flex items-center justify-center gap-2">
-              <FontAwesomeIcon icon={faShieldHalved} className="text-[#4CAF50]" />
+              <ShieldCheck size={18} className="text-[#4CAF50]" />
               Secure checkout
             </p>
           </div>

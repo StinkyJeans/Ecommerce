@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Navbar from "../components/sellerNavbar";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUpload,
-  faLock,
-  faMapMarkerAlt,
-  faImage,
-} from "@fortawesome/free-solid-svg-icons";
+import { Upload, Lock, LocationPin, Image } from "griddy-icons";
 
 const initialForm = {
   storeName: "Totally Normal Store",
@@ -135,11 +129,11 @@ export default function SellerSettingsPage() {
                   type="button"
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E0E0E0] dark:border-[#404040] bg-white dark:bg-[#2C2C2C] text-[#2C2C2C] dark:text-[#e5e5e5] font-medium hover:bg-[#F5F5F5] dark:hover:bg-[#404040] transition-colors"
                 >
-                  <FontAwesomeIcon icon={faUpload} className="text-sm" />
+                  <Upload size={16} className="text-sm" />
                   Upload New Logo
                 </button>
                 <div className="w-28 h-20 sm:w-32 sm:h-24 rounded-xl border-2 border-dashed border-[#E0E0E0] dark:border-[#404040] flex items-center justify-center bg-[#FAFAFA] dark:bg-[#404040]/30 flex-shrink-0">
-                  <FontAwesomeIcon icon={faImage} className="text-2xl text-[#999999] dark:text-[#a3a3a3]" />
+                  <Image size={28} className="text-2xl text-[#999999] dark:text-[#a3a3a3]" />
                 </div>
               </div>
             </div>
@@ -187,7 +181,7 @@ export default function SellerSettingsPage() {
             </div>
 
             <div className="flex items-start gap-3 p-4 rounded-xl bg-[#EFF6FF] dark:bg-[#FFBF00]/15 border border-[#BFDBFE] dark:border-[#FFBF00]/40 mb-6">
-              <FontAwesomeIcon icon={faLock} className="text-[#FFBF00] mt-0.5 flex-shrink-0" />
+              <Lock size={18} className="text-[#FFBF00] mt-0.5 flex-shrink-0" />
               <div className="text-sm">
                 <p className="font-semibold text-[#FFBF00]">Secure Banking</p>
                 <p className="text-[#FFBF00]/90 dark:text-[#93C5FD] mt-1">
@@ -315,7 +309,7 @@ export default function SellerSettingsPage() {
               type="button"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#E0E0E0] dark:border-[#404040] bg-white dark:bg-[#2C2C2C] text-[#2C2C2C] dark:text-[#e5e5e5] font-medium hover:bg-[#F5F5F5] dark:hover:bg-[#404040] transition-colors"
             >
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm" />
+              <LocationPin size={16} className="text-sm" />
               Map view of shipping origin
             </button>
           </section>

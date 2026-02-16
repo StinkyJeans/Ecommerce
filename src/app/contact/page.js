@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEnvelope,
-  faPhone,
-  faLocationDot,
-  faArrowRight,
-  faQuestionCircle,
-} from "@fortawesome/free-solid-svg-icons";
+  At,
+  Phone,
+  LocationPin,
+  ArrowRight,
+  AnnotationQuestion,
+} from "griddy-icons";
 
 export default function ContactPage() {
   const router = useRouter();
@@ -109,7 +108,7 @@ export default function ContactPage() {
                   onClick={() => router.push("mailto:support@totallynormalstore.com")}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-[#2F79F4] hover:text-[#2563eb]"
                 >
-                  <FontAwesomeIcon icon={faEnvelope} />
+                  <At size={18} />
                   <span>support@totallynormalstore.com</span>
                 </button>
               </div>
@@ -142,10 +141,7 @@ export default function ContactPage() {
                 <div className="absolute inset-0 bg-black/10 dark:bg-black/30" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#2F79F4] shadow-lg flex items-center justify-center">
-                    <FontAwesomeIcon
-                      icon={faLocationDot}
-                      className="text-white text-lg sm:text-xl"
-                    />
+                    <LocationPin size={24} className="text-white text-lg sm:text-xl" />
                   </div>
                 </div>
               </div>
@@ -244,7 +240,7 @@ export default function ContactPage() {
                   ) : (
                     <>
                       <span>Send Message</span>
-                      <FontAwesomeIcon icon={faArrowRight} />
+                      <ArrowRight size={18} />
                     </>
                   )}
                 </button>
@@ -286,10 +282,7 @@ export default function ContactPage() {
               >
                 <div className="flex items-start gap-3 mb-2">
                   <div className="w-8 h-8 rounded-full bg-[#2F79F4]/15 flex items-center justify-center">
-                    <FontAwesomeIcon
-                      icon={faQuestionCircle}
-                      className="text-[#2F79F4] text-sm"
-                    />
+                    <AnnotationQuestion size={16} className="text-[#2F79F4] text-sm" />
                   </div>
                   <h3 className="text-sm sm:text-base font-semibold text-[#2C2C2C] dark:text-[#e5e5e5]">
                     {faq.question}
@@ -305,7 +298,7 @@ export default function ContactPage() {
                     className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#2F79F4] hover:text-[#2563eb]"
                   >
                     <span>{faq.ctaLabel}</span>
-                    <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
+                    <ArrowRight size={12} className="text-[10px]" />
                   </button>
                 )}
               </div>

@@ -8,13 +8,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faTh, 
-  faList, 
-  faSearch,
-  faEye
-} from "@fortawesome/free-solid-svg-icons";
+import { Grid, ListBulleted, Search, Eye } from "griddy-icons";
 import Header from "@/app/components/header";
 import Navbar from "../components/sellerNavbar";
 import { ProductGridSkeleton } from "@/app/components/ProductSkeleton";
@@ -236,7 +230,7 @@ export default function Dashboard() {
             <div className="flex flex-col items-center justify-center h-96 text-center">
               <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-10 max-w-md border border-gray-100">
                 <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FontAwesomeIcon icon={faSearch} className="text-5xl text-red-500" />
+                  <Search size={52} className="text-5xl text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">
                   {products.length === 0 ? "No Products Available" : "No Results Found"}
@@ -271,7 +265,7 @@ export default function Dashboard() {
                         : "text-[#666666] dark:text-[#a3a3a3] hover:bg-[#E0E0E0] dark:hover:bg-[#404040]"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faTh} className="mr-1 sm:mr-2 text-sm sm:text-base" />
+                    <Grid size={18} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">Grid</span>
                   </button>
                   <button
@@ -282,7 +276,7 @@ export default function Dashboard() {
                         : "text-[#666666] dark:text-[#a3a3a3] hover:bg-[#E0E0E0] dark:hover:bg-[#404040]"
                     }`}
                   >
-                    <FontAwesomeIcon icon={faList} className="mr-1 sm:mr-2 text-sm sm:text-base" />
+                    <ListBulleted size={18} className="mr-1 sm:mr-2 text-sm sm:text-base" />
                     <span className="hidden xs:inline">List</span>
                   </button>
                 </div>
@@ -342,7 +336,7 @@ export default function Dashboard() {
                             onClick={() => handleView(product)}
                             className="cursor-pointer px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                           >
-                            <FontAwesomeIcon icon={faEye} className="text-base" />
+                            <Eye size={18} className="text-base" />
                             View Details
                           </button>
                         </div>

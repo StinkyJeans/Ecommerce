@@ -10,21 +10,20 @@ import { getImageUrl } from "@/lib/supabase/storage";
 import Header from "@/app/components/header";
 import Navbar from "../components/sellerNavbar";
 import Pagination from "@/app/components/Pagination";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBox,
-  faSpinner,
-  faCheckCircle,
-  faTruck,
-  faTimes,
-  faEdit,
-  faFilter,
-  faSearch,
-  faCalendar,
-  faUser,
-  faTag,
-  faBarcode
-} from "@fortawesome/free-solid-svg-icons";
+  Package,
+  Timer,
+  CheckCircle,
+  Truck,
+  Close,
+  Edit,
+  Filter,
+  Search,
+  Calendar,
+  User,
+  Tag,
+  Barcode,
+} from "griddy-icons";
 
 export default function SellerOrders() {
   const router = useRouter();
@@ -182,10 +181,7 @@ export default function SellerOrders() {
                   : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
               }`}>
                 <div className="flex items-start gap-2 sm:gap-3">
-                  <FontAwesomeIcon 
-                    icon={message.type === "success" ? faCheckCircle : faTimes} 
-                    className="text-base sm:text-lg mt-0.5 flex-shrink-0"
-                  />
+                  {message.type === "success" ? <CheckCircle size={20} className="text-base sm:text-lg mt-0.5 flex-shrink-0" /> : <Close size={20} className="text-base sm:text-lg mt-0.5 flex-shrink-0" />}
                   <span className="font-medium text-sm sm:text-base">{message.text}</span>
                 </div>
               </div>
@@ -197,7 +193,7 @@ export default function SellerOrders() {
                 {/* Status Filter */}
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    <FontAwesomeIcon icon={faFilter} className="mr-2" />
+                    <Filter size={16} className="mr-2" />
                     Filter by Status
                   </label>
                   <select
@@ -217,7 +213,7 @@ export default function SellerOrders() {
                 {/* Search */}
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                    <Search size={16} className="mr-2" />
                     Search
                   </label>
                   <input
@@ -240,7 +236,7 @@ export default function SellerOrders() {
               </div>
             ) : filteredOrders.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sm:p-8 md:p-12 text-center border border-gray-200 dark:border-gray-700">
-                <FontAwesomeIcon icon={faBox} className="text-4xl sm:text-5xl md:text-6xl text-gray-300 dark:text-gray-600 mb-4 sm:mb-6" />
+                <Package size={56} className="text-4xl sm:text-5xl md:text-6xl text-gray-300 dark:text-gray-600 mb-4 sm:mb-6" />
                 <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg md:text-xl mb-4 sm:mb-6 px-2">
                   {orders.length === 0 ? "No orders yet" : "No orders match your filters"}
                 </p>
@@ -269,7 +265,7 @@ export default function SellerOrders() {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-600">
-                                  <FontAwesomeIcon icon={faBox} className="text-gray-400 dark:text-gray-500 text-xl sm:text-2xl" />
+                                  <Package size={28} className="text-gray-400 dark:text-gray-500 text-xl sm:text-2xl" />
                                 </div>
                               )}
                             </div>
@@ -279,21 +275,21 @@ export default function SellerOrders() {
                               </h3>
                               <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                 <span>
-                                  <FontAwesomeIcon icon={faUser} className="mr-1" />
+                                  <User size={16} className="mr-1" />
                                   Customer: <span className="font-medium">{order.username}</span>
                                 </span>
                                 <span>
-                                  <FontAwesomeIcon icon={faTag} className="mr-1" />
+                                  <Tag size={16} className="mr-1" />
                                   Quantity: <span className="font-semibold">{order.quantity}</span>
                                 </span>
                                 <span>
-                                  <FontAwesomeIcon icon={faCalendar} className="mr-1" />
+                                  <Calendar size={16} className="mr-1" />
                                   {new Date(order.created_at).toLocaleDateString()}
                                 </span>
                               </div>
                               {order.tracking_number && (
                                 <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                  <FontAwesomeIcon icon={faBarcode} />
+                                  <Barcode size={18} />
                                   <span>Tracking: <span className="font-mono font-semibold">{order.tracking_number}</span></span>
                                 </div>
                               )}
@@ -312,7 +308,7 @@ export default function SellerOrders() {
                               onClick={() => openStatusModal(order)}
                               className="mt-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 dark:from-red-500 dark:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 text-white rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center gap-2"
                             >
-                              <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                              <Edit size={14} className="text-xs" />
                               Update Status
                             </button>
                           </div>
@@ -363,7 +359,7 @@ export default function SellerOrders() {
                   }}
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                  <Close size={22} className="text-xl" />
                 </button>
               </div>
 
@@ -413,7 +409,7 @@ export default function SellerOrders() {
                   >
                     {updating ? (
                       <span className="flex items-center justify-center gap-2">
-                        <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                        <Timer size={18} className="animate-spin" />
                         Updating...
                       </span>
                     ) : (

@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/formatPrice";
 import { orderFunctions } from "@/lib/supabase/api";
 import Pagination from "@/app/components/Pagination";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBox, faSpinner, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { Package, Timer, Close } from "griddy-icons";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -71,7 +70,7 @@ export default function AccountOrdersSection({ username, setMessage }) {
       {orders.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-6 sm:p-12 text-center">
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-            <FontAwesomeIcon icon={faBox} className="text-4xl sm:text-5xl text-gray-400 dark:text-gray-500" />
+            <Package size={48} className="text-4xl sm:text-5xl text-gray-400 dark:text-gray-500" />
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">No orders yet</h3>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Start shopping to see your orders here</p>
@@ -101,7 +100,7 @@ export default function AccountOrdersSection({ username, setMessage }) {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <FontAwesomeIcon icon={faBox} className="text-gray-400 dark:text-gray-500 text-2xl" />
+                        <Package size={28} className="text-gray-400 dark:text-gray-500 text-2xl" />
                       </div>
                     )}
                   </div>
@@ -151,12 +150,12 @@ export default function AccountOrdersSection({ username, setMessage }) {
                         >
                           {cancellingOrderId === order.id ? (
                             <>
-                              <FontAwesomeIcon icon={faSpinner} className="text-sm animate-spin" />
+                              <Timer size={16} className="text-sm animate-spin" />
                               <span>Cancelling...</span>
                             </>
                           ) : (
                             <>
-                              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+                              <Close size={16} className="text-sm" />
                               <span>Cancel Order</span>
                             </>
                           )}

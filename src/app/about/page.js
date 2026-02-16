@@ -1,35 +1,29 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faShield,
-  faUsers,
-  faStar,
-  faLeaf,
-} from "@fortawesome/free-solid-svg-icons";
+import { Shield, Users, Star, Leaf } from "griddy-icons";
 
 export default function AboutPage() {
   const router = useRouter();
 
   const values = [
     {
-      icon: faShield,
+      icon: Shield,
       title: "Integrity",
       description: "Transparent practices and honest communication in everything we do.",
     },
     {
-      icon: faUsers,
+      icon: Users,
       title: "Community",
       description: "Building connections between creators, sellers, and customers.",
     },
     {
-      icon: faStar,
+      icon: Star,
       title: "Quality",
       description: "Curating products that meet our high standards for excellence.",
     },
     {
-      icon: faLeaf,
+      icon: Leaf,
       title: "Sustainability",
       description: "Committed to responsible practices and environmental consciousness.",
     },
@@ -107,16 +101,15 @@ export default function AboutPage() {
             {/* Right Column - Core Values */}
             <div>
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {values.map((value, index) => (
+                {values.map((value, index) => {
+                  const Icon = value.icon;
+                  return (
                   <div
                     key={index}
                     className="bg-white dark:bg-[#2C2C2C] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border border-[#E0E0E0] dark:border-[#404040]"
                   >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00]/10 dark:bg-[#FFBF00]/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                      <FontAwesomeIcon
-                        icon={value.icon}
-                        className="text-[#FFBF00] text-lg sm:text-xl"
-                      />
+                      {Icon ? <Icon size={24} className="text-[#FFBF00] text-lg sm:text-xl" /> : null}
                     </div>
                     <h3 className="text-base sm:text-lg font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">
                       {value.title}
@@ -125,7 +118,8 @@ export default function AboutPage() {
                       {value.description}
                     </p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

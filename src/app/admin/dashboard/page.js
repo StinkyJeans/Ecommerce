@@ -7,24 +7,23 @@ import AdminNavbar from "../components/adminNavbar";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
 import { getImageUrl } from "@/lib/supabase/storage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faUsers,
-  faStore,
-  faBoxes,
-  faChartLine,
-  faEye,
-  faCheckCircle,
-  faTimes,
-  faSpinner,
-  faIdCard,
-  faEnvelope,
-  faPhone,
-  faCalendar,
-  faGlobe,
-  faUserCheck,
-  faClock
-} from "@fortawesome/free-solid-svg-icons";
+  Users,
+  Store,
+  Folders,
+  ChartLine,
+  Eye,
+  CheckCircle,
+  Close,
+  Timer,
+  Badge,
+  At,
+  Phone,
+  Calendar,
+  Globe,
+  UserCheck,
+  Alarm,
+} from "griddy-icons";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -222,7 +221,7 @@ export default function AdminDashboard() {
               : "bg-[#F44336] text-white"
           }`}>
             <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={message.type === "success" ? faCheckCircle : faTimes} className="flex-shrink-0" />
+              {message.type === "success" ? <CheckCircle size={20} className="flex-shrink-0" /> : <Close size={20} className="flex-shrink-0" />}
               <span className="text-sm sm:text-base break-words">{message.text}</span>
             </div>
           </div>
@@ -233,7 +232,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-[#2C2C2C] p-4 sm:p-6 rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] hover:shadow-lg transition-all">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow-sm">
-                  <FontAwesomeIcon icon={faUsers} className="text-[#2C2C2C] text-lg sm:text-xl" />
+                  <Users size={22} className="text-[#2C2C2C] text-lg sm:text-xl" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.users.total}</h3>
@@ -243,7 +242,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-[#2C2C2C] p-4 sm:p-6 rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] hover:shadow-lg transition-all">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow-sm">
-                  <FontAwesomeIcon icon={faStore} className="text-[#2C2C2C] text-lg sm:text-xl" />
+                  <Store size={22} className="text-[#2C2C2C] text-lg sm:text-xl" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.users.sellers.total}</h3>
@@ -253,7 +252,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-[#2C2C2C] p-4 sm:p-6 rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] hover:shadow-lg transition-all">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow-sm">
-                  <FontAwesomeIcon icon={faBoxes} className="text-[#2C2C2C] text-lg sm:text-xl" />
+                  <Folders size={22} className="text-[#2C2C2C] text-lg sm:text-xl" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.products.total}</h3>
@@ -263,7 +262,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-[#2C2C2C] p-4 sm:p-6 rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] hover:shadow-lg transition-all">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow-sm">
-                  <FontAwesomeIcon icon={faGlobe} className="text-[#2C2C2C] text-lg sm:text-xl" />
+                  <Globe size={22} className="text-[#2C2C2C] text-lg sm:text-xl" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.visits.total}</h3>
@@ -273,7 +272,7 @@ export default function AdminDashboard() {
             <div className="bg-white dark:bg-[#2C2C2C] p-4 sm:p-6 rounded-xl shadow-md border border-[#E0E0E0] dark:border-[#404040] hover:shadow-lg transition-all col-span-2 sm:col-span-1">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FFBF00] rounded-lg flex items-center justify-center shadow-sm">
-                  <FontAwesomeIcon icon={faClock} className="text-[#2C2C2C] text-lg sm:text-xl" />
+                  <Alarm size={22} className="text-[#2C2C2C] text-lg sm:text-xl" />
                 </div>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.users.sellers.pending}</h3>
@@ -291,7 +290,7 @@ export default function AdminDashboard() {
 
             {pendingSellers.length === 0 ? (
               <div className="text-center py-12">
-                <FontAwesomeIcon icon={faCheckCircle} className="text-[#4CAF50] text-5xl mb-4" />
+                <CheckCircle size={52} className="text-[#4CAF50] text-5xl mb-4" />
                 <p className="text-[#666666] dark:text-[#a3a3a3] text-lg">No pending sellers</p>
                 <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-2">All sellers have been reviewed</p>
               </div>
@@ -304,17 +303,17 @@ export default function AdminDashboard() {
                         <h3 className="font-bold text-lg text-[#2C2C2C] dark:text-[#e5e5e5] mb-1 truncate">{seller.username}</h3>
                         <div className="space-y-1 text-sm text-[#666666] dark:text-[#a3a3a3]">
                           <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faEnvelope} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
+                            <At size={16} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                             <span className="truncate">{seller.email}</span>
                           </div>
                           {seller.contact && (
                             <div className="flex items-center gap-2">
-                              <FontAwesomeIcon icon={faPhone} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
+                              <Phone size={16} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                               <span className="truncate">{seller.contact}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-2">
-                            <FontAwesomeIcon icon={faCalendar} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
+                            <Calendar size={16} className="text-[#666666] dark:text-[#a3a3a3] flex-shrink-0" />
                             <span>{new Date(seller.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -339,7 +338,7 @@ export default function AdminDashboard() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div className="bg-[#FFBF00] rounded-full p-2 shadow-lg">
-                                  <FontAwesomeIcon icon={faEye} className="text-[#2C2C2C] text-xl" />
+                                  <Eye size={22} className="text-[#2C2C2C] text-xl" />
                                 </div>
                                 <p className="text-white text-sm mt-2 font-medium">View ID</p>
                               </div>
@@ -356,10 +355,10 @@ export default function AdminDashboard() {
                         className="flex-1 bg-[#4CAF50] hover:bg-[#43A047] text-white font-semibold py-2.5 px-2 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0 shadow-sm hover:shadow-md"
                       >
                         {processingSeller === seller.id ? (
-                          <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                          <Timer size={18} className="animate-spin" />
                         ) : (
                           <>
-                            <FontAwesomeIcon icon={faCheckCircle} className="flex-shrink-0" />
+                            <CheckCircle size={18} className="flex-shrink-0" />
                             <span className="truncate">Approve</span>
                           </>
                         )}
@@ -370,10 +369,10 @@ export default function AdminDashboard() {
                         className="flex-1 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white font-semibold py-2.5 px-2 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base min-w-0 shadow-sm hover:shadow-md"
                       >
                         {processingSeller === seller.id ? (
-                          <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                          <Timer size={18} className="animate-spin" />
                         ) : (
                           <>
-                            <FontAwesomeIcon icon={faTimes} className="flex-shrink-0" />
+                            <Close size={18} className="flex-shrink-0" />
                             <span className="truncate">Reject</span>
                           </>
                         )}
@@ -391,7 +390,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <div className="p-4 bg-[#E0E0E0]/30 dark:bg-[#404040]/50 rounded-lg border border-[#E0E0E0] dark:border-[#404040]">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <FontAwesomeIcon icon={faUserCheck} className="text-[#FFBF00] text-lg sm:text-xl" />
+                  <UserCheck size={22} className="text-[#FFBF00] text-lg sm:text-xl" />
                   <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5]">Unique Visitors</h3>
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.visits.uniqueLast30Days}</p>
@@ -399,7 +398,7 @@ export default function AdminDashboard() {
 
               <div className="p-4 bg-[#E0E0E0]/30 dark:bg-[#404040]/50 rounded-lg border border-[#E0E0E0] dark:border-[#404040]">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <FontAwesomeIcon icon={faChartLine} className="text-[#FFBF00] text-lg sm:text-xl" />
+                  <ChartLine size={22} className="text-[#FFBF00] text-lg sm:text-xl" />
                   <h3 className="font-semibold text-sm sm:text-base text-[#2C2C2C] dark:text-[#e5e5e5]">Total Visits</h3>
                 </div>
                 <p className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">{stats.visits.total}</p>
@@ -443,7 +442,7 @@ export default function AdminDashboard() {
               }}
               className="absolute top-2 right-2 sm:top-4 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 bg-[#E0E0E0] dark:bg-[#404040] hover:bg-[#E0E0E0]/80 dark:hover:bg-[#505050] rounded-full flex items-center justify-center transition-colors z-10"
             >
-              <FontAwesomeIcon icon={faTimes} className="text-[#2C2C2C] dark:text-[#e5e5e5] text-sm sm:text-base" />
+              <Close size={18} className="text-[#2C2C2C] dark:text-[#e5e5e5] text-sm sm:text-base" />
             </button>
             <div className="p-4 sm:p-5">
               <h3 className="text-lg sm:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">ID Verification - {selectedSeller.username}</h3>
@@ -474,10 +473,10 @@ export default function AdminDashboard() {
                   className="flex-1 bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] font-semibold py-2.5 px-3 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base shadow-sm hover:shadow-md"
                 >
                   {processingSeller === selectedSeller.id ? (
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                    <Timer size={18} className="animate-spin" />
                   ) : (
                     <>
-                      <FontAwesomeIcon icon={faCheckCircle} />
+                      <CheckCircle size={20} />
                       <span>Approve Seller</span>
                     </>
                   )}
@@ -491,10 +490,10 @@ export default function AdminDashboard() {
                   className="flex-1 bg-[#F44336] hover:bg-[#E53935] text-white font-semibold py-2.5 px-3 sm:px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base shadow-sm hover:shadow-md"
                 >
                   {processingSeller === selectedSeller.id ? (
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                    <Timer size={18} className="animate-spin" />
                   ) : (
                     <>
-                      <FontAwesomeIcon icon={faTimes} />
+                      <Close size={20} />
                       <span>Reject Seller</span>
                     </>
                   )}

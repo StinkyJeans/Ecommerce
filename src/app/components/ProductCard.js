@@ -4,8 +4,7 @@ import { memo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { Eye, ShoppingBasket } from "griddy-icons";
 
 const ProductModal = dynamic(() => import("./ProductModal"), {
   loading: () => <div className="animate-pulse bg-[#E0E0E0] dark:bg-[#404040] rounded-lg h-96" />,
@@ -50,7 +49,7 @@ const ProductCard = memo(({ product, onView, onAddToCart, isAddingToCart = false
             className="bg-white dark:bg-[#404040] rounded-full p-2.5 shadow-lg hover:bg-[#E0E0E0] dark:hover:bg-[#505050] hover:scale-110 transition-all"
             aria-label="View product details"
           >
-            <FontAwesomeIcon icon={faEye} className="text-[#FFBF00] text-sm" />
+            <Eye size={16} className="text-[#FFBF00]" />
           </button>
         </div>
 
@@ -99,7 +98,7 @@ const ProductCard = memo(({ product, onView, onAddToCart, isAddingToCart = false
               </>
             ) : (
               <>
-                <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+                <ShoppingBasket size={16} className="text-current" />
                 <span>View Details</span>
               </>
             )}

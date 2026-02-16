@@ -2,40 +2,39 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSearch,
-  faTruckFast,
-  faRotateLeft,
-  faCreditCard,
-  faUserGear,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+  Search,
+  Truck,
+  Undo,
+  CreditCard,
+  UserSettings,
+  ChevronRight,
+} from "griddy-icons";
 
 const categories = [
   {
-    icon: faTruckFast,
+    icon: Truck,
     title: "Orders & Shipping",
     description:
       "Track your delivery status, shipping times, and international rates.",
     href: "/account", // placeholder route
   },
   {
-    icon: faRotateLeft,
+    icon: Undo,
     title: "Returns & Refunds",
     description:
       "Start a return, print labels, or check your refund status.",
     href: "/contact?topic=returns",
   },
   {
-    icon: faCreditCard,
+    icon: CreditCard,
     title: "Payments",
     description:
       "Manage billing issues, payment methods, and security settings.",
     href: "/contact?topic=payments",
   },
   {
-    icon: faUserGear,
+    icon: UserSettings,
     title: "Account Settings",
     description:
       "Password resets, profile updates, and preferences.",
@@ -82,7 +81,7 @@ export default function HelpPage() {
                   type="button"
                   className="absolute inset-y-1 right-1 flex items-center justify-center rounded-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-4 sm:px-5 text-sm font-medium shadow-md"
                 >
-                  <FontAwesomeIcon icon={faSearch} className="mr-1.5 hidden sm:inline" />
+                  <Search size={18} className="mr-1.5 hidden sm:inline" />
                   Search
                 </button>
               </div>
@@ -119,7 +118,9 @@ export default function HelpPage() {
         {/* Category cards */}
         <section className="mb-10 sm:mb-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {categories.map((cat) => (
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              return (
               <button
                 key={cat.title}
                 type="button"
@@ -127,10 +128,7 @@ export default function HelpPage() {
                 className="text-left bg-white dark:bg-[#020617] rounded-2xl border border-[#E2E8F0] dark:border-[#1e293b] px-4 sm:px-5 py-5 sm:py-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#eff6ff] dark:bg-[#1d4ed8]/20 flex items-center justify-center mb-4">
-                  <FontAwesomeIcon
-                    icon={cat.icon}
-                    className="text-[#2563eb] text-base sm:text-lg"
-                  />
+                  {Icon && <Icon size={20} className="text-[#2563eb] text-base sm:text-lg" />}
                 </div>
                 <h2 className="text-sm sm:text-base font-semibold text-[#0f172a] dark:text-white mb-1.5">
                   {cat.title}
@@ -140,10 +138,11 @@ export default function HelpPage() {
                 </p>
                 <span className="inline-flex items-center text-xs sm:text-sm font-semibold text-[#2563eb]">
                   View articles
-                  <FontAwesomeIcon icon={faChevronRight} className="ml-1.5 text-[10px]" />
+                  <ChevronRight size={12} className="ml-1.5 text-[10px]" />
                 </span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -165,8 +164,8 @@ export default function HelpPage() {
                     <span className="text-sm sm:text-base text-[#111827] dark:text-[#e5e7eb]">
                       {question}
                     </span>
-                    <FontAwesomeIcon
-                      icon={faChevronRight}
+                    <ChevronRight
+                      size={14}
                       className={`text-[#9ca3af] text-xs flex-shrink-0 transition-transform ${
                         isOpen ? "transform rotate-90" : ""
                       }`}

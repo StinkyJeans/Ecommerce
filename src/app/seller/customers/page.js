@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Navbar from "../components/sellerNavbar";
 import Header from "@/app/components/header";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUsers } from "@fortawesome/free-solid-svg-icons";
+import { Users } from "griddy-icons";
 
 export default function SellerCustomersPage() {
   const router = useRouter();
@@ -38,7 +37,7 @@ export default function SellerCustomersPage() {
               View and manage your customers. Coming soon.
             </p>
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
-              <FontAwesomeIcon icon={faUsers} className="text-5xl text-gray-300 dark:text-gray-600 mb-4" />
+              <Users size={52} className="text-5xl text-gray-300 dark:text-gray-600 mb-4" />
               <p className="text-gray-500 dark:text-gray-400">Customer management will be available here.</p>
             </div>
           </div>

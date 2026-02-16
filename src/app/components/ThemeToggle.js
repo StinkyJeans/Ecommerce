@@ -1,8 +1,7 @@
 "use client";
 
 import { useTheme } from "../context/ThemeContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { Moon, Sun } from "griddy-icons";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -13,10 +12,7 @@ export default function ThemeToggle() {
       className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 touch-manipulation bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      <FontAwesomeIcon
-        icon={theme === "light" ? faMoon : faSun}
-        className="text-gray-700 dark:text-gray-300 text-base sm:text-lg"
-      />
+      {theme === "light" ? <Moon size={20} className="text-gray-700 dark:text-gray-300" /> : <Sun size={20} className="text-gray-700 dark:text-gray-300" />}
     </button>
   );
 }

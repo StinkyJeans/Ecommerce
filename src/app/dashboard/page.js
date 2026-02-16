@@ -9,19 +9,7 @@ import { useSidebar } from "../context/SidebarContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faSearch,
-  faEye,
-  faHeart,
-  faShoppingCart,
-  faChevronRight,
-  faArrowRight,
-  faCheckCircle,
-  faTimes,
-  faExclamationTriangle,
-  faBars
-} from "@fortawesome/free-solid-svg-icons";
+import { Heart, ShoppingBasket, ChevronRight, ArrowRight, CheckCircle, Close, AlertTriangle, Menu } from "griddy-icons";
 import { ProductGridSkeleton } from "../components/ProductSkeleton";
 import { getShopCategories } from "@/lib/categories";
 
@@ -196,7 +184,7 @@ export default function Dashboard() {
                   className="md:hidden p-2 sm:p-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors flex-shrink-0"
                   aria-label="Open menu"
                 >
-                  <FontAwesomeIcon icon={faBars} className="text-[#2C2C2C] dark:text-white text-base sm:text-lg" />
+                  <Menu size={20} className="text-[#2C2C2C] dark:text-white" />
                 </button>
               </div>
               <div className="flex-1 flex justify-center min-w-0 max-w-2xl shrink-0">
@@ -208,13 +196,13 @@ export default function Dashboard() {
               </div>
               <div className="flex-1 flex items-center justify-end gap-2 sm:gap-3 md:gap-4 min-w-0">
                 <button className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors p-2">
-                  <FontAwesomeIcon icon={faHeart} className="text-lg sm:text-xl" />
+                  <Heart size={22} className="text-current" />
                 </button>
                 <button 
                   onClick={() => router.push("/cart/viewCart")}
                   className="relative text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors p-2"
                 >
-                  <FontAwesomeIcon icon={faShoppingCart} className="text-lg sm:text-xl" />
+                  <ShoppingBasket size={22} className="text-current" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[18px] sm:min-w-[20px] h-[18px] sm:h-5 px-1 bg-orange-500 text-white rounded-full text-[10px] sm:text-xs flex items-center justify-center font-semibold">
                       {cartCount > 99 ? "99+" : cartCount}
@@ -249,7 +237,7 @@ export default function Dashboard() {
                         className="px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                       >
                         Shop All Products
-                        <FontAwesomeIcon icon={faArrowRight} className="text-xs sm:text-sm" />
+                        <ArrowRight size={16} className="text-current" />
                       </button>
                     </div>
                   </div>
@@ -265,7 +253,7 @@ export default function Dashboard() {
                   </div>
                   <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2 text-sm sm:text-base self-start sm:self-auto">
                     View all
-                    <FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" />
+                    <ChevronRight size={16} className="text-current" />
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -315,7 +303,7 @@ export default function Dashboard() {
                   </div>
                   <button className="text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] font-semibold flex items-center gap-2 text-sm sm:text-base self-start sm:self-auto">
                     Shop New
-                    <FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" />
+                    <ChevronRight size={16} className="text-current" />
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -406,10 +394,10 @@ export default function Dashboard() {
           cartMessage === "login" ? "bg-[#e6ac00]" : 
           "bg-[#F44336]"
         } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
-          {cartMessage === "success" && <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />}
-          {cartMessage === "exists" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
-          {cartMessage === "error" && <FontAwesomeIcon icon={faTimes} className="text-lg flex-shrink-0 mt-0.5" />}
-          {cartMessage === "login" && <FontAwesomeIcon icon={faExclamationTriangle} className="text-lg flex-shrink-0 mt-0.5" />}
+          {cartMessage === "success" && <CheckCircle size={20} className="flex-shrink-0 mt-0.5 text-white" />}
+          {cartMessage === "exists" && <AlertTriangle size={20} className="flex-shrink-0 mt-0.5 text-white" />}
+          {cartMessage === "error" && <Close size={20} className="flex-shrink-0 mt-0.5 text-white" />}
+          {cartMessage === "login" && <AlertTriangle size={20} className="flex-shrink-0 mt-0.5 text-white" />}
           <p className="font-medium text-sm sm:text-base break-words flex-1">
             {cartMessage === "success" && "Product added to cart successfully!"}
             {cartMessage === "exists" && "This product is already in your cart"}
@@ -417,7 +405,7 @@ export default function Dashboard() {
             {cartMessage === "login" && "Please Login to add this product to your cart."}
           </p>
           <button onClick={() => setCartMessage("")} className="text-white/80 hover:text-white">
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            <Close size={16} className="text-white" />
           </button>
         </div>
       )}

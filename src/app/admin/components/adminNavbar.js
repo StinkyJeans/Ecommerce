@@ -2,18 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faBars, 
-  faTimes, 
-  faChartLine, 
-  faUsers, 
-  faStore, 
-  faGripHorizontal, 
-  faChevronRight, 
-  faEllipsisV,
-  faSignOutAlt
-} from "@fortawesome/free-solid-svg-icons";
+import { Menu, Close, ChartLine, Users, Store, Grid, ChevronRight, MoreVertical, LogOut } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 
 export default function AdminNavbar() {
@@ -61,21 +50,21 @@ export default function AdminNavbar() {
     {
       id: "dashboard",
       label: "Dashboard",
-      icon: faChartLine,
+      icon: ChartLine,
       path: "/admin/dashboard",
       action: dashboard,
     },
     {
       id: "users",
       label: "View Users",
-      icon: faUsers,
+      icon: Users,
       path: "/admin/viewUsers",
       action: viewUsers,
     },
     {
       id: "sellers",
       label: "View Sellers",
-      icon: faStore,
+      icon: Store,
       path: "/admin/viewSellers",
       action: viewSellers,
     },
@@ -87,7 +76,7 @@ export default function AdminNavbar() {
         <div className="flex justify-between items-center px-4 py-3">
           <div onClick={dashboard} className="flex items-center gap-2 cursor-pointer group">
           <div className="w-10 h-10 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
+              <ChartLine size={20} className="text-white" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">TotallyNormal</h1>
@@ -95,7 +84,7 @@ export default function AdminNavbar() {
             </div>
           </div>
           <button onClick={() => setOpen(!open)} className="p-2.5 rounded-xl transition-all active:scale-95">
-            <FontAwesomeIcon icon={open ? faTimes : faBars} className="text-[#2C2C2C] dark:text-[#e5e5e5] text-xl" />
+            {open ? <Close size={24} className="text-[#2C2C2C] dark:text-[#e5e5e5]" /> : <Menu size={24} className="text-[#2C2C2C] dark:text-[#e5e5e5]" />}
           </button>
         </div>
       </div>
@@ -107,7 +96,7 @@ export default function AdminNavbar() {
         <div className="flex flex-col h-full">
           <div onClick={dashboard} className="hidden md:flex items-center gap-3 p-6 border-b border-[#E0E0E0] dark:border-[#404040] cursor-pointer group">
             <div className="w-12 h-12 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faChartLine} className="text-white text-xl" />
+              <ChartLine size={24} className="text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5]">TotallyNormal</h1>
@@ -118,7 +107,7 @@ export default function AdminNavbar() {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
               <div className="flex items-center gap-2 px-3 mb-3">
-                <FontAwesomeIcon icon={faGripHorizontal} className="text-[#666666] dark:text-[#a3a3a3] text-sm" />
+                <Grid size={16} className="text-[#666666] dark:text-[#a3a3a3]" />
                 <p className="text-xs font-bold text-[#666666] dark:text-[#a3a3a3] uppercase tracking-wider">Navigation</p>
               </div>
 
@@ -134,12 +123,12 @@ export default function AdminNavbar() {
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isActive ? "bg-white/20" : "bg-[#E0E0E0] dark:bg-[#404040]/50"}`}>
-                        <FontAwesomeIcon icon={item.icon} className={`text-lg ${isActive ? "text-white" : "text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} />
+                        {item.icon && <item.icon size={20} className={isActive ? "text-white" : "text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]"} />}
                       </div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold">{item.label}</span>
                       </div>
-                      {isActive && <FontAwesomeIcon icon={faChevronRight} className="text-sm" />}
+                      {isActive && <ChevronRight size={16} className="text-current" />}
                     </button>
                   );
                 })}
@@ -154,32 +143,32 @@ export default function AdminNavbar() {
                 className={`w-full flex items-center gap-3 px-2 py-3 rounded-lg transition-colors group ${showDropdown ? "bg-[#E0E0E0] dark:bg-[#404040]" : ""}`}
               >
                 <div className="w-11 h-11 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md">
-                  <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
+                  <ChartLine size={20} className="text-white" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <p className="font-semibold text-sm truncate text-[#2C2C2C] dark:text-[#e5e5e5]">{username ? `${username.toUpperCase()}'S ACCOUNT` : "Admin Account"}</p>
                   <p className="text-xs text-[#666666] dark:text-[#a3a3a3] truncate">Full Access</p>
                 </div>
-                <FontAwesomeIcon icon={faBars} className="cursor-pointer text-sm text-[#666666] dark:text-[#a3a3a3]" />
+                <Menu size={16} className="cursor-pointer text-[#666666] dark:text-[#a3a3a3]" />
               </button>
 
                 {showDropdown && (
                 <div className="absolute bottom-0 left-full ml-2 bg-white dark:bg-[#2C2C2C] rounded-xl shadow-xl border border-[#E0E0E0] dark:border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-left-2 duration-200 w-64">
                   <button onClick={() => handleMenuClick(() => router.push("/admin/dashboard"))} className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faChartLine} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <ChartLine size={18} className="text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">Dashboard</span>
                   </button>
                   <button onClick={() => handleMenuClick(() => router.push("/admin/viewUsers"))} className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faUsers} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <Users size={18} className="text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">View Users</span>
                   </button>
                   <button onClick={() => handleMenuClick(() => router.push("/admin/viewSellers"))} className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faStore} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <Store size={18} className="text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">View Sellers</span>
                   </button>
                   <div className="border-t border-[#E0E0E0] dark:border-[#404040] my-1"></div>
                   <button onClick={handleLogout} className="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#2C2C2C] dark:text-[#e5e5e5] hover:text-[#F44336] transition-colors group">
-                    <FontAwesomeIcon icon={faSignOutAlt} className="text-base text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#F44336]" />
+                    <LogOut size={18} className="text-[#666666] dark:text-[#a3a3a3] group-hover:text-[#F44336]" />
                     <span className="font-medium text-sm">Logout</span>
                   </button>
                 </div>

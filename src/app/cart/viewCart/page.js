@@ -6,21 +6,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { useCart } from "@/app/hooks/useCart";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import {
-  faTrash,
-  faPlus,
-  faMinus,
-  faShoppingCart,
-  faExclamationCircle,
-  faSpinner,
-  faChevronRight,
-  faArrowRight
-} from "@fortawesome/free-solid-svg-icons";
+import { Trash, Plus, Minus, ShoppingBag, AlertCircle, Timer, ArrowRight } from "griddy-icons";
 
 export default function ViewCart() {
   const [removingId, setRemovingId] = useState(null);
@@ -179,7 +169,7 @@ export default function ViewCart() {
           ) : cartItems.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
               <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FontAwesomeIcon icon={faShoppingCart} className="text-5xl text-gray-400 dark:text-gray-500" />
+                <ShoppingBag size={52} className="text-5xl text-gray-400 dark:text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                 Your cart is empty
@@ -250,7 +240,7 @@ export default function ViewCart() {
                             disabled={updatingId === item.id}
                             className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-l-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                           >
-                            <FontAwesomeIcon icon={faMinus} className="text-xs" />
+                            <Minus size={14} className="text-xs" />
                           </button>
                           <input
                             type="number"
@@ -264,9 +254,9 @@ export default function ViewCart() {
                             className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-r-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
                           >
                             {updatingId === item.id ? (
-                              <FontAwesomeIcon icon={faSpinner} className="text-xs animate-spin" />
+                              <Timer size={14} className="text-xs animate-spin" />
                             ) : (
-                              <FontAwesomeIcon icon={faPlus} className="text-xs" />
+                              <Plus size={14} className="text-xs" />
                             )}
                           </button>
                         </div>
@@ -311,7 +301,7 @@ export default function ViewCart() {
                     className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Complete Purchase
-                    <FontAwesomeIcon icon={faArrowRight} />
+                    <ArrowRight size={18} />
                   </button>
                 </div>
               </div>

@@ -7,14 +7,7 @@ import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
 import { userFunctions, shippingFunctions } from "@/lib/supabase/api";
 import UserPortalSidebar from "@/app/components/UserPortalSidebar";
 import ThemeToggle from "@/app/components/ThemeToggle";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faLock,
-  faPlus,
-  faSpinner,
-  faBars,
-} from "@fortawesome/free-solid-svg-icons";
+import { User, Lock, Plus, Timer, Menu } from "griddy-icons";
 
 function formatPasswordChangedAt(ts) {
   if (!ts) return "Never";
@@ -106,7 +99,7 @@ function AccountSettingsContent() {
                 onClick={() => setPortalSidebarOpen(true)}
                 className="md:hidden p-2 -ml-1 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <FontAwesomeIcon icon={faBars} className="text-lg" />
+                <Menu size={20} className="text-lg" />
               </button>
               <div className="flex items-center gap-2 cursor-pointer truncate" onClick={() => router.push("/dashboard")}>
                 <span className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">Totally Normal</span>
@@ -155,7 +148,7 @@ function AccountSettingsContent() {
               <section className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Profile Information</h2>
-                  <FontAwesomeIcon icon={faUser} className="text-gray-400 dark:text-gray-500" />
+                  <User size={22} className="text-gray-400 dark:text-gray-500" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -192,7 +185,7 @@ function AccountSettingsContent() {
                     disabled={profileLoading}
                     className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-50"
                   >
-                    {profileLoading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : "Update Profile"}
+                    {profileLoading ? <Timer size={18} className="animate-spin" /> : "Update Profile"}
                   </button>
                 </div>
               </section>
@@ -201,7 +194,7 @@ function AccountSettingsContent() {
               <section className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Security</h2>
-                  <FontAwesomeIcon icon={faLock} className="text-gray-400 dark:text-gray-500" />
+                  <Lock size={22} className="text-gray-400 dark:text-gray-500" />
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -259,7 +252,7 @@ function AccountSettingsContent() {
                     onClick={() => router.push("/account?tab=addresses")}
                     className="min-h-[140px] p-4 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center gap-2 text-gray-500 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
-                    <FontAwesomeIcon icon={faPlus} className="text-2xl" />
+                    <Plus size={28} className="text-2xl" />
                     <span className="font-medium">Add New Address</span>
                   </button>
                 </div>

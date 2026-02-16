@@ -4,28 +4,22 @@ import { useEffect, useState } from "react";
 import ProductImage from "@/app/components/ProductImage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions } from "@/lib/supabase/api";
 import {
-  faTrash,
-  faEdit,
-  faBoxes,
-  faPlusCircle,
-  faBoxOpen,
-  faSpinner,
-  faEye,
-  faTimes,
-  faCheckCircle,
-  faExclamationCircle,
-  faDesktop,
-  faMobileAlt,
-  faClock,
-  faTag,
-  faCalendar,
-  faAlignLeft
-} from "@fortawesome/free-solid-svg-icons";
+  Trash,
+  Edit,
+  PlusCircle,
+  Package,
+  Timer,
+  Eye,
+  Close,
+  CheckCircle,
+  AlertCircle,
+  Tag,
+  AlignTextLeft,
+} from "griddy-icons";
 import Navbar from "../components/sellerNavbar";
 import Header from "@/app/components/header";
 
@@ -138,19 +132,19 @@ export default function ViewProduct() {
           <div className="p-8">
           {successMessage && (
             <div className="mb-4 flex items-center gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3">
-              <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 dark:text-green-400" />
+              <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
               <p className="text-green-800 dark:text-green-300 font-semibold flex-1">{successMessage}</p>
               <button onClick={() => setSuccessMessage("")} className="text-green-600 dark:text-green-400 hover:text-green-800">
-                <FontAwesomeIcon icon={faTimes} />
+                <Close size={18} />
               </button>
             </div>
           )}
           {errorMessage && (
             <div className="mb-4 flex items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
-              <FontAwesomeIcon icon={faExclamationCircle} className="text-red-600 dark:text-red-400" />
+              <AlertCircle size={20} className="text-red-600 dark:text-red-400" />
               <p className="text-red-800 dark:text-red-300 font-semibold flex-1">{errorMessage}</p>
               <button onClick={() => setErrorMessage("")} className="text-red-600 dark:text-red-400 hover:text-red-800">
-                <FontAwesomeIcon icon={faTimes} />
+                <Close size={18} />
               </button>
             </div>
           )}
@@ -172,7 +166,7 @@ export default function ViewProduct() {
               onClick={() => router.push("/seller/addProduct")}
               className="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
             >
-              <FontAwesomeIcon icon={faPlusCircle} />
+              <PlusCircle size={20} />
               Add Product
             </button>
           </div>
@@ -185,7 +179,7 @@ export default function ViewProduct() {
           ) : products.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
               <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FontAwesomeIcon icon={faBoxOpen} className="text-4xl text-gray-400 dark:text-gray-500" />
+                <Package size={40} className="text-4xl text-gray-400 dark:text-gray-500" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">No products yet</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">Add your first product to start selling.</p>
@@ -193,7 +187,7 @@ export default function ViewProduct() {
                 onClick={() => router.push("/seller/addProduct")}
                 className="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold transition-all"
               >
-                <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
+                <PlusCircle size={18} className="mr-2" />
                 Add Product
               </button>
             </div>
@@ -221,7 +215,7 @@ export default function ViewProduct() {
                       disabled={removingId === pid(product)}
                       className="absolute top-3 right-3 w-9 h-9 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center shadow hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 disabled:opacity-50"
                     >
-                      {removingId === pid(product) ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faTrash} />}
+                      {removingId === pid(product) ? <Timer size={16} className="animate-spin" /> : <Trash size={16} />}
                     </button>
                   </div>
                   <div className="p-4">
@@ -232,7 +226,7 @@ export default function ViewProduct() {
                       onClick={() => handleViewDetails(product)}
                       className="w-full py-2.5 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                     >
-                      <FontAwesomeIcon icon={faEye} />
+                      <Eye size={18} />
                       View Details
                     </button>
                   </div>
@@ -250,7 +244,7 @@ export default function ViewProduct() {
                   <ProductImage src={selectedProduct.id_url} alt={selectedProduct.product_name} className="object-cover w-full h-full rounded-t-2xl" sizes="512px" priority />
                 </div>
                 <button onClick={closeModal} className="absolute top-3 right-3 w-10 h-10 bg-white/95 dark:bg-gray-800/95 rounded-full flex items-center justify-center shadow" aria-label="Close">
-                  <FontAwesomeIcon icon={faTimes} className="text-gray-700 dark:text-gray-300" />
+                  <Close size={20} className="text-gray-700 dark:text-gray-300" />
                 </button>
                 <div className="absolute top-3 left-3">
                   <span className="px-3 py-1 bg-white/95 dark:bg-gray-800/95 rounded-lg text-sm font-semibold text-gray-800 dark:text-gray-200">{selectedProduct.category || "—"}</span>
@@ -260,7 +254,7 @@ export default function ViewProduct() {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{selectedProduct.product_name}</h2>
                 <div className="mb-4">
                   <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faAlignLeft} /> Description
+                    <AlignTextLeft size={18} /> Description
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300 text-sm">{selectedProduct.description || "No description"}</p>
                 </div>
@@ -278,11 +272,11 @@ export default function ViewProduct() {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={() => handleEdit(selectedProduct)} className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2">
-                    <FontAwesomeIcon icon={faEdit} />
+                    <Edit size={18} />
                     Edit
                   </button>
                   <button onClick={() => handleDelete(pid(selectedProduct))} disabled={removingId === pid(selectedProduct)} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
-                    {removingId === pid(selectedProduct) ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faTrash} />}
+                    {removingId === pid(selectedProduct) ? <Timer size={16} className="animate-spin" /> : <Trash size={16} />}
                     Delete
                   </button>
                 </div>

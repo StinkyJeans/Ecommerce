@@ -5,13 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { createClient } from "@/lib/supabase/client";
 import { authFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEye,
-  faEyeSlash,
-  faCheckCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { Eye, EyeOff, CheckCircle, Google } from "griddy-icons";
 import { AuthHeaderRegister } from "@/app/components/auth/AuthHeader";
 import { AuthFooterRegister } from "@/app/components/auth/AuthFooter";
 
@@ -104,7 +98,7 @@ export default function RegisterPage() {
           <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in ${
             popupSuccess ? "bg-[#4CAF50]" : "bg-[#F44336]"
           } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-center gap-3`}>
-            <FontAwesomeIcon icon={faCheckCircle} className="text-lg flex-shrink-0" />
+            <CheckCircle size={20} className="flex-shrink-0 text-white" />
             <span className="font-medium text-sm sm:text-base break-words">{popupMessage}</span>
           </div>
         )}
@@ -174,7 +168,7 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
                 >
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-lg" />
+                  {showPassword ? <EyeOff size={20} className="text-current" /> : <Eye size={20} className="text-current" />}
                 </button>
               </div>
             </div>
@@ -200,7 +194,7 @@ export default function RegisterPage() {
             disabled={loading || googleLoading}
             className="w-full py-3 px-4 bg-white border border-[#E0E0E0] dark:bg-[#404040] dark:border-[#505050] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-medium flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#505050] transition-colors disabled:opacity-50"
           >
-            <FontAwesomeIcon icon={faGoogle} className="text-xl" />
+            <Google size={24} className="text-current" />
             Sign up with Gmail
           </button>
 

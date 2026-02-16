@@ -4,8 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { ArrowLeft, Trash } from "griddy-icons";
 import Navbar from "../components/sellerNavbar";
 export default function ViewCart() {
   const [cartItems, setCartItems] = useState([]);
@@ -50,7 +49,7 @@ export default function ViewCart() {
             onClick={() => router.back()}
             className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 dark:from-red-500 dark:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 text-white px-4 py-2 rounded-lg transition cursor-pointer shadow-lg hover:shadow-xl"
           >
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <ArrowLeft size={18} />
             Back
           </button>
         </div>
@@ -94,7 +93,7 @@ export default function ViewCart() {
                   className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition"
                   title="Remove item"
                 >
-                  <FontAwesomeIcon icon={faTrash} />
+                  <Trash size={18} />
                 </button>
               </div>
             ))}
@@ -103,4 +102,4 @@ export default function ViewCart() {
       </main>
     </div>
   );
-}
+}

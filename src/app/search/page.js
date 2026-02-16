@@ -10,8 +10,7 @@ import ThemeToggle from "@/app/components/ThemeToggle";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { productFunctions, cartFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faEye, faHeart, faShoppingCart, faBars } from "@fortawesome/free-solid-svg-icons";
+import { Search, Eye, Heart, ShoppingBasket, Menu } from "griddy-icons";
 import dynamic from "next/dynamic";
 
 const ProductModal = dynamic(() => import("@/app/components/ProductModal"), { loading: () => null, ssr: false });
@@ -117,7 +116,7 @@ function SearchContent() {
                     className="md:hidden p-2 sm:p-2.5 bg-white dark:bg-[#2C2C2C] border border-[#E0E0E0] dark:border-[#404040] rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors flex-shrink-0"
                     aria-label="Open menu"
                   >
-                    <FontAwesomeIcon icon={faBars} className="text-[#2C2C2C] dark:text-white text-base sm:text-lg" />
+                    <Menu size={20} className="text-[#2C2C2C] dark:text-white" />
                   </button>
                   <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer flex-shrink-0 min-w-0" onClick={() => router.push("/dashboard")}>
                     <span className="text-base sm:text-lg md:text-xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] whitespace-nowrap">Totally Normal</span>
@@ -131,7 +130,7 @@ function SearchContent() {
               </div>
               <div className="flex-1 w-full sm:max-w-2xl min-w-0">
                 <div className="relative">
-                  <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3] text-sm sm:text-base" />
+                  <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3]" />
                   <input
                     type="text"
                     placeholder="Search products..."
@@ -171,7 +170,7 @@ function SearchContent() {
           ) : filteredProducts.length === 0 ? (
             <div className="bg-white dark:bg-[#2C2C2C] rounded-xl border border-[#E0E0E0] dark:border-[#404040] p-6 sm:p-8 md:p-12 text-center">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 dark:bg-[#404040] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <FontAwesomeIcon icon={faSearch} className="text-2xl sm:text-3xl text-[#666666] dark:text-[#a3a3a3]" />
+                <Search size={32} className="text-[#666666] dark:text-[#a3a3a3]" />
               </div>
               <p className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3] font-medium">No products match &quot;{localQuery.trim()}&quot;</p>
               <button
@@ -201,7 +200,7 @@ function SearchContent() {
                         className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-[#404040] rounded-full flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition border border-[#E0E0E0] dark:border-[#404040]"
                         aria-label="Wishlist"
                       >
-                        <FontAwesomeIcon icon={faHeart} className="text-[#FFBF00] text-sm" />
+                        <Heart size={16} className="text-[#FFBF00]" />
                       </button>
                     </div>
                     <div className="p-4">
@@ -214,7 +213,7 @@ function SearchContent() {
                         onClick={() => handleView(p)}
                         className="w-full py-2.5 bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
                       >
-                        <FontAwesomeIcon icon={faShoppingCart} />
+                        <ShoppingBasket size={20} className="text-current" />
                         Add to Cart
                       </button>
                     </div>

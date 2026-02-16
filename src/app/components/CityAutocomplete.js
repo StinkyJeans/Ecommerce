@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCity, faSpinner, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { City, Timer, Close } from "griddy-icons";
 
 export default function CityAutocomplete({
   value = "",
@@ -176,10 +175,7 @@ export default function CityAutocomplete({
     <div className="relative">
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FontAwesomeIcon
-            icon={faCity}
-            className={`text-sm ${error ? "text-red-400" : "text-gray-400"}`}
-          />
+          <City size={16} className={`text-sm ${error ? "text-red-400" : "text-gray-400"}`} />
         </div>
         <input
           ref={inputRef}
@@ -201,10 +197,7 @@ export default function CityAutocomplete({
         />
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-2">
           {isLoading && (
-            <FontAwesomeIcon
-              icon={faSpinner}
-              className="text-gray-400 text-sm animate-spin"
-            />
+            <Timer size={16} className="text-gray-400 text-sm animate-spin" />
           )}
           {inputValue && !disabled && (
             <button
@@ -212,7 +205,7 @@ export default function CityAutocomplete({
               onClick={handleClear}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+              <Close size={16} className="text-sm" />
             </button>
           )}
         </div>

@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHome,
-  faShoppingBag,
-  faChevronDown,
-  faSignOutAlt,
-  faSignInAlt,
-  faUser,
-  faUserCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { Home, ShoppingBag, ChevronDown, LogOut, LogIn, User, UserCircle } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { getShopCategories } from "@/lib/categories";
 
@@ -39,13 +30,13 @@ export default function UserSidebar({ isOpen, onClose }) {
   const isMobile = useIsMobile();
 
   const menuItems = [
-    { id: "home", label: "Home", icon: faHome, path: "/" },
-    { id: "shop", label: "Shop All", icon: faShoppingBag, path: null, hasDropdown: true },
-    { id: "about", label: "About Us", icon: faUser, path: "/about" },
+    { id: "home", label: "Home", icon: Home, path: "/" },
+    { id: "shop", label: "Shop All", icon: ShoppingBag, path: null, hasDropdown: true },
+    { id: "about", label: "About Us", icon: User, path: "/about" },
   ];
 
   const portalItems = [
-    { id: "user-account", label: "User Account", icon: faUserCircle, path: "/account" },
+    { id: "user-account", label: "User Account", icon: UserCircle, path: "/account" },
   ];
 
   const isItemActive = (item) => {
@@ -126,10 +117,10 @@ export default function UserSidebar({ isOpen, onClose }) {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <FontAwesomeIcon icon={item.icon} className="text-base" />
+                        {item.icon && <item.icon size={18} className="text-current" />}
                         <span className="text-sm">{item.label}</span>
                       </div>
-                      <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform ${shopOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown size={14} className={`text-xs transition-transform ${shopOpen ? "rotate-180" : ""}`} />
                     </button>
                     {shopOpen && (
                       <div className="mt-1 ml-4 pl-4 border-l border-[#E0E0E0] dark:border-[#404040] space-y-0.5 py-1">
@@ -169,7 +160,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                       : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                   }`}
                 >
-                  <FontAwesomeIcon icon={item.icon} className="text-base" />
+                  {item.icon && <item.icon size={18} className="text-current" />}
                   <span className="text-sm">{item.label}</span>
                 </button>
               );
@@ -196,10 +187,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                         : "text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#404040]"
                     }`}
                   >
-                    <FontAwesomeIcon
-                      icon={item.icon}
-                      className="text-base"
-                    />
+                    {item.icon && <item.icon size={18} className="text-current" />}
                     <span className="text-sm">{item.label}</span>
                   </button>
                 );
@@ -218,7 +206,7 @@ export default function UserSidebar({ isOpen, onClose }) {
             }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-[#FFBF00] hover:bg-[#e6ac00] text-white rounded-xl transition-colors"
           >
-            <FontAwesomeIcon icon={faSignInAlt} className="text-sm" />
+            <LogIn size={16} className="text-sm" />
             <span>Login</span>
           </button>
         ) : (
@@ -240,7 +228,7 @@ export default function UserSidebar({ isOpen, onClose }) {
               onClick={handleLogout}
               className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#666666] dark:text-white/70 hover:text-[#2C2C2C] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
-              <FontAwesomeIcon icon={faSignOutAlt} className="text-sm" />
+              <LogOut size={16} className="text-sm" />
               <span>Logout</span>
             </button>
           </>

@@ -8,16 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { authFunctions } from "@/lib/supabase/api";
 import { setSigningKey } from "@/lib/signing-client";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faShoppingBag,
-  faEye,
-  faEyeSlash,
-  faExclamationTriangle,
-  faTimes,
-  faCheckCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { ShoppingBag, Eye, EyeOff, AlertTriangle, Close, CheckCircle, Google } from "griddy-icons";
 import { AuthHeaderLogin } from "@/app/components/auth/AuthHeader";
 import { AuthFooterLogin } from "@/app/components/auth/AuthFooter";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
@@ -118,13 +109,10 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-4">
         {showPopup && (
           <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md animate-fade-in bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
-            <FontAwesomeIcon
-              icon={popupType === "success" ? faCheckCircle : popupType === "warning" ? faExclamationTriangle : faTimes}
-              className="text-lg flex-shrink-0 mt-0.5"
-            />
+            {popupType === "success" ? <CheckCircle size={20} className="flex-shrink-0 mt-0.5 text-white" /> : popupType === "warning" ? <AlertTriangle size={20} className="flex-shrink-0 mt-0.5 text-white" /> : <Close size={20} className="flex-shrink-0 mt-0.5 text-white" />}
             <p className="font-medium text-sm sm:text-base break-words flex-1">{popupMessage}</p>
             <button onClick={() => setShowPopup(false)} className="text-white/80 hover:text-white">
-              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+              <Close size={16} className="text-white" />
             </button>
           </div>
         )}
@@ -144,7 +132,7 @@ export default function LoginPage() {
 
           <div className="text-center mb-6">
             <div className="inline-flex w-12 h-12 bg-[#2F79F4] rounded-lg items-center justify-center mb-4 shadow">
-              <FontAwesomeIcon icon={faShoppingBag} className="text-white text-lg" />
+              <ShoppingBag size={20} className="text-white" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#2C2C2C] dark:text-white">Welcome back</h1>
             <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1">Sign in to your Totally Normal account</p>
@@ -156,7 +144,7 @@ export default function LoginPage() {
             disabled={loading || googleLoading}
             className="w-full py-3 px-4 bg-white border border-[#E0E0E0] dark:bg-[#404040] dark:border-[#505050] rounded-xl text-[#2C2C2C] dark:text-[#e5e5e5] font-medium flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-[#404040] transition-colors disabled:opacity-50"
           >
-            <FontAwesomeIcon icon={faGoogle} className="text-xl" />
+            <Google size={24} className="text-current" />
             Login with Gmail
           </button>
 
@@ -203,7 +191,7 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
               >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-lg" />
+                {showPassword ? <EyeOff size={20} className="text-current" /> : <Eye size={20} className="text-current" />}
               </button>
             </div>
             {passwordChangedMessage && (

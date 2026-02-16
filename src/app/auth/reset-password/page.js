@@ -6,15 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { validatePasswordStrength } from "@/lib/validation";
 import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faLock,
-  faEye,
-  faEyeSlash,
-  faCheckCircle,
-  faTimes,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons";
+import { Lock, Eye, EyeOff, CheckCircle, Close, AlertTriangle } from "griddy-icons";
 
 function ResetPasswordContent() {
   const [password, setPassword] = useState("");
@@ -124,10 +116,7 @@ function ResetPasswordContent() {
           className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3"
         >
           <div className="flex-shrink-0 mt-0.5">
-            <FontAwesomeIcon
-              icon={popupType === "success" ? faCheckCircle : popupType === "warning" ? faExclamationTriangle : faTimes}
-              className="text-lg sm:text-xl"
-            />
+            {popupType === "success" ? <CheckCircle size={22} className="text-lg sm:text-xl" /> : popupType === "warning" ? <AlertTriangle size={22} className="text-lg sm:text-xl" /> : <Close size={22} className="text-lg sm:text-xl" />}
           </div>
           <div className="flex-1">
             <p className="font-medium text-sm sm:text-base break-words">
@@ -138,7 +127,7 @@ function ResetPasswordContent() {
             onClick={() => setShowPopup(false)}
             className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
           >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            <Close size={16} className="text-sm" />
           </button>
         </div>
       )}
@@ -158,7 +147,7 @@ function ResetPasswordContent() {
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <FontAwesomeIcon icon={faLock} className="text-white text-2xl" />
+            <Lock size={28} className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
             Reset Password
@@ -174,7 +163,7 @@ function ResetPasswordContent() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400 dark:text-gray-500 text-sm" />
+              <Lock size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
             </div>
             <input
               type={showPassword ? "text" : "password"}
@@ -190,10 +179,7 @@ function ResetPasswordContent() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <FontAwesomeIcon
-                icon={showPassword ? faEyeSlash : faEye}
-                className="text-sm"
-              />
+              {showPassword ? <EyeOff size={16} className="text-sm" /> : <Eye size={16} className="text-sm" />}
             </button>
           </div>
         </div>
@@ -204,7 +190,7 @@ function ResetPasswordContent() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faLock} className="text-gray-400 dark:text-gray-500 text-sm" />
+              <Lock size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
             </div>
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -220,10 +206,7 @@ function ResetPasswordContent() {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <FontAwesomeIcon
-                icon={showConfirmPassword ? faEyeSlash : faEye}
-                className="text-sm"
-              />
+              {showConfirmPassword ? <EyeOff size={16} className="text-sm" /> : <Eye size={16} className="text-sm" />}
             </button>
           </div>
         </div>

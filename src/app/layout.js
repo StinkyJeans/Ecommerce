@@ -1,11 +1,7 @@
 import { Geist, Geist_Mono, Inter } from "next/font/google";
-import { config } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
-
-config.autoAddCss = false;
 
 const inter = Inter({
   variable: "--font-inter",

@@ -7,16 +7,7 @@ import AdminNavbar from "../components/adminNavbar";
 import Pagination from "@/app/components/Pagination";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUsers,
-  faEnvelope,
-  faPhone,
-  faCalendar,
-  faSpinner,
-  faSearch,
-  faUser
-} from "@fortawesome/free-solid-svg-icons";
+import { Users, At, Phone, Calendar, Timer, Search, User } from "griddy-icons";
 
 export default function AdminViewUsers() {
   const router = useRouter();
@@ -114,7 +105,7 @@ export default function AdminViewUsers() {
                     <p className="text-gray-600 dark:text-gray-400">Manage and view all registered users</p>
                   </div>
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <FontAwesomeIcon icon={faUsers} className="text-red-600 dark:text-red-400" />
+                    <Users size={22} className="text-red-600 dark:text-red-400" />
                     <span className="font-semibold text-gray-800 dark:text-gray-200">{users.length}</span>
                     <span className="text-gray-600 dark:text-gray-400">Users</span>
                   </div>
@@ -122,7 +113,7 @@ export default function AdminViewUsers() {
 
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FontAwesomeIcon icon={faSearch} className="text-gray-400 dark:text-gray-500" />
+                <Search size={18} className="text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
@@ -138,7 +129,7 @@ export default function AdminViewUsers() {
         <div className="flex-1 overflow-auto px-4 sm:px-6 lg:px-8 py-8">
           {filteredUsers.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-12 text-center">
-              <FontAwesomeIcon icon={faUser} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
+              <User size={52} className="text-gray-400 dark:text-gray-500 text-5xl mb-4" />
               <p className="text-gray-600 dark:text-gray-300 text-lg font-semibold">
                 {searchTerm ? "No users found" : "No users registered yet"}
               </p>
@@ -171,14 +162,14 @@ export default function AdminViewUsers() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                            <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 dark:text-gray-500 text-sm" />
+                            <At size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
                             <span>{user.email || "N/A"}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {user.contact ? (
                             <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                              <FontAwesomeIcon icon={faPhone} className="text-gray-400 dark:text-gray-500 text-sm" />
+                              <Phone size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
                               <span>{user.contact}</span>
                             </div>
                           ) : (
@@ -187,7 +178,7 @@ export default function AdminViewUsers() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                            <FontAwesomeIcon icon={faCalendar} className="text-gray-400 dark:text-gray-500 text-sm" />
+                            <Calendar size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
                             <span>{new Date(user.created_at).toLocaleDateString()}</span>
                           </div>
                         </td>

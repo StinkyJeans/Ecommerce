@@ -6,29 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions, orderFunctions, shippingFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Trash, ChevronRight, Timer, Truck, CreditCard, Lock, CheckCircle, Minus, Plus, ArrowRight, Edit, Close, User, Phone, Home, LocationPin, Globe, Check } from "griddy-icons";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import ThemeToggle from "@/app/components/ThemeToggle";
-import {
-  faTrash,
-  faChevronRight,
-  faSpinner,
-  faTruck,
-  faCreditCard,
-  faLock,
-  faCheckCircle,
-  faMinus,
-  faPlus,
-  faArrowRight,
-  faEdit,
-  faTimes,
-  faUser,
-  faPhone,
-  faHome,
-  faMapMarkerAlt,
-  faGlobe,
-  faCheck
-} from "@fortawesome/free-solid-svg-icons";
 
 function CheckoutContent() {
   const router = useRouter();
@@ -204,7 +184,7 @@ function CheckoutContent() {
                   placeholder="Search products..."
                   className="pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl border-none focus:ring-2 focus:ring-orange-500 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
-                <FontAwesomeIcon icon={faChevronRight} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ChevronRight size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
               <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
             </div>
@@ -277,7 +257,7 @@ function CheckoutContent() {
                         onClick={() => updateQuantity(item.id, (item.quantity || 1) - 1)}
                         className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-l-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <FontAwesomeIcon icon={faMinus} className="text-xs" />
+                        <Minus size={14} className="text-xs" />
                       </button>
                       <input
                         type="number"
@@ -289,7 +269,7 @@ function CheckoutContent() {
                         onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
                         className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-r-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <FontAwesomeIcon icon={faPlus} className="text-xs" />
+                        <Plus size={14} className="text-xs" />
                       </button>
                     </div>
                     <div className="w-24 text-right">
@@ -306,14 +286,14 @@ function CheckoutContent() {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTruck} className="text-orange-500" />
+                  <Truck size={20} className="text-orange-500" />
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shipping Information</h2>
                 </div>
                 <button
                   onClick={() => setShowAddressModal(true)}
                   className="px-4 py-2 text-sm font-medium text-[#FFBF00] hover:text-[#e6ac00] hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors flex items-center gap-2"
                 >
-                  <FontAwesomeIcon icon={faEdit} className="text-sm" />
+                  <Edit size={16} className="text-sm" />
                   Edit
                 </button>
               </div>
@@ -401,7 +381,7 @@ function CheckoutContent() {
             {/* Payment Method */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-2 mb-4">
-                <FontAwesomeIcon icon={faCreditCard} className="text-orange-500" />
+                <CreditCard size={20} className="text-orange-500" />
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Payment Method</h2>
               </div>
 
@@ -416,14 +396,14 @@ function CheckoutContent() {
                       <p className="font-semibold text-gray-900 dark:text-gray-100">Credit Card</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">All major cards accepted</p>
                     </div>
-                    <FontAwesomeIcon icon={faCreditCard} className="text-2xl text-gray-400" />
+                    <CreditCard size={20} className="text-2xl text-gray-400" />
                   </div>
                   {paymentMethod === "card" && (
                     <div className="space-y-3 pl-8">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Card Number</label>
                         <div className="relative">
-                          <FontAwesomeIcon icon={faCreditCard} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                          <CreditCard size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                           <input
                             type="text"
                             placeholder="0000 0000 0000 0000"
@@ -523,27 +503,27 @@ function CheckoutContent() {
               >
                 {placingOrder ? (
                   <>
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                    <Timer size={24} className="animate-spin" />
                     Processing...
                   </>
                 ) : (
                   <>
                     Complete Purchase
-                    <FontAwesomeIcon icon={faArrowRight} />
+                    <ArrowRight size={20} />
                   </>
                 )}
               </button>
 
               {/* Secure Checkout */}
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4 flex items-center justify-center gap-2">
-                <FontAwesomeIcon icon={faLock} className="text-sm" />
+                <Lock size={16} className="text-sm" />
                 SECURE CHECKOUT POWERED BY NORMALPAY
               </p>
 
               {/* Normal Guarantee */}
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="flex items-start gap-3">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-green-600 dark:text-green-400 text-xl mt-1" />
+                  <CheckCircle size={20} className="text-green-600 dark:text-green-400 text-xl mt-1" />
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">Normal Guarantee</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -574,7 +554,7 @@ function CheckoutContent() {
                 onClick={() => setShowAddressModal(false)}
                 className="text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5] transition-colors"
               >
-                <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                <Close size={24} className="text-xl" />
               </button>
             </div>
 
@@ -582,7 +562,7 @@ function CheckoutContent() {
             <div className="flex-1 overflow-y-auto p-6">
               {addresses.length === 0 ? (
                 <div className="text-center py-12">
-                  <FontAwesomeIcon icon={faMapMarkerAlt} className="text-5xl text-[#666666] dark:text-[#a3a3a3] mb-4" />
+                  <LocationPin size={48} className="text-5xl text-[#666666] dark:text-[#a3a3a3] mb-4" />
                   <p className="text-[#666666] dark:text-[#a3a3a3] text-lg font-semibold mb-2">No addresses found</p>
                   <p className="text-[#666666] dark:text-[#a3a3a3] text-sm mb-6">Please add an address in your account settings</p>
                   <button
@@ -612,27 +592,27 @@ function CheckoutContent() {
                     >
                       {address.is_default && (
                         <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 bg-[#4CAF50] text-white text-xs font-semibold rounded-full">
-                          <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                          <Check size={14} className="text-xs" />
                           <span>Default</span>
                         </div>
                       )}
                       <div className="space-y-2">
                         <div className="flex items-start gap-2">
-                          <FontAwesomeIcon icon={faUser} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <User size={16} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Name</p>
                             <p className="font-bold text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.full_name}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <FontAwesomeIcon icon={faPhone} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <Phone size={16} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Phone</p>
                             <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.phone_number}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <FontAwesomeIcon icon={faHome} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <Home size={16} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-[#666666] dark:text-[#a3a3a3] uppercase mb-1">Address</p>
                             <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">{address.address_line1}</p>
@@ -642,7 +622,7 @@ function CheckoutContent() {
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
-                          <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
+                          <LocationPin size={48} className="text-[#666666] dark:text-[#a3a3a3] text-sm mt-1 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-[#2C2C2C] dark:text-[#e5e5e5] break-words">
                               {address.city}, {address.province} {address.postal_code}
@@ -653,7 +633,7 @@ function CheckoutContent() {
                       </div>
                       {selectedAddress?.id === address.id && (
                         <div className="mt-3 pt-3 border-t border-[#E0E0E0] dark:border-[#404040] flex items-center gap-2 text-[#FFBF00]">
-                          <FontAwesomeIcon icon={faCheckCircle} className="text-sm" />
+                          <CheckCircle size={20} className="text-sm" />
                           <span className="text-sm font-medium">Selected</span>
                         </div>
                       )}

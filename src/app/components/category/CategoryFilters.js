@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { ChevronDown } from "griddy-icons";
 
 const PRICE_PRESETS = [
   { label: "Any price", value: [0, 999999999] },
@@ -63,7 +62,7 @@ export default function CategoryFilters({
           <div className="relative w-full sm:w-auto">
             <button type="button" onClick={() => toggle("price")} className={btnClass}>
               <span>Price Range</span>
-              <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "price" ? "rotate-180" : ""}`} />
+              <ChevronDown size={14} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "price" ? "rotate-180" : ""}`} />
             </button>
             {openDropdown === "price" && (
               <div className={dropdownClass}>
@@ -89,7 +88,7 @@ export default function CategoryFilters({
           <div className="relative w-full sm:w-auto">
             <button type="button" onClick={() => toggle("rating")} className={btnClass}>
               <span>Rating</span>
-              <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "rating" ? "rotate-180" : ""}`} />
+              <ChevronDown size={14} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "rating" ? "rotate-180" : ""}`} />
             </button>
             {openDropdown === "rating" && (
               <div className={`${dropdownClass} sm:min-w-[160px]`}>
@@ -113,7 +112,7 @@ export default function CategoryFilters({
           <div className="relative w-full sm:w-auto">
             <button type="button" onClick={() => toggle("sort")} className={btnClass}>
               <span className="truncate">Sort By: {SORT_OPTIONS.find((o) => o.value === sortBy)?.label || "Newest"}</span>
-              <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "sort" ? "rotate-180" : ""}`} />
+              <ChevronDown size={14} className={`text-xs transition-transform flex-shrink-0 ${openDropdown === "sort" ? "rotate-180" : ""}`} />
             </button>
             {openDropdown === "sort" && (
               <div className={dropdownClass}>

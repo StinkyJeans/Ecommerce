@@ -3,24 +3,22 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { authFunctions } from "@/lib/supabase/api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faBars, 
-  faTimes, 
-  faChartLine, 
-  faPlusCircle, 
-  faBoxes, 
-  faShoppingBag, 
-  faStore, 
-  faGripHorizontal, 
-  faChevronRight, 
-  faEllipsisV,
-  faSignOutAlt,
-  faUserCircle,
-  faBox,
-  faCog,
-  faUsers
-} from "@fortawesome/free-solid-svg-icons";
+import {
+  Menu,
+  Close,
+  ChartLine,
+  PlusCircle,
+  Folders,
+  ShoppingBasket,
+  Store,
+  Grid,
+  ChevronRight,
+  LogOut,
+  UserCircle,
+  Package,
+  Settings,
+  Users,
+} from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 
 export default function Navbar() {
@@ -72,42 +70,42 @@ export default function Navbar() {
     {
       id: "dashboard",
       label: "Dashboard",
-      icon: faChartLine,
+      icon: ChartLine,
       path: "/seller/dashboard",
       action: dashboard,
     },
     {
       id: "orders",
       label: "Orders",
-      icon: faShoppingBag,
+      icon: ShoppingBasket,
       path: "/seller/orders",
       action: orders,
     },
     {
       id: "add",
       label: "Add Product",
-      icon: faPlusCircle,
+      icon: PlusCircle,
       path: "/seller/addProduct",
       action: addProduct,
     },
     {
       id: "products",
       label: "My Products",
-      icon: faBoxes,
+      icon: Folders,
       path: "/seller/viewProduct",
       action: viewProduct,
     },
     {
       id: "customers",
       label: "Customers",
-      icon: faUsers,
+      icon: Users,
       path: "/seller/customers",
       action: customers,
     },
     {
       id: "settings",
       label: "Settings",
-      icon: faCog,
+      icon: Settings,
       path: "/seller/settings",
       action: settings,
     },
@@ -122,7 +120,7 @@ export default function Navbar() {
             className="flex items-center gap-2 cursor-pointer group"
           >
             <div className="w-10 h-10 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faStore} className="text-[#2C2C2C] text-lg" />
+              <Store size={20} className="text-[#2C2C2C] text-lg" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-[#e5e5e5]">TotallyNormal</h1>
@@ -133,7 +131,7 @@ export default function Navbar() {
             onClick={() => setOpen(!open)}
             className="p-2.5 hover:bg-[#404040] rounded-xl transition-all active:scale-95"
           >
-            <FontAwesomeIcon icon={open ? faTimes : faBars} className="text-[#e5e5e5] text-xl" />
+            {open ? <Close size={22} className="text-[#e5e5e5] text-xl" /> : <Menu size={22} className="text-[#e5e5e5] text-xl" />}
           </button>
         </div>
       </div>
@@ -148,7 +146,7 @@ export default function Navbar() {
             className="hidden md:flex items-center gap-3 p-6 border-b border-[#404040] cursor-pointer group"
           >
             <div className="w-12 h-12 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <FontAwesomeIcon icon={faStore} className="text-[#2C2C2C] text-xl" />
+              <Store size={24} className="text-[#2C2C2C] text-xl" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-[#e5e5e5]">TotallyNormal</h1>
@@ -159,7 +157,7 @@ export default function Navbar() {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-6">
               <div className="flex items-center gap-2 px-3 mb-3">
-                <FontAwesomeIcon icon={faGripHorizontal} className="text-[#a3a3a3] text-sm" />
+                <Grid size={16} className="text-[#a3a3a3] text-sm" />
                 <p className="text-xs font-bold text-[#a3a3a3] uppercase tracking-wider">Navigation</p>
               </div>
 
@@ -175,12 +173,12 @@ export default function Navbar() {
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isActive ? "bg-[#2C2C2C]/20" : "bg-[#404040]/50 group-hover:bg-[#505050]"}`}>
-                        <FontAwesomeIcon icon={item.icon} className={`text-lg ${isActive ? "text-[#2C2C2C]" : "text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} />
+                        {(() => { const Icon = item.icon; return Icon ? <Icon size={20} className={`text-lg ${isActive ? "text-[#2C2C2C]" : "text-[#a3a3a3] group-hover:text-[#FFBF00]"}`} /> : null; })()}
                       </div>
                       <div className="flex-1 text-left">
                         <span className="font-semibold">{item.label}</span>
                       </div>
-                      {isActive && <FontAwesomeIcon icon={faChevronRight} className="text-sm" />}
+                      {isActive && <ChevronRight size={16} className="text-sm" />}
                     </button>
                   );
                 })}
@@ -195,32 +193,32 @@ export default function Navbar() {
                 className={`w-full flex items-center gap-3 px-2 py-3 rounded-lg transition-colors group ${showDropdown ? "bg-[#404040]" : "hover:bg-[#404040]"}`}
               >
                 <div className="w-11 h-11 bg-[#FFBF00] rounded-xl flex items-center justify-center shadow-md">
-                  <FontAwesomeIcon icon={faStore} className="text-[#2C2C2C] text-lg" />
+                  <Store size={20} className="text-[#2C2C2C] text-lg" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <p className="font-semibold text-sm truncate text-[#e5e5e5]">{username ? `${username.toUpperCase()}'S ACCOUNT` : "Seller Account"}</p>
                   <p className="text-xs text-[#a3a3a3] truncate">Active Status</p>
                 </div>
-                <FontAwesomeIcon icon={faBars} className="text-sm text-[#a3a3a3]" />
+                <Menu size={16} className="text-sm text-[#a3a3a3]" />
               </button>
 
               {showDropdown && (
                 <div className="absolute bottom-0 left-full ml-2 bg-[#2C2C2C] rounded-xl shadow-xl border border-[#404040] py-2 z-50 animate-in fade-in slide-in-from-left-2 duration-200 w-64">
                   <button onClick={() => handleMenuClick(() => router.push("/account?tab=addresses"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#e5e5e5] hover:bg-[#404040] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <UserCircle size={18} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">Manage My Account</span>
                   </button>
                   <button onClick={() => handleMenuClick(() => router.push("/seller/sellerCart"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#e5e5e5] hover:bg-[#404040] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faBox} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <Package size={18} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">My Orders</span>
                   </button>
                   <button onClick={() => handleMenuClick(() => router.push("/seller/viewProduct"))} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#e5e5e5] hover:bg-[#404040] hover:text-[#FFBF00] transition-colors group">
-                    <FontAwesomeIcon icon={faBoxes} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
+                    <Folders size={18} className="text-base text-[#a3a3a3] group-hover:text-[#FFBF00]" />
                     <span className="font-medium text-sm">My Products</span>
                   </button>
                   <div className="border-t border-[#404040] my-1"></div>
                   <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[#e5e5e5] hover:bg-[#404040] hover:text-[#F44336] transition-colors group">
-                    <FontAwesomeIcon icon={faSignOutAlt} className="text-base text-[#a3a3a3] group-hover:text-[#F44336]" />
+                    <LogOut size={18} className="text-base text-[#a3a3a3] group-hover:text-[#F44336]" />
                     <span className="font-medium text-sm">Logout</span>
                   </button>
                 </div>

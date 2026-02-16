@@ -1,6 +1,5 @@
 "use client";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { ChevronLeft, ChevronRight } from "griddy-icons";
 export default function Pagination({ 
   currentPage, 
   totalPages, 
@@ -48,7 +47,7 @@ export default function Pagination({
           disabled={currentPage === 1}
           className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm"
         >
-          <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
+          <ChevronLeft size={16} className="text-sm" />
           <span className="hidden sm:inline">Previous</span>
         </button>
         <div className="flex items-center gap-1">
@@ -81,7 +80,7 @@ export default function Pagination({
           className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1 text-sm"
         >
           <span className="hidden sm:inline">Next</span>
-          <FontAwesomeIcon icon={faChevronRight} className="text-sm" />
+          <ChevronRight size={16} className="text-sm" />
         </button>
       </div>
     </div>

@@ -4,19 +4,18 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faStore,
-  faIdCard,
-  faShieldAlt,
-  faEnvelope,
-  faPhone,
-  faLock,
-  faEye,
-  faEyeSlash,
-  faCheckCircle,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+  Store,
+  Badge,
+  ShieldCheck,
+  At,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  Close,
+} from "griddy-icons";
 import { AuthHeaderSeller } from "@/app/components/auth/AuthHeader";
 import { AuthFooterSeller } from "@/app/components/auth/AuthFooter";
 
@@ -124,13 +123,13 @@ export default function SellerRegisterPage() {
           <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 animate-fade-in ${
             popupError ? "bg-[#F44336]" : "bg-[#4CAF50]"
           } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl shadow-2xl flex items-start gap-3`}>
-            <FontAwesomeIcon icon={popupError ? faTimes : faCheckCircle} className="text-lg flex-shrink-0 mt-0.5" />
+            {popupError ? <Close size={20} className="flex-shrink-0 mt-0.5" /> : <CheckCircle size={20} className="flex-shrink-0 mt-0.5" />}
             <div className="flex-1 min-w-0">
               <p className="font-semibold">{popupError ? "Error" : "Application submitted"}</p>
               <p className="text-sm mt-1 break-words whitespace-pre-line">{popupMessage}</p>
             </div>
             <button onClick={() => setShowPopup(false)} className="text-white/80 hover:text-white">
-              <FontAwesomeIcon icon={faTimes} className="text-sm" />
+              <Close size={16} className="text-sm" />
             </button>
           </div>
         )}
@@ -164,7 +163,7 @@ export default function SellerRegisterPage() {
                   <img src={idPreview} alt="ID preview" className="max-h-32 rounded-lg object-contain mx-auto mb-2" />
                 ) : (
                   <>
-                    <FontAwesomeIcon icon={faIdCard} className="text-4xl text-[#2F79F4] mb-3" />
+                    <Badge size={40} className="text-[#2F79F4] mb-3" />
                     <p className="text-[#666666] dark:text-[#a3a3a3] text-sm text-center mb-2">
                       Drag and drop your ID card image here, or click to browse.
                     </p>
@@ -187,7 +186,7 @@ export default function SellerRegisterPage() {
                 className="hidden"
               />
               <div className="mt-4 p-3 rounded-xl bg-[#e0edff] dark:bg-[#1e293b] border border-[#bfdbfe] dark:border-[#1d4ed8] flex gap-3">
-                <FontAwesomeIcon icon={faShieldAlt} className="text-[#2F79F4] mt-0.5 flex-shrink-0" />
+                <ShieldCheck size={18} className="text-[#2F79F4] mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-[#2C2C2C] dark:text-[#e5e5e5]">
                   Your data is protected by industry-standard encryption. We only use your ID for merchant verification purposes and do not share it with third parties.
                 </p>
@@ -204,7 +203,7 @@ export default function SellerRegisterPage() {
                   <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Display Name</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
-                      <FontAwesomeIcon icon={faStore} className="text-sm" />
+                      <Store size={16} className="text-sm" />
                     </div>
                     <input
                       type="text"
@@ -220,7 +219,7 @@ export default function SellerRegisterPage() {
                   <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Business Email</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
-                      <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
+                      <At size={16} className="text-sm" />
                     </div>
                     <input
                       type="email"
@@ -236,7 +235,7 @@ export default function SellerRegisterPage() {
                   <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Phone Number</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
-                      <FontAwesomeIcon icon={faPhone} className="text-sm" />
+                      <Phone size={16} className="text-sm" />
                     </div>
                     <input
                       type="tel"
@@ -252,7 +251,7 @@ export default function SellerRegisterPage() {
                   <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Password</label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
-                      <FontAwesomeIcon icon={faLock} className="text-sm" />
+                      <Lock size={16} className="text-sm" />
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -267,7 +266,7 @@ export default function SellerRegisterPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
                     >
-                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-sm" />
+                      {showPassword ? <EyeOff size={16} className="text-sm" /> : <Eye size={16} className="text-sm" />}
                     </button>
                   </div>
                 </div>

@@ -1,7 +1,6 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faHeart, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { Eye, Heart, ShoppingBasket } from "griddy-icons";
 import ProductImage from "../ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
 
@@ -21,7 +20,7 @@ export default function CategoryProductCard({ product, onView }) {
           type="button"
           className="w-8 h-8 bg-white dark:bg-[#404040] rounded-full flex items-center justify-center shadow-md hover:bg-[#E0E0E0] dark:hover:bg-[#505050] transition-colors opacity-0 group-hover:opacity-100 border border-[#E0E0E0] dark:border-[#404040]"
         >
-          <FontAwesomeIcon icon={faHeart} className="text-[#FFBF00] text-sm" />
+          <Heart size={16} className="text-[#FFBF00]" />
         </button>
       </div>
 
@@ -38,7 +37,7 @@ export default function CategoryProductCard({ product, onView }) {
             onClick={() => onView(product)}
             className="bg-white dark:bg-[#404040] rounded-full p-3 shadow-lg hover:scale-110 transition-transform"
           >
-            <FontAwesomeIcon icon={faEye} className="text-[#FFBF00] text-lg" />
+            <Eye size={20} className="text-[#FFBF00]" />
           </button>
         </div>
       </div>
@@ -54,7 +53,7 @@ export default function CategoryProductCard({ product, onView }) {
           onClick={() => onView(product)}
           className="w-full bg-[#FFBF00] hover:bg-[#e6ac00] text-white py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
-          <FontAwesomeIcon icon={faShoppingCart} className="text-sm" />
+          <ShoppingBasket size={16} className="text-current" />
           Add to Cart
         </button>
       </div>

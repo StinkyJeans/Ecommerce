@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { Search, Close } from "griddy-icons";
 export default function SearchBar({ 
   placeholder = "Search products...", 
   onSearch, 
@@ -35,9 +34,9 @@ export default function SearchBar({
   return (
     <div className={`relative w-full max-w-md ${className}`}>
       <div className="relative flex items-center group">
-        <FontAwesomeIcon
-          icon={faSearch}
-          className="absolute left-3 sm:left-4 text-[#666666] dark:text-[#a3a3a3] group-focus-within:text-[#FFBF00] pointer-events-none text-sm sm:text-base transition-colors"
+        <Search
+          size={18}
+          className="absolute left-3 sm:left-4 text-[#666666] dark:text-[#a3a3a3] group-focus-within:text-[#FFBF00] pointer-events-none transition-colors"
         />
         <input
           type="text"
@@ -52,7 +51,7 @@ export default function SearchBar({
             className="absolute right-2 sm:right-3 text-[#666666] dark:text-[#a3a3a3] hover:text-[#2C2C2C] dark:hover:text-[#e5e5e5] transition cursor-pointer p-1 sm:p-1.5 hover:bg-[#E0E0E0] dark:hover:bg-[#404040] rounded-lg touch-manipulation"
             aria-label="Clear search"
           >
-            <FontAwesomeIcon icon={faTimes} className="text-sm sm:text-base" />
+            <Close size={18} className="text-current" />
           </button>
         )}
       </div>

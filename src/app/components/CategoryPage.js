@@ -11,8 +11,7 @@ import CategoryProductCard from "./category/CategoryProductCard";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { useCategoryProducts } from "@/app/hooks/useCategoryProducts";
 import { useAddToCartToast } from "@/app/hooks/useAddToCartToast";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { Search, ChevronRight } from "griddy-icons";
 import dynamic from "next/dynamic";
 
 const ProductModal = dynamic(() => import("./ProductModal"), {
@@ -93,9 +92,9 @@ export default function CategoryPage({ categoryName, categoryValue }) {
             </div>
             <div className="flex-1 w-full sm:max-w-2xl min-w-0">
               <div className="relative">
-                <FontAwesomeIcon
-                  icon={faChevronRight}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3] pointer-events-none text-sm sm:text-base"
+                <Search
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666] dark:text-[#a3a3a3] pointer-events-none"
                 />
                 <input
                   type="text"

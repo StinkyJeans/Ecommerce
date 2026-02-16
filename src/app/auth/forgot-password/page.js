@@ -4,13 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authFunctions } from "@/lib/supabase/api";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEnvelope,
-  faCheckCircle,
-  faTimes,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons";
+import { At, CheckCircle, Close, AlertTriangle } from "griddy-icons";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -75,10 +69,7 @@ export default function ForgotPasswordPage() {
           className="fixed top-4 right-4 left-4 sm:left-auto sm:right-5 z-50 max-w-sm sm:max-w-md mx-auto sm:mx-0 animate-fade-in bg-red-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-start gap-3"
         >
           <div className="flex-shrink-0 mt-0.5">
-            <FontAwesomeIcon
-              icon={popupType === "success" ? faCheckCircle : popupType === "warning" ? faExclamationTriangle : faTimes}
-              className="text-lg sm:text-xl"
-            />
+            {popupType === "success" ? <CheckCircle size={22} className="text-lg sm:text-xl" /> : popupType === "warning" ? <AlertTriangle size={22} className="text-lg sm:text-xl" /> : <Close size={22} className="text-lg sm:text-xl" />}
           </div>
           <div className="flex-1">
             <p className="font-medium text-sm sm:text-base break-words">
@@ -89,7 +80,7 @@ export default function ForgotPasswordPage() {
             onClick={() => setShowPopup(false)}
             className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
           >
-            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+            <Close size={16} className="text-sm" />
           </button>
         </div>
       )}
@@ -109,7 +100,7 @@ export default function ForgotPasswordPage() {
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 shadow-lg">
-            <FontAwesomeIcon icon={faEnvelope} className="text-white text-2xl" />
+            <At size={28} className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
             Forgot Password
@@ -125,7 +116,7 @@ export default function ForgotPasswordPage() {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 dark:text-gray-500 text-sm" />
+              <At size={16} className="text-gray-400 dark:text-gray-500 text-sm" />
             </div>
             <input
               type="email"

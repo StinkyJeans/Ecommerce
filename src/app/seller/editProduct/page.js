@@ -8,23 +8,22 @@ import { getCategoryOptionsForForm } from "@/lib/categories";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faImage,
-  faSyncAlt,
-  faCloudUploadAlt,
-  faCheckCircle,
-  faInfoCircle,
-  faEdit,
-  faTag,
-  faAlignLeft,
-  faDollarSign,
-  faTimes,
-  faDesktop,
-  faMobileAlt,
-  faClock,
-  faSpinner
-} from "@fortawesome/free-solid-svg-icons";
+  Image,
+  RefreshCw,
+  Upload,
+  CheckCircle,
+  InfoCircle,
+  Edit,
+  Tag,
+  AlignTextLeft,
+  BanknoteDollar,
+  Close,
+  Monitor,
+  Mobile,
+  SmartWatch,
+  Timer,
+} from "griddy-icons";
 
 function EditProductContent() {
   const [image, setImage] = useState(null);
@@ -191,10 +190,10 @@ function EditProductContent() {
   };
 
   const getCategoryIcon = (cat) => {
-    if (cat === "Pc" || (cat && cat.toLowerCase().includes("pc"))) return faDesktop;
-    if (cat === "Mobile" || (cat && cat.toLowerCase().includes("mobile"))) return faMobileAlt;
-    if (cat === "Watch" || (cat && cat.toLowerCase().includes("watch"))) return faClock;
-    return faTag;
+    if (cat === "Pc" || (cat && cat.toLowerCase().includes("pc"))) return Monitor;
+    if (cat === "Mobile" || (cat && cat.toLowerCase().includes("mobile"))) return Mobile;
+    if (cat === "Watch" || (cat && cat.toLowerCase().includes("watch"))) return SmartWatch;
+    return Tag;
   };
 
   return (
@@ -229,7 +228,7 @@ function EditProductContent() {
                 onClick={() => router.push("/seller/viewProduct")}
                 className="cursor-pointer px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 touch-manipulation"
               >
-                <FontAwesomeIcon icon={faTimes} className="text-base sm:text-lg" />
+                <Close size={20} className="text-base sm:text-lg" />
                 <span className="hidden sm:inline">Cancel</span>
               </button>
             </div>
@@ -255,14 +254,14 @@ function EditProductContent() {
                       <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 z-10 flex items-center justify-center">
                         <div className="opacity-0 hover:opacity-100 transition-opacity">
                           <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                            <FontAwesomeIcon icon={faImage} className="text-red-600 dark:text-red-400 text-xl" />
+                            <Image size={22} className="text-red-600 dark:text-red-400 text-xl" />
                           </div>
                         </div>
                       </div>
                     </>
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                      <FontAwesomeIcon icon={faCloudUploadAlt} className="text-4xl mb-2" />
+                      <Upload size={40} className="text-4xl mb-2" />
                       <p className="text-sm">No image selected</p>
                     </div>
                   )}
@@ -282,7 +281,7 @@ function EditProductContent() {
                     }}
                     className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 flex items-center gap-1"
                   >
-                    <FontAwesomeIcon icon={faTimes} className="text-xs" />
+                    <Close size={14} className="text-xs" />
                     Remove image
                   </button>
                 )}
@@ -290,7 +289,7 @@ function EditProductContent() {
 
               <div className="mb-5 sm:mb-6">
                 <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTag} className="text-red-600 dark:text-red-400 text-sm" />
+                  <Tag size={16} className="text-red-600 dark:text-red-400 text-sm" />
                   Product Name
                 </label>
                 <input
@@ -305,7 +304,7 @@ function EditProductContent() {
 
               <div className="mb-5 sm:mb-6">
                 <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <FontAwesomeIcon icon={faAlignLeft} className="text-red-600 dark:text-red-400 text-sm" />
+                  <AlignTextLeft size={16} className="text-red-600 dark:text-red-400 text-sm" />
                   Description
                 </label>
                 <textarea
@@ -321,7 +320,7 @@ function EditProductContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-5 sm:mb-6">
                 <div>
                   <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faDollarSign} className="text-red-600 dark:text-red-400 text-sm" />
+                    <BanknoteDollar size={16} className="text-red-600 dark:text-red-400 text-sm" />
                     Price
                   </label>
                   <input
@@ -338,7 +337,7 @@ function EditProductContent() {
 
                 <div>
                   <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FontAwesomeIcon icon={getCategoryIcon(category)} className="text-red-600 dark:text-red-400 text-sm" />
+                    {(() => { const Icon = getCategoryIcon(category); return Icon ? <Icon size={16} className="text-red-600 dark:text-red-400 text-sm" /> : null; })()}
                     Category
                   </label>
                   <select
@@ -362,12 +361,12 @@ function EditProductContent() {
               >
                 {loading ? (
                   <>
-                    <FontAwesomeIcon icon={faSpinner} className="text-lg sm:text-xl animate-spin" />
+                    <Timer size={22} className="text-lg sm:text-xl animate-spin" />
                     Updating...
                   </>
                 ) : (
                   <>
-                    <FontAwesomeIcon icon={faEdit} className="text-lg sm:text-xl" />
+                    <Edit size={22} className="text-lg sm:text-xl" />
                     Update Product
                   </>
                 )}
@@ -381,10 +380,7 @@ function EditProductContent() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 animate-in zoom-in-95 border border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FontAwesomeIcon
-                    icon={popupMessage.includes("success") ? faCheckCircle : faInfoCircle}
-                    className="text-white text-xl"
-                  />
+                  {popupMessage.includes("success") ? <CheckCircle size={22} className="text-white text-xl" /> : <InfoCircle size={22} className="text-white text-xl" />}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200">
@@ -396,7 +392,7 @@ function EditProductContent() {
                   onClick={() => setShowPopup(false)}
                   className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                  <Close size={20} className="text-lg" />
                 </button>
               </div>
             </div>

@@ -1,15 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBox,
-  faCog,
-  faHeart,
-  faHome,
-  faLocationDot,
-  faSignOutAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { Package, Settings, Heart, Home, LocationPin, LogOut } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { usePortalSidebar } from "@/app/context/PortalSidebarContext";
 
@@ -23,11 +15,11 @@ export default function UserPortalSidebar() {
   const onClose = portalContext ? () => portalContext.setPortalSidebarOpen(false) : () => {};
 
   const menuItems = [
-    { id: "home", label: "Home", icon: faHome, path: "/dashboard" },
-    { id: "addresses", label: "Addresses", icon: faLocationDot, path: "/account", tab: "addresses" },
-    { id: "orders", label: "Order History", icon: faBox, path: "/account", tab: "orders" },
-    { id: "settings", label: "Account Settings", icon: faCog, path: "/account/settings" },
-    { id: "wishlist", label: "Wishlist", icon: faHeart, path: "/dashboard" },
+    { id: "home", label: "Home", icon: Home, path: "/dashboard" },
+    { id: "addresses", label: "Addresses", icon: LocationPin, path: "/account", tab: "addresses" },
+    { id: "orders", label: "Order History", icon: Package, path: "/account", tab: "orders" },
+    { id: "settings", label: "Account Settings", icon: Settings, path: "/account/settings" },
+    { id: "wishlist", label: "Wishlist", icon: Heart, path: "/dashboard" },
   ];
 
   const handleLogout = async () => {
@@ -75,6 +67,7 @@ export default function UserPortalSidebar() {
         <div className="space-y-1">
           {menuItems.map((item) => {
             const active = isActive(item);
+            const Icon = item.icon;
             return (
               <button
                 key={item.id}
@@ -85,7 +78,7 @@ export default function UserPortalSidebar() {
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
-                <FontAwesomeIcon icon={item.icon} className="text-base" />
+                {Icon && <Icon size={18} className="text-base" />}
                 <span className="text-sm">{item.label}</span>
               </button>
             );
@@ -98,7 +91,7 @@ export default function UserPortalSidebar() {
           onClick={handleLogout}
           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-medium"
         >
-          <FontAwesomeIcon icon={faSignOutAlt} className="text-sm" />
+          <LogOut size={16} className="text-sm" />
           Logout
         </button>
       </div>
