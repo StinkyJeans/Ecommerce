@@ -69,6 +69,8 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (loading) return; // Prevent multiple simultaneous requests
     setLoading(true);
     try {
       const data = await authFunctions.login({ email, password });
@@ -106,7 +108,8 @@ export default function LoginPage() {
           setPasswordChangedMessage(`You have changed your password ${formatRelativeTime(err.passwordChangedAt)}`);
       }
       setShowPopup(true);
-      setTimeout(() => setShowPopup(false), status === 403 ? 5000 : status === 429 ? 6000 : 4000);
+      // Rate limit messages stay for 5 seconds, others for 4 seconds
+      setTimeout(() => setShowPopup(false), status === 429 ? 5000 : status === 403 ? 5000 : 4000);
     } finally {
       setLoading(false);
     }
@@ -136,11 +139,11 @@ export default function LoginPage() {
           onSubmit={handleLogin}
           className="relative w-full max-w-md bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-lg border border-[#E0E0E0] dark:border-[#404040] p-6 sm:p-8"
         >
-          {(loading || googleLoading) && (
+          {googleLoading && (
             <div className="absolute inset-0 bg-white/95 dark:bg-[#2C2C2C]/95 rounded-2xl flex items-center justify-center z-10">
               <div className="flex flex-col items-center gap-3">
                 <LoadingSpinner size="md" color="blue" />
-                <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">{googleLoading ? "Redirecting to Google..." : "Signing in..."}</p>
+                <p className="text-[#2C2C2C] dark:text-[#e5e5e5] font-medium">Redirecting to Google...</p>
               </div>
             </div>
           )}
@@ -217,9 +220,10 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || googleLoading}
-            className="w-full py-3 px-4 bg-[#2F79F4] hover:bg-[#2563eb] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow"
+            className="w-full py-3 px-4 bg-[#2F79F4] hover:bg-[#2563eb] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow flex items-center justify-center gap-2"
           >
-            Sign In
+            {loading && <LoadingSpinner size="sm" color="white" />}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
 
           <p className="mt-6 text-center text-[#666666] dark:text-[#a3a3a3] text-sm">
