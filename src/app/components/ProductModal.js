@@ -1,14 +1,37 @@
 "use client";
 
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
-import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp } from "griddy-icons";
+import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp, ChatBubble } from "griddy-icons";
 import StartChatButton from "./chat/StartChatButton";
+import { useChatModal } from "@/app/context/ChatModalContext";
 
 const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = false, username, initialQuantity = 1 }) => {
   const [quantity, setQuantity] = useState(initialQuantity);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [showChatOption, setShowChatOption] = useState(false);
+  const { openChat } = useChatModal();
+
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      if (!isAddingToCart) {
+        setShowChatOption(true);
+      }
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdated);
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdated);
+    };
+  }, [isAddingToCart]);
+
+  useEffect(() => {
+    if (showChatOption) {
+      const timer = setTimeout(() => setShowChatOption(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [showChatOption]);
 
   const increaseQuantity = useCallback(() => {
     setQuantity((prev) => prev + 1);
@@ -23,6 +46,18 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
       onAddToCart(product, quantity);
     }
   }, [product, quantity, onAddToCart]);
+
+  const handleMessageSeller = useCallback(() => {
+    const seller = product?.sellerUsername || product?.seller_username;
+    const productId = product?.product_id || product?.productId;
+    if (seller) {
+      openChat({
+        seller,
+        product: productId,
+      });
+      setShowChatOption(false);
+    }
+  }, [product, openChat]);
 
   const calculateTotalPrice = () => {
     if (!product) return "0.00";
@@ -202,6 +237,17 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                 </>
               )}
             </button>
+
+            {/* Message Seller Option After Add to Cart */}
+            {showChatOption && (product?.sellerUsername || product?.seller_username) && (
+              <button
+                onClick={handleMessageSeller}
+                className="mt-3 w-full py-3 rounded-xl font-medium text-sm bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <ChatBubble size={18} className="text-current" />
+                Message Seller About This Product
+              </button>
+            )}
 
             {/* Trust */}
             <p className="mt-4 text-center text-xs text-[#666666] dark:text-[#a3a3a3] flex items-center justify-center gap-2">

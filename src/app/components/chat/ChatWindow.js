@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
+import ProductInfoCard from "./ProductInfoCard";
 import { Store } from "griddy-icons";
 
 export default function ChatWindow({
@@ -51,16 +52,21 @@ export default function ChatWindow({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-1">
-        {(messages || []).map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            message={msg}
-            isOwn={msg.sender_username === currentUsername}
-            otherName={msg.sender_username === currentUsername ? null : otherName}
-          />
-        ))}
-        <div ref={bottomRef} />
+      <div className="flex-1 overflow-y-auto space-y-1">
+        {conversation.product_id && (
+          <ProductInfoCard productId={conversation.product_id} />
+        )}
+        <div className="p-4 space-y-1">
+          {(messages || []).map((msg) => (
+            <ChatMessage
+              key={msg.id}
+              message={msg}
+              isOwn={msg.sender_username === currentUsername}
+              otherName={msg.sender_username === currentUsername ? null : otherName}
+            />
+          ))}
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       <ChatInput onSend={onSend} disabled={sending} />
