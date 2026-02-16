@@ -48,8 +48,8 @@ const DEV_RATE_LIMITS = {
     windowMs: 60 * 60 * 1000,
   },
   resetPassword: {
-    maxRequests: 10,
-    windowMs: 60 * 60 * 1000,
+    maxRequests: 20, // Increased for development testing
+    windowMs: 15 * 60 * 1000, // 15 minutes instead of 1 hour
   },
   addToCart: {
     maxRequests: 200,

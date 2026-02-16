@@ -1,11 +1,14 @@
 import nodemailer from 'nodemailer';
 import { getPasswordResetTemplate, getSellerWelcomeTemplate, getSellerApprovalTemplate } from './templates';
+import { getOAuth2Auth } from './gmail-oauth2';
+
 const EMAIL_FROM = process.env.EMAIL_FROM || 'noreply@example.com';
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Your Store';
 const SITE_NAME = process.env.SITE_NAME || 'Your Store';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 let transporter = null;
 let transporterPromise = null;
+
 async function getTransporter() {
   if (transporter) {
     return transporter;
@@ -15,8 +18,17 @@ async function getTransporter() {
   }
   transporterPromise = (async () => {
     const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    // Check for Gmail OAuth2 configuration (preferred method)
+    const hasOAuth2Config = process.env.GMAIL_CLIENT_ID && 
+                            process.env.GMAIL_CLIENT_SECRET && 
+                            process.env.GMAIL_REFRESH_TOKEN;
+    
+    // Check for SMTP configuration (fallback)
     const hasSmtpConfig = process.env.SMTP_USER && process.env.SMTP_PASS;
-    if (isDevelopment && !hasSmtpConfig) {
+    
+    // Use Ethereal in development if no email config is provided
+    if (isDevelopment && !hasOAuth2Config && !hasSmtpConfig) {
       console.log('📧 Nodemailer: Using Ethereal test account (development mode)');
       try {
         const testAccount = await nodemailer.createTestAccount();
@@ -38,34 +50,108 @@ async function getTransporter() {
         throw new Error('Failed to create Ethereal test account: ' + error.message);
       }
     }
-    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-    const smtpSecure = process.env.SMTP_SECURE === 'true';
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    if (!smtpUser || !smtpPass) {
-      throw new Error('SMTP configuration missing. Set SMTP_USER and SMTP_PASS in .env.local (or use Ethereal in development)');
-    }
-    console.log('📧 Nodemailer: Using SMTP configuration');
-    console.log(`📧 SMTP Host: ${smtpHost}:${smtpPort}`);
-    console.log(`📧 SMTP User: ${smtpUser}`);
-    transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpSecure,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass
+
+    // Use OAuth2 if configured (preferred for Gmail)
+    if (hasOAuth2Config) {
+      try {
+        console.log('📧 Nodemailer: Using Gmail OAuth2 authentication');
+        const oauth2Auth = await getOAuth2Auth();
+        const emailFrom = process.env.EMAIL_FROM || process.env.GMAIL_USER;
+        
+        if (!emailFrom) {
+          throw new Error('EMAIL_FROM or GMAIL_USER must be set when using OAuth2');
+        }
+
+        transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: oauth2Auth
+        });
+
+        try {
+          await transporter.verify();
+          console.log('✅ Gmail OAuth2 connection verified successfully');
+        } catch (error) {
+          console.error('❌ Gmail OAuth2 connection verification failed:', error);
+          throw new Error('Gmail OAuth2 connection failed: ' + error.message);
+        }
+        
+        return transporter;
+      } catch (error) {
+        console.error('❌ Failed to initialize Gmail OAuth2:', error);
+        // Fall through to SMTP if OAuth2 fails
+        if (!hasSmtpConfig) {
+          throw error;
+        }
+        console.log('⚠️  Falling back to SMTP configuration');
       }
-    });
-    try {
-      await transporter.verify();
-      console.log('✅ SMTP connection verified successfully');
-    } catch (error) {
-      console.error('❌ SMTP connection verification failed:', error);
-      throw new Error('SMTP connection failed: ' + error.message);
     }
-    return transporter;
+
+    // Fallback to SMTP configuration
+    if (hasSmtpConfig) {
+      const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+      const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+      // Port 587 uses STARTTLS (secure: false), Port 465 uses SSL/TLS (secure: true)
+      const smtpSecure = smtpPort === 465 || process.env.SMTP_SECURE === 'true';
+      const smtpUser = process.env.SMTP_USER;
+      const smtpPass = process.env.SMTP_PASS;
+
+      console.log('📧 Nodemailer: Using SMTP configuration');
+      console.log(`📧 SMTP Host: ${smtpHost}:${smtpPort}`);
+      console.log(`📧 SMTP User: ${smtpUser}`);
+      console.log(`📧 SMTP Secure: ${smtpSecure} (Port ${smtpPort} uses ${smtpSecure ? 'SSL/TLS' : 'STARTTLS'})`);
+      
+      let transporterConfig;
+
+      // Gmail-specific configuration
+      if (smtpHost.includes('gmail.com')) {
+        // Use Gmail service (simpler and more reliable)
+        transporterConfig = {
+          service: 'gmail',
+          auth: {
+            user: smtpUser,
+            pass: smtpPass
+          }
+        };
+        console.log('📧 Using Gmail service configuration (Note: App passwords deprecated after March 2025)');
+      } else {
+        // Generic SMTP configuration
+        transporterConfig = {
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpSecure,
+          auth: {
+            user: smtpUser,
+            pass: smtpPass
+          },
+          tls: {
+            rejectUnauthorized: false // Allow self-signed certificates
+          }
+        };
+        console.log('📧 Using generic SMTP configuration');
+      }
+
+      transporter = nodemailer.createTransport(transporterConfig);
+      try {
+        await transporter.verify();
+        console.log('✅ SMTP connection verified successfully');
+      } catch (error) {
+        console.error('❌ SMTP connection verification failed:', error);
+        console.error('Error details:', {
+          code: error.code,
+          command: error.command,
+          response: error.response,
+          responseCode: error.responseCode
+        });
+        throw new Error('SMTP connection failed: ' + error.message);
+      }
+      return transporter;
+    }
+
+    // No configuration found
+    throw new Error(
+      'Email configuration missing. Set Gmail OAuth2 credentials (GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN) ' +
+      'or SMTP credentials (SMTP_USER, SMTP_PASS) in .env.local (or use Ethereal in development)'
+    );
   })();
   return transporterPromise;
 }
@@ -172,4 +258,4 @@ export async function sendSellerApprovalEmail({ email, userName, approved = true
     console.error('❌ Error sending seller approval email:', error);
     throw error;
   }
-}
+}

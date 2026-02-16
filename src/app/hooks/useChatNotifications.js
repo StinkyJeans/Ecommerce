@@ -56,27 +56,34 @@ export function useChatNotifications(currentUsername, enabled = true) {
   useEffect(() => {
     if (!enabled || !currentUsername) {
       setConversationIds([]);
+      setUnreadTotal(0);
       return;
     }
 
+    // Delay fetch to avoid blocking initial page load
+    // Only fetch after page is interactive
     let cancelled = false;
-    (async () => {
-      try {
-        const data = await chatFunctions.getConversations();
-        const list = data?.conversations ?? [];
-        if (!cancelled) {
-          setConversationIds(list.map((c) => c.id).filter(Boolean));
-          setUnreadTotal(data?.unreadTotal ?? 0);
+    const timeoutId = setTimeout(() => {
+      (async () => {
+        try {
+          const data = await chatFunctions.getConversations();
+          const list = data?.conversations ?? [];
+          if (!cancelled) {
+            setConversationIds(list.map((c) => c.id).filter(Boolean));
+            setUnreadTotal(data?.unreadTotal ?? 0);
+          }
+        } catch (_) {
+          if (!cancelled) {
+            setConversationIds([]);
+            setUnreadTotal(0);
+          }
         }
-      } catch (_) {
-        if (!cancelled) {
-          setConversationIds([]);
-          setUnreadTotal(0);
-        }
-      }
-    })();
+      })();
+    }, 500); // Wait 500ms after component mount
+
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
   }, [enabled, currentUsername]);
 

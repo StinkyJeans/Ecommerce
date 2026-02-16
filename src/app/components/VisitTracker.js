@@ -34,7 +34,8 @@ export default function VisitTracker() {
       }
     };
 
-    const timeoutId = setTimeout(trackVisit, 100);
+    // Delay tracking to avoid blocking page load
+    const timeoutId = setTimeout(trackVisit, 2000); // 2 second delay
 
     return () => clearTimeout(timeoutId);
   }, [pathname, role]);
