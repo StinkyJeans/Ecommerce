@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { chatFunctions } from "@/lib/supabase/api";
@@ -11,7 +11,10 @@ import ThemeToggle from "@/app/components/ThemeToggle";
 import { ChevronLeft, Chat as ChatIcon } from "griddy-icons";
 import Link from "next/link";
 
-export default function ChatPage() {
+// Force dynamic rendering to prevent prerendering errors with useSearchParams
+export const dynamic = 'force-dynamic';
+
+function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { username, role, loading: authLoading } = useAuth();
@@ -234,5 +237,19 @@ export default function ChatPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#F5F7FB] dark:bg-[#0f172a]">
+          <div className="w-10 h-10 border-4 border-[#2F79F4] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <ChatPageContent />
+    </Suspense>
   );
 }
