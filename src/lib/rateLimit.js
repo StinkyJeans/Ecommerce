@@ -12,8 +12,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Production limits (strict)
 const PROD_RATE_LIMITS = {
   login: {
-    maxRequests: 5,
-    windowMs: 15 * 60 * 1000, 
+    maxRequests: 10, // Changed from 5 to 10 attempts
+    windowMs: 15 * 60 * 1000, // 15 minutes
   },
   register: {
     maxRequests: 3,
@@ -40,8 +40,8 @@ const PROD_RATE_LIMITS = {
 // Development limits (relaxed for testing)
 const DEV_RATE_LIMITS = {
   login: {
-    maxRequests: 20,
-    windowMs: 15 * 60 * 1000,
+    maxRequests: 30, // Changed from 20 to 30 attempts
+    windowMs: 15 * 60 * 1000, // 15 minutes
   },
   register: {
     maxRequests: 10,

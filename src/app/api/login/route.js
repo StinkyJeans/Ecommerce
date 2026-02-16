@@ -14,6 +14,9 @@ export async function POST(req) {
     }
 
     const { email, password } = await req.json();
+    
+    // Store rate limit info for later use in error responses
+    const remainingAttempts = rateLimitResult?.remaining ?? null;
 
     if (!email || !password) {
       return createValidationErrorResponse("Email and password are required");
@@ -35,11 +38,11 @@ export async function POST(req) {
       .single();
 
     if (userError || !userData) {
-
-      return NextResponse.json(
-        { message: "Invalid Email or Password" },
-        { status: 401 }
-      );
+      const response = { message: "Invalid Email or Password" };
+      if (remainingAttempts !== null && remainingAttempts > 0) {
+        response.remainingAttempts = remainingAttempts;
+      }
+      return NextResponse.json(response, { status: 401 });
     }
 
     if (!userData.email) {
@@ -89,13 +92,17 @@ export async function POST(req) {
       }
 
       if (authError.message.includes('Invalid login credentials')) {
-
         const response = {
           message: "Invalid Email or Password"
         };
 
         if (userData?.password_changed_at) {
           response.passwordChangedAt = userData.password_changed_at;
+        }
+        
+        // Add remaining attempts if available
+        if (remainingAttempts !== null && remainingAttempts > 0) {
+          response.remainingAttempts = remainingAttempts;
         }
 
         return NextResponse.json(

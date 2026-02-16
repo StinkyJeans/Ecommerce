@@ -11,7 +11,8 @@
     "reset:db": "node scripts/reset-database.js",
     "create:admin": "node scripts/create-admin.js",
     "create:admin:simple": "node scripts/create-admin-simple.js",
-    "clear:data": "node scripts/clear-database.js"
+    "clear:data": "node scripts/clear-database.js",
+    "clear:all": "node scripts/clear-all-data.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
