@@ -20,7 +20,10 @@ function initializeOAuth2Client() {
   const clientId = process.env.GMAIL_CLIENT_ID;
   const clientSecret = process.env.GMAIL_CLIENT_SECRET;
   const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
-  const redirectUri = process.env.GMAIL_REDIRECT_URI || 'http://localhost:3000/api/auth/gmail/callback';
+  
+  // Use production URL if available, otherwise fallback to localhost or custom redirect URI
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const redirectUri = process.env.GMAIL_REDIRECT_URI || `${siteUrl}/api/auth/gmail/callback`;
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(

@@ -192,14 +192,14 @@ export default function AboutPage() {
         <footer className="border-t border-[#E0E0E0] dark:border-[#404040] pt-6 sm:pt-8">
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
             <button
-              onClick={() => router.push("/privacy")}
+              onClick={() => router.push("/privacy-policy")}
               className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3] hover:text-[#FFBF00] transition-colors"
             >
               Privacy Policy
             </button>
             <span className="hidden sm:inline text-[#666666] dark:text-[#a3a3a3]">•</span>
             <button
-              onClick={() => router.push("/terms")}
+              onClick={() => router.push("/terms-of-service")}
               className="text-sm sm:text-base text-[#666666] dark:text-[#a3a3a3] hover:text-[#FFBF00] transition-colors"
             >
               Terms of Service
