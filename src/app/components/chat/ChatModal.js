@@ -131,32 +131,27 @@ export default function ChatModal() {
       () => (selectedConversation?.id ? [selectedConversation.id] : []),
       [selectedConversation?.id]
     ),
-    useCallback(
-      (newMsg) => {
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === newMsg.id)) return prev;
-          return [...prev, newMsg];
-        });
-        // Keep conversation list in sync (last message, unread)
-        fetchConversations();
-      },
-      [fetchConversations]
-    ),
+    useCallback((newMsg) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+      // Only update conversation panel (messages); left list does not refresh
+    }, []),
     isOpen && !!selectedConversation?.id
   );
 
-  // Refetch messages when tab becomes visible (fallback if Realtime missed an event)
+  // Refetch messages when tab becomes visible (fallback if Realtime missed an event); only conversation panel
   useEffect(() => {
     if (!isOpen || !selectedConversation?.id) return;
     const onVisible = () => {
       if (document.visibilityState === "visible") {
         fetchMessages(selectedConversation.id);
-        fetchConversations();
       }
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [isOpen, selectedConversation?.id, fetchMessages, fetchConversations]);
+  }, [isOpen, selectedConversation?.id, fetchMessages]);
 
   const handleSend = useCallback(
     async (text) => {
@@ -165,25 +160,23 @@ export default function ChatModal() {
       try {
         const msg = await chatFunctions.sendMessage(selectedConversation.id, text);
         setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
-        await fetchConversations();
+        // Only conversation panel updates; left list does not refresh
       } finally {
         setSending(false);
       }
     },
-    [selectedConversation?.id, username, fetchConversations]
+    [selectedConversation?.id, username]
   );
 
   const handleRefresh = useCallback(async () => {
+    if (!selectedConversation?.id) return;
     setRefreshing(true);
     try {
-      await fetchConversations();
-      if (selectedConversation?.id) {
-        await fetchMessages(selectedConversation.id);
-      }
+      await fetchMessages(selectedConversation.id);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchConversations, fetchMessages, selectedConversation?.id]);
+  }, [fetchMessages, selectedConversation?.id]);
 
   const handleMarkRead = useCallback(async (conversationId) => {
     try {
@@ -231,7 +224,7 @@ export default function ChatModal() {
             <button
               type="button"
               onClick={handleRefresh}
-              disabled={refreshing}
+              disabled={refreshing || !selectedConversation?.id}
               className="p-1.5 rounded-lg text-[#666666] dark:text-[#a3a3a3] hover:bg-[#f0f0f0] dark:hover:bg-[#404040] transition-colors disabled:opacity-60"
               aria-label="Refresh chat"
               title="Load latest messages"
