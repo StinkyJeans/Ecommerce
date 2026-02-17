@@ -19,7 +19,7 @@ export default function ViewCart() {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const { username } = useAuth();
-  const { cartItems, loading, invalidateCart, isError } = useCart(username);
+  const { cartItems, loading, invalidateCart, isError, queryClient } = useCart(username);
   useEffect(() => {
     if (isError) setErrorMessage("Failed to load cart");
   }, [isError]);
@@ -36,24 +36,63 @@ export default function ViewCart() {
     setUpdatingId(itemId);
     setErrorMessage("");
 
+    // Find the item to update optimistically
+    const itemToUpdate = cartItems.find(item => item.id === itemId);
+    if (!itemToUpdate) {
+      setErrorMessage("Item not found");
+      setUpdatingId(null);
+      return;
+    }
+
+    // Calculate new quantity optimistically
+    const currentQuantity = itemToUpdate.quantity || 1;
+    let optimisticQuantity;
+    if (action === 'increase') {
+      optimisticQuantity = currentQuantity + 1;
+    } else if (action === 'decrease') {
+      optimisticQuantity = Math.max(1, currentQuantity - 1);
+    } else {
+      setUpdatingId(null);
+      return;
+    }
+
+    // Optimistically update the cart in React Query cache for instant UI update
+    if (queryClient && username) {
+      queryClient.setQueryData(['cart', username], (oldCart = []) => {
+        if (action === 'decrease' && currentQuantity <= 1) {
+          // Remove item if decreasing from 1
+          return oldCart.filter(item => item.id !== itemId);
+        }
+        return oldCart.map(item => 
+          item.id === itemId 
+            ? { ...item, quantity: optimisticQuantity }
+            : item
+        );
+      });
+    }
+
     try {
       const data = await cartFunctions.updateCartQuantity(itemId, action, username);
 
       if (data.success) {
+        // Silently refetch in background to ensure sync with server
         invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
         setErrorMessage(""); // Clear any previous errors
       } else {
+        // Revert optimistic update on error
+        invalidateCart();
         setErrorMessage(data.message || "Failed to update quantity");
-        setTimeout(() => setErrorMessage(""), 5000); // Auto-clear after 5 seconds
+        setTimeout(() => setErrorMessage(""), 5000);
       }
     } catch (error) {
-      // Handle API errors - check for error response data
+      // Revert optimistic update on error
+      invalidateCart();
       const errorMessage = error?.response?.message || 
                           error?.message || 
                           "Failed to update quantity";
       setErrorMessage(errorMessage);
-      setTimeout(() => setErrorMessage(""), 5000); // Auto-clear after 5 seconds
+      setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setUpdatingId(null);
     }
