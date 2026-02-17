@@ -80,28 +80,34 @@ export default function ViewCart() {
 
       if (data.success) {
         // Update cache with server response to ensure consistency
-        // This happens without triggering a full refetch
-        if (queryClient && username && data.cartItem) {
-          queryClient.setQueryData(['cart', username], (oldCart = []) => {
-            if (data.removed) {
-              // Item was removed (decreased from 1)
+        // No need to refetch - the server response is authoritative
+        if (queryClient && username) {
+          if (data.removed) {
+            // Item was removed (decreased from 1)
+            queryClient.setQueryData(['cart', username], (oldCart = []) => {
               return oldCart.filter(item => item.id !== itemId);
+            });
+          } else if (data.cartItem && data.cartItem.quantity !== undefined) {
+            // Verify server response matches our optimistic update
+            // If it does, no need to update cache (optimistic is already correct)
+            // If it doesn't match, update with server value (might be stock limit or error)
+            const serverQuantity = data.cartItem.quantity;
+            if (serverQuantity !== optimisticQuantity) {
+              // Server returned different quantity - update to server value
+              // This handles cases like stock limits where server might adjust quantity
+              queryClient.setQueryData(['cart', username], (oldCart = []) => {
+                return oldCart.map(item => 
+                  item.id === itemId 
+                    ? { ...item, quantity: serverQuantity }
+                    : item
+                );
+              });
             }
-            // Update the item with server response
-            return oldCart.map(item => 
-              item.id === itemId 
-                ? { ...item, quantity: data.cartItem.quantity }
-                : item
-            );
-          });
+            // If serverQuantity === optimisticQuantity, optimistic update is already correct
+            // No need to update cache again
+          }
+          // If no cartItem in response, optimistic update stays (which is correct)
         }
-        // Refetch in background after delay to ensure full sync (non-blocking)
-        setTimeout(() => {
-          queryClient?.refetchQueries({ 
-            queryKey: ['cart', username],
-            type: 'active'
-          });
-        }, 500);
         window.dispatchEvent(new Event("cartUpdated"));
         setErrorMessage(""); // Clear any previous errors
       } else {
