@@ -235,53 +235,68 @@ export default function ViewCart() {
 
                   <div className="space-y-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                          <ProductImage
-                            src={item.id_url || item.idUrl}
-                            alt={item.product_name || item.productName}
-                            className="object-cover"
-                            sizes="80px"
-                          />
+                      <div key={item.id} className="grid grid-cols-12 gap-4 items-center pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="col-span-6 flex items-center gap-4">
+                          <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                            <ProductImage
+                              src={item.id_url || item.idUrl}
+                              alt={item.product_name || item.productName}
+                              className="object-cover"
+                              sizes="80px"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                              {item.product_name || item.productName}
+                            </h3>
+                            <button
+                              onClick={() => handleRemove(item.id)}
+                              className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            >
+                              REMOVE
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
-                            {item.product_name || item.productName}
-                          </h3>
-                          <button
-                            onClick={() => handleRemove(item.id)}
-                            className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                          >
-                            REMOVE
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
+                        <div className={`col-span-3 flex items-center justify-center gap-2 transition-all ${updatingId === item.id ? 'opacity-75' : ''}`}>
                           <button
                             onClick={() => handleQuantityChange(item.id, "decrease")}
                             disabled={updatingId === item.id}
-                            className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-l-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                            className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-l-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            aria-label="Decrease quantity"
                           >
-                            <Minus size={14} className="text-xs" />
+                            {updatingId === item.id ? (
+                              <Timer size={14} className="text-xs animate-spin text-orange-500" />
+                            ) : (
+                              <Minus size={14} className="text-xs" />
+                            )}
                           </button>
-                          <input
-                            type="number"
-                            value={item.quantity || 1}
-                            readOnly
-                            className="w-12 h-8 border-y border-gray-300 dark:border-gray-600 text-center text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
-                          />
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={item.quantity || 1}
+                              readOnly
+                              className={`w-12 h-8 border-y border-gray-300 dark:border-gray-600 text-center text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 transition-all ${updatingId === item.id ? 'border-orange-300 dark:border-orange-600' : ''}`}
+                            />
+                            {updatingId === item.id && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-800/90 rounded backdrop-blur-sm">
+                                <Timer size={12} className="animate-spin text-orange-500" />
+                              </div>
+                            )}
+                          </div>
                           <button
                             onClick={() => handleQuantityChange(item.id, "increase")}
                             disabled={updatingId === item.id}
-                            className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-r-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                            className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded-r-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            aria-label="Increase quantity"
                           >
                             {updatingId === item.id ? (
-                              <Timer size={14} className="text-xs animate-spin" />
+                              <Timer size={14} className="text-xs animate-spin text-orange-500" />
                             ) : (
                               <Plus size={14} className="text-xs" />
                             )}
                           </button>
                         </div>
-                        <div className="w-24 text-right">
+                        <div className="col-span-3 text-right">
                           <p className="font-bold text-gray-900 dark:text-gray-100">
                             ₱{formatPrice(parseFloat(item.price || 0) * (item.quantity || 1))}
                           </p>
