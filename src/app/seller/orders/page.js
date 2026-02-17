@@ -81,6 +81,9 @@ export default function SellerOrders() {
       const data = await sellerOrderFunctions.getSellerOrders(username, statusFilter);
       if (data.success) {
         setOrders(data.orders || []);
+        try {
+          await sellerOrderFunctions.markSellerOrderNotificationsRead();
+        } catch (_) {}
       } else {
         setOrders([]);
       }

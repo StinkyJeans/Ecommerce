@@ -159,16 +159,16 @@ export async function POST(req) {
       }
     }
 
-    for (const cartItemId of cartItemIds) {
+    if (cartItemIds.length > 0) {
       const { error: deleteError } = await supabase
         .from('cart_items')
         .delete()
-        .eq('id', cartItemId);
+        .in('id', cartItemIds);
       if (deleteError) {
-        console.error('Failed to remove cart item:', deleteError);
+        console.error('Failed to remove cart items:', deleteError);
       }
     }
-    
+
     return NextResponse.json({ 
       success: true,
       message: "Order created successfully",

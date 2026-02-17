@@ -97,20 +97,32 @@ export default function ViewCart() {
     router.push(`/checkout?items=${encodeURIComponent(JSON.stringify(itemIds))}`);
   };
 
+  const [optimisticCleared, setOptimisticCleared] = useState(false);
+
   const handleClearCart = async () => {
     if (cartItems.length === 0) return;
-    setClearingCart(true);
     setErrorMessage("");
+    setOptimisticCleared(true);
+    setClearingCart(true);
     try {
-      const data = await cartFunctions.clearCart();
+      let data;
+      try {
+        data = await cartFunctions.clearCart();
+      } catch (first) {
+        await new Promise((r) => setTimeout(r, 500));
+        data = await cartFunctions.clearCart();
+      }
       if (data?.success) {
         invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
       } else {
+        setOptimisticCleared(false);
         setErrorMessage(data?.message || "Failed to clear cart");
       }
     } catch (e) {
+      setOptimisticCleared(false);
       setErrorMessage(e?.message || "Failed to clear cart");
+      invalidateCart();
     } finally {
       setClearingCart(false);
     }
@@ -166,16 +178,18 @@ export default function ViewCart() {
                 <p className="text-gray-600 dark:text-gray-400 font-medium">Loading your cart...</p>
               </div>
             </div>
-          ) : cartItems.length === 0 ? (
+          ) : cartItems.length === 0 || optimisticCleared ? (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-12 text-center">
               <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
                 <ShoppingBag size={52} className="text-5xl text-gray-400 dark:text-gray-500" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-                Your cart is empty
+                {optimisticCleared && clearingCart ? "Clearing cart…" : "Your cart is empty"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
+                {optimisticCleared && clearingCart
+                  ? "Please wait a moment."
+                  : "Looks like you haven't added any items to your cart yet. Start shopping to fill it up!"}
               </p>
               <button
                 onClick={() => router.push("/dashboard")}

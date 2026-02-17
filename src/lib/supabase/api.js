@@ -172,6 +172,15 @@ export const sellerOrderFunctions = {
       body: { order_id, status, tracking_number },
     });
   },
+  async getSellerOrderNotifications() {
+    return callApi('/api/sellers/order-notifications');
+  },
+  async markSellerOrderNotificationsRead(orderIds) {
+    return callApi('/api/sellers/order-notifications/read', {
+      method: 'POST',
+      body: orderIds && orderIds.length > 0 ? { order_ids: orderIds } : {},
+    });
+  },
 };
 export const shippingFunctions = {
   async getAddresses(username) {
