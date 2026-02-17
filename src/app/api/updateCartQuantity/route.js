@@ -44,9 +44,55 @@ export async function PATCH(req) {
       return createForbiddenResponse("You do not have permission to modify this cart item");
     }
     if (action === 'increase') {
+      // Check stock availability before increasing quantity
+      const { data: product, error: productError } = await supabase
+        .from('products')
+        .select('stock_quantity, is_available')
+        .eq('product_id', cartItem.product_id)
+        .single();
+
+      if (productError || !product) {
+        return NextResponse.json({
+          message: "Product not found",
+          success: false
+        }, { status: 404 });
+      }
+
+      if (!product.is_available) {
+        return NextResponse.json({
+          message: "Product is currently unavailable",
+          success: false
+        }, { status: 400 });
+      }
+
+      // Parse stock quantity - 0 or null means out of stock
+      const rawStock = product.stock_quantity;
+      const availableStock = rawStock != null && rawStock !== "" 
+        ? Number(rawStock) 
+        : 0;
+
+      // Check if stock is available
+      if (availableStock <= 0) {
+        return NextResponse.json({
+          message: "Product is out of stock",
+          success: false
+        }, { status: 400 });
+      }
+
+      // Check if new quantity would exceed available stock
+      const newQuantity = cartItem.quantity + 1;
+      if (newQuantity > availableStock) {
+        return NextResponse.json({
+          message: `Insufficient stock. Available: ${availableStock}, Requested: ${newQuantity}`,
+          success: false,
+          available_stock: availableStock,
+          requested: newQuantity
+        }, { status: 400 });
+      }
+
       const { data: updated, error: updateError } = await supabase
         .from('cart_items')
-        .update({ quantity: cartItem.quantity + 1 })
+        .update({ quantity: newQuantity })
         .eq('id', id)
         .select()
         .single();

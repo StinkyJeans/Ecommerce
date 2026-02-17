@@ -42,11 +42,18 @@ export default function ViewCart() {
       if (data.success) {
         invalidateCart();
         window.dispatchEvent(new Event("cartUpdated"));
+        setErrorMessage(""); // Clear any previous errors
       } else {
         setErrorMessage(data.message || "Failed to update quantity");
+        setTimeout(() => setErrorMessage(""), 5000); // Auto-clear after 5 seconds
       }
     } catch (error) {
-      setErrorMessage(error.response?.message || error.message || "Failed to update quantity");
+      // Handle API errors - check for error response data
+      const errorMessage = error?.response?.message || 
+                          error?.message || 
+                          "Failed to update quantity";
+      setErrorMessage(errorMessage);
+      setTimeout(() => setErrorMessage(""), 5000); // Auto-clear after 5 seconds
     } finally {
       setUpdatingId(null);
     }
