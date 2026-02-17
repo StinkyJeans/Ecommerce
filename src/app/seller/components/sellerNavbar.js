@@ -15,7 +15,6 @@ import {
   Grid,
   ChevronRight,
   LogOut,
-  UserCircle,
   Package,
   Settings,
   Users,
@@ -128,9 +127,6 @@ export default function Navbar() {
     router.replace("/");
   };
 
-  const userPortalItems = [
-    { id: "profile", label: "My Profile", icon: UserCircle, path: "/account", action: () => router.push("/account") },
-  ];
   const sellerPortalItems = [
     { id: "dashboard", label: "Dashboard", icon: Grid, path: "/seller/dashboard", action: dashboard },
     { id: "inventory", label: "Inventory", icon: Folders, path: "/seller/viewProduct", action: viewProduct },
@@ -274,12 +270,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {userPortalItems.length > 0 && (
-            <div className="mb-4">
-              <p className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">User Portal</p>
-              {userPortalItems.map((item) => renderNavItem(item, pathname === item.path))}
-            </div>
-          )}
           <div className="mb-4">
             <p className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Portal</p>
             {sellerPortalItems.map((item) => renderNavItem(item, pathname === item.path))}
