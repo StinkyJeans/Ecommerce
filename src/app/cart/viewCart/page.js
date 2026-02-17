@@ -57,6 +57,7 @@ export default function ViewCart() {
     }
 
     // Optimistically update the cart in React Query cache for instant UI update
+    // This happens BEFORE the API call so UI updates immediately
     if (queryClient && username) {
       queryClient.setQueryData(['cart', username], (oldCart = []) => {
         if (action === 'decrease' && currentQuantity <= 1) {
@@ -71,23 +72,51 @@ export default function ViewCart() {
       });
     }
 
+    // Store original cart state for potential rollback
+    const originalCart = [...cartItems];
+
     try {
       const data = await cartFunctions.updateCartQuantity(itemId, action, username);
 
       if (data.success) {
-        // Silently refetch in background to ensure sync with server
-        invalidateCart();
+        // Update cache with server response to ensure consistency
+        // This happens without triggering a full refetch
+        if (queryClient && username && data.cartItem) {
+          queryClient.setQueryData(['cart', username], (oldCart = []) => {
+            if (data.removed) {
+              // Item was removed (decreased from 1)
+              return oldCart.filter(item => item.id !== itemId);
+            }
+            // Update the item with server response
+            return oldCart.map(item => 
+              item.id === itemId 
+                ? { ...item, quantity: data.cartItem.quantity }
+                : item
+            );
+          });
+        }
+        // Refetch in background after delay to ensure full sync (non-blocking)
+        setTimeout(() => {
+          queryClient?.refetchQueries({ 
+            queryKey: ['cart', username],
+            type: 'active'
+          });
+        }, 500);
         window.dispatchEvent(new Event("cartUpdated"));
         setErrorMessage(""); // Clear any previous errors
       } else {
-        // Revert optimistic update on error
-        invalidateCart();
+        // Revert optimistic update on error by restoring original cart
+        if (queryClient && username) {
+          queryClient.setQueryData(['cart', username], originalCart);
+        }
         setErrorMessage(data.message || "Failed to update quantity");
         setTimeout(() => setErrorMessage(""), 5000);
       }
     } catch (error) {
-      // Revert optimistic update on error
-      invalidateCart();
+      // Revert optimistic update on error by restoring original cart
+      if (queryClient && username) {
+        queryClient.setQueryData(['cart', username], originalCart);
+      }
       const errorMessage = error?.response?.message || 
                           error?.message || 
                           "Failed to update quantity";
@@ -312,12 +341,12 @@ export default function ViewCart() {
                           <div className="relative">
                             <input
                               type="number"
-                              value={item.quantity || 1}
+                              value={item.quantity ?? 1}
                               readOnly
                               className={`w-12 h-8 border-y border-gray-300 dark:border-gray-600 text-center text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 transition-all ${updatingId === item.id ? 'border-orange-300 dark:border-orange-600' : ''}`}
                             />
                             {updatingId === item.id && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-800/90 rounded backdrop-blur-sm">
+                              <div className="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-800/90 rounded backdrop-blur-sm pointer-events-none">
                                 <Timer size={12} className="animate-spin text-orange-500" />
                               </div>
                             )}
