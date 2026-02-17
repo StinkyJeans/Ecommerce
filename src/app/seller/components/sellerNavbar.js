@@ -20,7 +20,7 @@ import {
   Settings,
   Users,
   Chat,
-  Bell,
+  ConciergeBell as Bell,
 } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { useChatModal } from "@/app/context/ChatModalContext";
