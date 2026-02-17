@@ -33,8 +33,9 @@ export async function addItem(supabase, payload) {
     description,
     price,
     id_url,
-    quantity = 1,
+    quantity: quantityRaw = 1,
   } = payload;
+  const quantity = Math.max(1, parseInt(quantityRaw, 10) || 1);
 
   const { data: product, error: productError } = await supabase
     .from("products")
@@ -56,9 +57,9 @@ export async function addItem(supabase, payload) {
     .eq("product_id", product_id)
     .single();
 
-  const currentCartQuantity = existing && !fetchError ? existing.quantity : 0;
-  const totalRequested = currentCartQuantity + (quantity || 1);
-  const availableStock = product.stock_quantity || 0;
+  const currentCartQuantity = existing && !fetchError ? Number(existing.quantity) || 0 : 0;
+  const totalRequested = currentCartQuantity + quantity;
+  const availableStock = Number(product.stock_quantity) || 0;
 
   if (availableStock < totalRequested) {
     return {
@@ -70,7 +71,7 @@ export async function addItem(supabase, payload) {
   }
 
   if (existing && !fetchError) {
-    const newQuantity = existing.quantity + (quantity || 1);
+    const newQuantity = currentCartQuantity + quantity;
     const { data: updated, error: updateError } = await supabase
       .from("cart_items")
       .update({ quantity: newQuantity })
@@ -96,7 +97,7 @@ export async function addItem(supabase, payload) {
       description,
       price: priceString,
       id_url,
-      quantity: quantity || 1,
+      quantity,
     })
     .select()
     .single();

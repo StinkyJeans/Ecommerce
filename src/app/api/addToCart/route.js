@@ -26,7 +26,8 @@ export async function POST(req) {
     const description = sanitizeString(body.description, 1000);
     const price = body.price;
     const id_url = sanitizeString(body.idUrl || body.id_url, 500);
-    const quantity = body.quantity || 1;
+    const quantityRaw = body.quantity ?? 1;
+    const quantity = Math.max(1, parseInt(quantityRaw, 10) || 1);
     if (!username || !product_id || !product_name || !description || price === null || price === undefined || !id_url) {
       return createValidationErrorResponse("All fields are required");
     }
