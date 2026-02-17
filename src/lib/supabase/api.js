@@ -116,6 +116,20 @@ export const productFunctions = {
   async getSellerProducts(username) {
     return callApi(`/api/sellers/getProducts?username=${encodeURIComponent(username)}`);
   },
+  async getProductReviews(productId, options = {}) {
+    const params = new URLSearchParams();
+    if (options.rating != null && options.rating >= 1 && options.rating <= 5) {
+      params.set("rating", String(options.rating));
+    }
+    const query = params.toString();
+    return callApi(`/api/products/${encodeURIComponent(productId)}/reviews${query ? `?${query}` : ""}`);
+  },
+  async submitProductReview(productId, { rating, review_text }) {
+    return callApi(`/api/products/${encodeURIComponent(productId)}/reviews`, {
+      method: "POST",
+      body: { rating, review_text: review_text ?? null },
+    });
+  },
 };
 export const cartFunctions = {
   async addToCart({ username, productId, productName, description, price, idUrl, quantity = 1 }) {

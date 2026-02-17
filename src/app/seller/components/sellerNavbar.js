@@ -126,7 +126,7 @@ export default function Navbar() {
 
         <div className="flex-1 overflow-y-auto py-4">
           <div className="mb-4">
-            <p className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Portal</p>
+            <p className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Navigation</p>
             {sellerPortalItems.map((item) => renderNavItem(item, pathname === item.path))}
           </div>
           {adminPortalItems.length > 0 && (

@@ -24,7 +24,11 @@ const PROD_RATE_LIMITS = {
   },
   addToCart: {
     maxRequests: 50,
-    windowMs: 60 * 1000, 
+    windowMs: 60 * 1000,
+  },
+  submitReview: {
+    maxRequests: 20,
+    windowMs: 60 * 1000,
   },
   publicRead: {
     maxRequests: 200,
@@ -51,6 +55,10 @@ const DEV_RATE_LIMITS = {
   },
   addToCart: {
     maxRequests: 200,
+    windowMs: 60 * 1000,
+  },
+  submitReview: {
+    maxRequests: 60,
     windowMs: 60 * 1000,
   },
   publicRead: {
