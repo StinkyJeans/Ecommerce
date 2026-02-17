@@ -25,6 +25,10 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
   const [formText, setFormText] = useState("");
   const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
   const [reviewMessage, setReviewMessage] = useState({ type: "", text: "" });
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editText, setEditText] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
   const { openChat } = useChatModal();
   const productId = product?.product_id || product?.productId;
 
@@ -95,6 +99,39 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
       .catch((e) => setReviewMessage({ type: "error", text: e?.message || "Failed to save review." }))
       .finally(() => setSubmitReviewLoading(false));
   }, [productId, username, formRating, formText]);
+
+  const handleStartEdit = useCallback((r) => {
+    setEditingReviewId(r.id);
+    setEditRating(r.rating);
+    setEditText(r.review_text || "");
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingReviewId(null);
+    setEditRating(0);
+    setEditText("");
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!productId || !username || editRating < 1 || editRating > 5) return;
+    setEditSaving(true);
+    productFunctions
+      .submitProductReview(productId, { rating: editRating, review_text: editText || null })
+      .then((data) => {
+        if (data?.success) return productFunctions.getProductReviews(productId, ratingFilter != null ? { rating: ratingFilter } : {});
+        throw new Error(data?.message || "Failed to update review.");
+      })
+      .then((data) => {
+        if (data?.success) {
+          setReviews(data.reviews || []);
+          setAverageRating(data.averageRating ?? 0);
+          setTotalCount(data.totalCount ?? 0);
+          setEditingReviewId(null);
+        }
+      })
+      .catch(() => setEditingReviewId(null))
+      .finally(() => setEditSaving(false));
+  }, [productId, username, editRating, editText, ratingFilter]);
 
   const increaseQuantity = useCallback(() => {
     setQuantity((prev) => prev + 1);
@@ -321,6 +358,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             {/* Reviews */}
             <section className="mt-6 pt-6 border-t border-[#E0E0E0] dark:border-[#404040]">
               <h3 className="text-sm font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-3">Reviews</h3>
+              {/* Star rating aggregate + filter */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="flex items-center gap-1 text-[#2C2C2C] dark:text-[#e5e5e5]">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -354,32 +392,10 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                   </button>
                 ))}
               </div>
-              {reviewsLoading ? (
-                <p className="text-sm text-[#666666] dark:text-[#a3a3a3] py-2">Loading reviews…</p>
-              ) : reviews.length === 0 ? (
-                <p className="text-sm text-[#666666] dark:text-[#a3a3a3] py-2">
-                  {ratingFilter != null ? `No reviews with ${ratingFilter} star${ratingFilter === 1 ? "" : "s"}.` : "No reviews yet."}
-                </p>
-              ) : (
-                <ul className="space-y-3 max-h-48 overflow-y-auto">
-                  {reviews.map((r) => (
-                    <li key={r.id} className="rounded-lg border border-[#E0E0E0] dark:border-[#404040] p-3 bg-white dark:bg-white/5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5] text-sm">{r.username || "Customer"}</span>
-                        <span className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} size={12} className={s <= r.rating ? "text-[#FFBF00] fill-[#FFBF00]" : "text-[#E0E0E0] dark:text-[#404040]"} />
-                          ))}
-                        </span>
-                        <span className="text-xs text-[#666666] dark:text-[#a3a3a3]">{formatRelativeTime(r.created_at)}</span>
-                      </div>
-                      {r.review_text && <p className="text-sm text-[#2C2C2C] dark:text-[#e5e5e5]">{r.review_text}</p>}
-                    </li>
-                  ))}
-                </ul>
-              )}
+
+              {/* Write a review — below star rating, above reviews list */}
               {username ? (
-                <div className="mt-4">
+                <div className="mb-6">
                   <p className="text-xs font-medium text-[#666666] dark:text-[#a3a3a3] mb-2">Write a review</p>
                   <div className="flex items-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((s) => (
@@ -419,11 +435,92 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                   </div>
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-[#666666] dark:text-[#a3a3a3]">
+                <p className="mb-6 text-sm text-[#666666] dark:text-[#a3a3a3]">
                   <Link href="/login" className="text-[#FFBF00] hover:underline">
                     Sign in to leave a review
                   </Link>
                 </p>
+              )}
+
+              {/* Reviews list — below Write a review / Submit button */}
+              {reviewsLoading ? (
+                <p className="text-sm text-[#666666] dark:text-[#a3a3a3] py-2">Loading reviews…</p>
+              ) : reviews.length === 0 ? (
+                <p className="text-sm text-[#666666] dark:text-[#a3a3a3] py-2">
+                  {ratingFilter != null ? `No reviews with ${ratingFilter} star${ratingFilter === 1 ? "" : "s"}.` : "No reviews yet."}
+                </p>
+              ) : (
+                <ul className="space-y-3 max-h-48 overflow-y-auto">
+                  {reviews.map((r) => (
+                    <li key={r.id} className="rounded-lg border border-[#E0E0E0] dark:border-[#404040] p-3 bg-white dark:bg-white/5">
+                      {editingReviewId === r.id ? (
+                        <div className="inline-edit">
+                          <div className="flex items-center gap-1 mb-2">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => setEditRating(s)}
+                                className="p-0.5 rounded hover:bg-[#E0E0E0] dark:hover:bg-[#404040]"
+                                aria-label={`${s} star${s === 1 ? "" : "s"}`}
+                              >
+                                <Star size={18} className={s <= editRating ? "text-[#FFBF00] fill-[#FFBF00]" : "text-[#E0E0E0] dark:text-[#404040]"} />
+                              </button>
+                            ))}
+                          </div>
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            placeholder="Your review (optional)"
+                            maxLength={2000}
+                            rows={2}
+                            className="w-full rounded-lg border border-[#E0E0E0] dark:border-[#404040] bg-white dark:bg-white/5 px-3 py-2 text-sm text-[#2C2C2C] dark:text-[#e5e5e5] placeholder-[#a3a3a3] resize-none mb-2"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleSaveEdit}
+                              disabled={editSaving}
+                              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[#FFBF00] hover:bg-[#e6ac00] text-[#2C2C2C] disabled:opacity-50"
+                            >
+                              {editSaving ? "Saving…" : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEdit}
+                              disabled={editSaving}
+                              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[#E0E0E0] dark:bg-[#404040] text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#d0d0d0] dark:hover:bg-[#505050] disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5] text-sm">{r.username || "Customer"}</span>
+                            <span className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star key={s} size={12} className={s <= r.rating ? "text-[#FFBF00] fill-[#FFBF00]" : "text-[#E0E0E0] dark:text-[#404040]"} />
+                              ))}
+                            </span>
+                            <span className="text-xs text-[#666666] dark:text-[#a3a3a3]">{formatRelativeTime(r.created_at)}</span>
+                            {username && r.username === username && (
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(r)}
+                                className="ml-auto text-xs font-medium text-[#FFBF00] hover:underline"
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </div>
+                          {r.review_text && <p className="text-sm text-[#2C2C2C] dark:text-[#e5e5e5]">{r.review_text}</p>}
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               )}
             </section>
           </div>
