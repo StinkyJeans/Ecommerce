@@ -21,7 +21,6 @@ import {
   Users,
   Chat,
   ConciergeBell as Bell,
-  Switch,
   AnnotationQuestion,
 } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
@@ -294,13 +293,6 @@ export default function Navbar() {
         </div>
 
         <div className="p-4 border-t border-gray-200 space-y-2 shrink-0">
-          <button
-            onClick={() => { router.push("/dashboard"); setOpen(false); }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-colors"
-          >
-            <Switch size={20} />
-            Switch Portal
-          </button>
           <div className="flex items-center gap-2">
             <button onClick={() => router.push("/help")} className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 text-sm">
               <AnnotationQuestion size={18} />
