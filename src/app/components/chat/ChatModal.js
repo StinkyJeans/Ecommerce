@@ -7,7 +7,7 @@ import { chatFunctions } from "@/lib/supabase/api";
 import { useChatRealtime } from "@/app/hooks/useChatRealtime";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
-import { Close, Chat as ChatIcon, ChevronLeft } from "griddy-icons";
+import { Close, Chat as ChatIcon, ChevronLeft, RefreshCw } from "griddy-icons";
 
 export default function ChatModal() {
   const { isOpen, closeChat, initialSeller, initialProduct, initialConversation } = useChatModal();
@@ -20,6 +20,7 @@ export default function ChatModal() {
   const [messages, setMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [mobileShowWindow, setMobileShowWindow] = useState(false);
 
   const currentRole = role === "seller" ? "seller" : "user";
@@ -172,6 +173,18 @@ export default function ChatModal() {
     [selectedConversation?.id, username, fetchConversations]
   );
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchConversations();
+      if (selectedConversation?.id) {
+        await fetchMessages(selectedConversation.id);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchConversations, fetchMessages, selectedConversation?.id]);
+
   const handleMarkRead = useCallback(async (conversationId) => {
     try {
       await chatFunctions.markAsRead(conversationId);
@@ -214,13 +227,25 @@ export default function ChatModal() {
             <ChatIcon size={20} className="text-[#2F79F4]" />
             <h2 className="text-base font-semibold text-[#2C2C2C] dark:text-[#e5e5e5]">Messages</h2>
           </div>
-          <button
-            onClick={closeChat}
-            className="p-1.5 rounded-lg text-[#666666] dark:text-[#a3a3a3] hover:bg-[#f0f0f0] dark:hover:bg-[#404040] transition-colors"
-            aria-label="Close chat"
-          >
-            <Close size={20} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-1.5 rounded-lg text-[#666666] dark:text-[#a3a3a3] hover:bg-[#f0f0f0] dark:hover:bg-[#404040] transition-colors disabled:opacity-60"
+              aria-label="Refresh chat"
+              title="Load latest messages"
+            >
+              <RefreshCw size={20} className={refreshing ? "animate-spin" : ""} />
+            </button>
+            <button
+              onClick={closeChat}
+              className="p-1.5 rounded-lg text-[#666666] dark:text-[#a3a3a3] hover:bg-[#f0f0f0] dark:hover:bg-[#404040] transition-colors"
+              aria-label="Close chat"
+            >
+              <Close size={20} />
+            </button>
+          </div>
         </header>
 
         {/* Content */}
