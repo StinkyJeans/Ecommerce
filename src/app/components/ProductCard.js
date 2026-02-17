@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
 import { Eye, ShoppingBasket } from "griddy-icons";
-import StartChatButton from "./chat/StartChatButton";
 
 const ProductModal = dynamic(() => import("./ProductModal"), {
   loading: () => <div className="animate-pulse bg-[#E0E0E0] dark:bg-[#404040] rounded-lg h-96" />,
@@ -85,14 +84,6 @@ const ProductCard = memo(({ product, onView, onAddToCart, isAddingToCart = false
           <p className="text-xs text-[#666666] dark:text-[#a3a3a3] truncate">
             by <span className="font-medium text-[#2C2C2C] dark:text-[#e5e5e5]">{product.sellerUsername || product.seller_username}</span>
           </p>
-
-          {(product.sellerUsername || product.seller_username) && (
-            <StartChatButton
-              sellerUsername={product.sellerUsername || product.seller_username}
-              productId={product.product_id || product.productId}
-              className="text-xs py-1.5 px-2 rounded-lg text-[#2F79F4] hover:bg-[#2F79F4]/10 dark:hover:bg-[#2F79F4]/20 mb-1"
-            />
-          )}
 
           {/* Action Button */}
           <button

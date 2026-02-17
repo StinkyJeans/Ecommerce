@@ -75,10 +75,10 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const seller_username = body.seller_username?.trim?.() || null;
+    const seller_username_input = body.seller_username?.trim?.() || null;
     const product_id = body.product_id?.trim?.() || null;
 
-    if (!seller_username) {
+    if (!seller_username_input) {
       return NextResponse.json({ message: "seller_username is required" }, { status: 400 });
     }
 
@@ -87,9 +87,6 @@ export async function POST(req) {
       return NextResponse.json({ message: "Server error" }, { status: 500 });
     }
 
-    const user_username = role === "user" ? username : null;
-    const other_username = role === "seller" ? username : seller_username;
-
     if (role === "seller") {
       return NextResponse.json(
         { message: "Customers start conversations; use GET to list your conversations" },
@@ -97,13 +94,28 @@ export async function POST(req) {
       );
     }
 
-    const { data: existing } = await supabase
+    // Resolve seller to exact username from DB (fixes case mismatch so seller sees the conversation)
+    const { data: sellerRow } = await supabase
+      .from("users")
+      .select("username")
+      .eq("role", "seller")
+      .ilike("username", seller_username_input)
+      .maybeSingle();
+    const seller_username = sellerRow?.username ?? seller_username_input;
+
+    const user_username = username;
+
+    let existingQuery = supabase
       .from("conversations")
       .select("id, user_username, seller_username, product_id, last_message_at, user_unread_count, seller_unread_count, created_at, updated_at")
       .eq("user_username", user_username)
-      .eq("seller_username", seller_username)
-      .is("product_id", product_id)
-      .maybeSingle();
+      .eq("seller_username", seller_username);
+    if (product_id) {
+      existingQuery = existingQuery.eq("product_id", product_id);
+    } else {
+      existingQuery = existingQuery.is("product_id", null);
+    }
+    const { data: existing } = await existingQuery.maybeSingle();
 
     if (existing) {
       return NextResponse.json({ conversation: existing, created: false });
