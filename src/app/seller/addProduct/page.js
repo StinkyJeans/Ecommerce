@@ -132,10 +132,24 @@ export default function AddProduct() {
           body: formData,
         });
 
-        const uploadData = await uploadResponse.json();
+        // Check if response is JSON before parsing
+        const contentType = uploadResponse.headers.get('content-type');
+        let uploadData;
+        
+        if (contentType && contentType.includes('application/json')) {
+          uploadData = await uploadResponse.json();
+        } else {
+          // If not JSON, read as text to see what the error is
+          const textResponse = await uploadResponse.text();
+          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}. ${textResponse.substring(0, 200)}`);
+        }
 
         if (!uploadResponse.ok || !uploadData.success) {
-          throw new Error(uploadData.error || 'Failed to upload image');
+          throw new Error(uploadData.error || uploadData.message || 'Failed to upload image');
+        }
+
+        if (!uploadData.url) {
+          throw new Error('Upload succeeded but no URL returned');
         }
 
         uploadedUrls.push(uploadData.url);

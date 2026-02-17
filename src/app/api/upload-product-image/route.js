@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
+
+// Configure route to handle larger file uploads
+export const maxDuration = 60; // 60 seconds
+export const runtime = 'nodejs';
+
 export async function POST(req) {
   try {
     const authResult = await requireRole('seller');
