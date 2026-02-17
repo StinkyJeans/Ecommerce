@@ -136,11 +136,26 @@ export default function ChatModal() {
           if (prev.some((m) => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         });
+        // Keep conversation list in sync (last message, unread)
+        fetchConversations();
       },
-      []
+      [fetchConversations]
     ),
     isOpen && !!selectedConversation?.id
   );
+
+  // Refetch messages when tab becomes visible (fallback if Realtime missed an event)
+  useEffect(() => {
+    if (!isOpen || !selectedConversation?.id) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        fetchMessages(selectedConversation.id);
+        fetchConversations();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [isOpen, selectedConversation?.id, fetchMessages, fetchConversations]);
 
   const handleSend = useCallback(
     async (text) => {

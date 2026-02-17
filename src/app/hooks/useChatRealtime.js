@@ -25,24 +25,28 @@ export function useChatRealtime(conversationIds, onMessage, enabled = true) {
     const channel = supabase.channel(channelName);
 
     const handler = (payload) => {
-      if (payload.eventType === "INSERT" && payload.new) {
-        const convId = payload.new.conversation_id;
-        if (convId && idSet.has(convId)) {
-          callbackRef.current?.(payload.new);
-        }
+      const ev = payload.eventType ?? payload.event_type ?? "";
+      const isInsert = String(ev).toUpperCase() === "INSERT";
+      const newRow = payload.new ?? payload.payload?.new;
+      if (!isInsert || !newRow) return;
+      const convId = newRow.conversation_id;
+      if (convId && idSet.has(convId)) {
+        callbackRef.current?.(newRow);
       }
     };
 
+    const subConfig = {
+      event: "INSERT",
+      schema: "public",
+      table: "messages",
+    };
+    // Filter by conversation when subscribing to one so the server only sends relevant events
+    if (ids.length === 1) {
+      subConfig.filter = `conversation_id=eq.${ids[0]}`;
+    }
+
     channel
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        handler
-      )
+      .on("postgres_changes", subConfig, handler)
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           // no-op
