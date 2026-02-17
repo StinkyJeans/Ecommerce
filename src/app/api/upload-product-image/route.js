@@ -9,6 +9,7 @@ export async function POST(req) {
       return authResult;
     }
     const { userData } = authResult;
+    const supabase = await createClient();
     const formData = await req.formData();
     const file = formData.get('file');
     const sellerUsername = formData.get('sellerUsername');
@@ -38,18 +39,50 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    const adminClient = createSupabaseAdminClient();
+    
     const timestamp = Date.now();
     const fileName = `${sellerUsername}/${timestamp}-${file.name}`;
-    const { data: uploadData, error: uploadError } = await adminClient.storage
-      .from('product-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false,
-      });
+    
+    // Try using authenticated client first (respects RLS policies)
+    // This should work since we've verified the user is a seller
+    let uploadData, uploadError;
+    
+    if (supabase) {
+      const result = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+      uploadData = result.data;
+      uploadError = result.error;
+    }
+    
+    // If authenticated client fails, try admin client as fallback
+    if (uploadError && (uploadError.message?.includes('row-level security') || uploadError.message?.includes('RLS'))) {
+      try {
+        const adminClient = createSupabaseAdminClient();
+        const result = await adminClient.storage
+          .from('product-images')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+        uploadData = result.data;
+        uploadError = result.error;
+      } catch (adminError) {
+        uploadError = adminError;
+      }
+    }
+    
     if (uploadError) {
+      console.error('Upload error:', uploadError);
+      let errorMessage = `Failed to upload file: ${uploadError.message}`;
+      if (uploadError.message?.includes('row-level security') || uploadError.message?.includes('RLS')) {
+        errorMessage = 'Storage permission error. Please ensure you are logged in as an approved seller and that SUPABASE_SERVICE_ROLE_KEY is configured correctly.';
+      }
       return NextResponse.json(
-        { error: `Failed to upload file: ${uploadError.message}` },
+        { error: errorMessage, details: uploadError.message },
         { status: 500 }
       );
     }
@@ -67,4 +100,4 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-}
+}

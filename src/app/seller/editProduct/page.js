@@ -134,6 +134,14 @@ function EditProductContent() {
       
       files.forEach((file) => {
         if (file.type.startsWith('image/')) {
+          // Check if adding this file would exceed the 5 image limit (existing + new)
+          const totalImages = existingImages.length + updatedImages.length;
+          if (totalImages >= 5) {
+            setPopupMessage("Maximum 5 images allowed per product");
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 3000);
+            return;
+          }
           updatedImages.push(file);
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -162,6 +170,14 @@ function EditProductContent() {
     
     if (existingImages.length === 0 && newImages.length === 0) {
       setPopupMessage("Please upload at least one product image");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+    
+    const totalImages = existingImages.length + newImages.length;
+    if (totalImages > 5) {
+      setPopupMessage("Maximum 5 images allowed per product");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       return;
@@ -401,8 +417,13 @@ function EditProductContent() {
                 />
                 
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Upload multiple images to showcase your product. First image will be the main display image.
+                  Upload multiple images to showcase your product (max 5 images). First image will be the main display image.
                 </p>
+                {(existingImages.length > 0 || newImagePreviews.length > 0) && (
+                  <p className="mt-2 text-xs text-gray-600 dark:text-gray-300 font-medium">
+                    {existingImages.length + newImagePreviews.length} / 5 images
+                  </p>
+                )}
               </div>
 
               <div className="mb-5 sm:mb-6">

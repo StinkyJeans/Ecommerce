@@ -71,6 +71,13 @@ export default function AddProduct() {
       
       files.forEach((file) => {
         if (file.type.startsWith('image/')) {
+          // Check if adding this file would exceed the 5 image limit
+          if (newImages.length >= 5) {
+            setPopupMessage("Maximum 5 images allowed per product");
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 3000);
+            return;
+          }
           newImages.push(file);
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -97,6 +104,13 @@ export default function AddProduct() {
     
     if (images.length === 0) {
       setPopupMessage("Please upload at least one product image");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+    
+    if (images.length > 5) {
+      setPopupMessage("Maximum 5 images allowed per product");
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       return;
@@ -321,8 +335,13 @@ export default function AddProduct() {
 
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
               <InfoCircle size={24} className="text-blue-500 dark:text-blue-400" />
-              Upload multiple images to showcase your product. First image will be the main display image.
+              Upload multiple images to showcase your product (max 5 images). First image will be the main display image.
             </p>
+            {imagePreviews.length > 0 && (
+              <p className="mt-2 text-xs text-gray-600 dark:text-gray-300 font-medium">
+                {imagePreviews.length} / 5 images uploaded
+              </p>
+            )}
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-5 border border-gray-100 dark:border-gray-700">
