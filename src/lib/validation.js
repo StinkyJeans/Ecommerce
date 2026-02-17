@@ -76,7 +76,7 @@ export function isValidUrl(url) {
   }
 }
 
-export function isValidImageUrl(url) {
+function isValidSingleImageUrl(url) {
   if (!url || typeof url !== 'string' || url.trim() === '') {
     return false;
   }
@@ -98,6 +98,29 @@ export function isValidImageUrl(url) {
     lowerUrl.includes('/storage/v1/object/');
 
   return hasImageExtension || isSupabaseStorage;
+}
+
+export function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return false;
+  }
+
+  // Check if it's a JSON array string
+  try {
+    const parsed = JSON.parse(url);
+    if (Array.isArray(parsed)) {
+      // Validate each URL in the array
+      return parsed.length > 0 && parsed.every(item => {
+        if (typeof item !== 'string' || item.trim() === '') return false;
+        return isValidSingleImageUrl(item);
+      });
+    }
+  } catch {
+    // Not JSON, continue with single URL validation
+  }
+
+  // Single URL validation
+  return isValidSingleImageUrl(url);
 }
 
 export function isValidPhone(phone) {

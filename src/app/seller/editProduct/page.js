@@ -24,11 +24,13 @@ import {
   SmartWatch,
   Timer,
   Package,
+  Plus,
 } from "griddy-icons";
 
 function EditProductContent() {
-  const [image, setImage] = useState(null);
-  const [idPreview, setIdPreview] = useState(null);
+  const [newImages, setNewImages] = useState([]);
+  const [newImagePreviews, setNewImagePreviews] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -86,7 +88,21 @@ function EditProductContent() {
             setPrice(product.price || "");
             setCategory(product.category || "");
             setStockQuantity(product.stock_quantity != null ? String(product.stock_quantity) : "");
-            setIdPreview(product.id_url || product.idUrl || null);
+            
+            // Parse existing images (support both single URL and JSON array)
+            const idUrl = product.id_url || product.idUrl || "";
+            let parsedImages = [];
+            try {
+              const parsed = JSON.parse(idUrl);
+              if (Array.isArray(parsed)) {
+                parsedImages = parsed;
+              } else {
+                parsedImages = idUrl ? [idUrl] : [];
+              }
+            } catch {
+              parsedImages = idUrl ? [idUrl] : [];
+            }
+            setExistingImages(parsedImages);
           } else {
             setPopupMessage("Product not found");
             setShowPopup(true);
@@ -111,26 +127,62 @@ function EditProductContent() {
   }, [username, authLoading, searchParams, router]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setIdPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setIdPreview(null);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const updatedImages = [...newImages];
+      const updatedPreviews = [...newImagePreviews];
+      
+      files.forEach((file) => {
+        if (file.type.startsWith('image/')) {
+          updatedImages.push(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            updatedPreviews.push(reader.result);
+            setNewImagePreviews([...updatedPreviews]);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      setNewImages(updatedImages);
     }
+  };
+
+  const removeExistingImage = (index) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index));
+    setNewImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (existingImages.length === 0 && newImages.length === 0) {
+      setPopupMessage("Please upload at least one product image");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+    
     setLoading(true);
-    let idUrl = idPreview;
+    let idUrl = "";
 
     try {
-      if (image) {
-        idUrl = await uploadProductImage(image, username);
+      // Upload new images
+      const uploadedUrls = [];
+      for (const image of newImages) {
+        const url = await uploadProductImage(image, username);
+        uploadedUrls.push(url);
       }
+
+      // Combine existing and new images
+      const allImages = [...existingImages, ...uploadedUrls];
+      
+      // Store as JSON array if multiple images, single string if one image
+      idUrl = allImages.length === 1 ? allImages[0] : JSON.stringify(allImages);
 
       const data = await productFunctions.updateProduct({
         productId,
@@ -244,51 +296,113 @@ function EditProductContent() {
             <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-100 dark:border-gray-700">
               <div className="mb-5 sm:mb-6">
                 <label className="block text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Product Image
+                  Product Images
                 </label>
-                <div className="relative w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-                  {idPreview ? (
-                    <>
-                      <img
-                        src={idPreview}
-                        alt="Product preview"
-                        className="absolute inset-0 w-full h-full object-cover z-0"
-                        style={{ minHeight: '100%', minWidth: '100%' }}
-                      />
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 z-10 flex items-center justify-center">
-                        <div className="opacity-0 hover:opacity-100 transition-opacity">
-                          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                            <Image size={22} className="text-red-600 dark:text-red-400 text-xl" />
-                          </div>
+                
+                {(existingImages.length > 0 || newImagePreviews.length > 0) ? (
+                  <div className="space-y-4">
+                    {/* Existing Images */}
+                    {existingImages.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Current Images</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {existingImages.map((imageUrl, index) => (
+                            <div key={`existing-${index}`} className="relative group">
+                              <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Product image ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeExistingImage(index);
+                                  }}
+                                  className="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                  aria-label="Remove image"
+                                >
+                                  <Close size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                      <Upload size={40} className="text-4xl mb-2" />
-                      <p className="text-sm">No image selected</p>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                  />
-                </div>
-                {idPreview && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImage(null);
-                      setIdPreview(null);
-                    }}
-                    className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 flex items-center gap-1"
+                    )}
+                    
+                    {/* New Images */}
+                    {newImagePreviews.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">New Images</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {newImagePreviews.map((preview, index) => (
+                            <div key={`new-${index}`} className="relative group">
+                              <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                                <img
+                                  src={preview}
+                                  alt={`New product preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeNewImage(index);
+                                  }}
+                                  className="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                  aria-label="Remove image"
+                                >
+                                  <Close size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("editFileInput").click()}
+                      className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-red-500 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Plus size={20} />
+                      Add More Images
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="relative w-full h-48 sm:h-64 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all"
+                    onClick={() => document.getElementById("editFileInput").click()}
                   >
-                    <Close size={14} className="text-xs" />
-                    Remove image
-                  </button>
+                    <div className="text-center p-8">
+                      <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Upload size={32} className="text-3xl text-red-600 dark:text-red-400" />
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 font-semibold mb-1 text-base">
+                        Upload Product Images
+                      </p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        Click to browse (multiple images supported)
+                      </p>
+                    </div>
+                  </div>
                 )}
+                
+                <input
+                  id="editFileInput"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Upload multiple images to showcase your product. First image will be the main display image.
+                </p>
               </div>
 
               <div className="mb-5 sm:mb-6">

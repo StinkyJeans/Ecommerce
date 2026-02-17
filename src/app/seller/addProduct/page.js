@@ -31,8 +31,8 @@ import {
 } from "griddy-icons";
 
 export default function AddProduct() {
-  const [image, setImage] = useState(null);
-  const [idPreview, setIdPreview] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -64,25 +64,51 @@ export default function AddProduct() {
   }, [username, role, authLoading, router]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setIdPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      setIdPreview(null);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const newImages = [...images];
+      const newPreviews = [...imagePreviews];
+      
+      files.forEach((file) => {
+        if (file.type.startsWith('image/')) {
+          newImages.push(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            newPreviews.push(reader.result);
+            setImagePreviews([...newPreviews]);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      setImages(newImages);
     }
+  };
+
+  const removeImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (images.length === 0) {
+      setPopupMessage("Please upload at least one product image");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
+      return;
+    }
+    
     setLoading(true);
     let idUrl = "";
 
     try {
-      if (image) {
-
+      // Upload all images
+      const uploadedUrls = [];
+      for (const image of images) {
         const formData = new FormData();
         formData.append('file', image);
         formData.append('sellerUsername', username);
@@ -98,8 +124,11 @@ export default function AddProduct() {
           throw new Error(uploadData.error || 'Failed to upload image');
         }
 
-        idUrl = uploadData.url;
+        uploadedUrls.push(uploadData.url);
       }
+
+      // Store as JSON array if multiple images, single string if one image
+      idUrl = uploadedUrls.length === 1 ? uploadedUrls[0] : JSON.stringify(uploadedUrls);
 
       const data = await productFunctions.addProduct({
         productName,
@@ -113,11 +142,11 @@ export default function AddProduct() {
       });
 
       const isSuccess = data && (
-        data.productId || 
+        data.productId ||
         (
-          data.message && 
-          !data.message.toLowerCase().includes('fail') && 
-          !data.message.toLowerCase().includes('error') && 
+          data.message &&
+          !data.message.toLowerCase().includes('fail') &&
+          !data.message.toLowerCase().includes('error') &&
           data.success !== false &&
           !data.error &&
           !data.errors
@@ -133,8 +162,8 @@ export default function AddProduct() {
         setPrice("");
         setCategory("");
         setStockQuantity("");
-        setImage(null);
-        setIdPreview(null);
+        setImages([]);
+        setImagePreviews([]);
 
         setTimeout(() => {
           setShowPopup(false);
@@ -218,60 +247,81 @@ export default function AddProduct() {
             <div className="flex items-center gap-2 mb-3">
               <Image size={24} className="text-red-600 dark:text-red-400" />
               <label className="text-gray-800 dark:text-gray-200 font-semibold text-base">
-                Product Image
+                Product Images
               </label>
             </div>
 
-            <div
-              className="relative w-full h-56 sm:h-64 md:h-72 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all overflow-hidden group touch-manipulation"
-              onClick={() => document.getElementById("idFileInput").click()}
-            >
-              {idPreview ? (
-                <>
-                  <img
-                    src={idPreview}
-                    alt="Product Preview"
-                    className="absolute inset-0 w-full h-full object-cover rounded-xl"
-                    style={{ minHeight: '100%', minWidth: '100%' }}
-                  />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center rounded-xl z-10">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                        <RefreshCw size={40} className="text-white text-4xl mb-2" />
-                        <p className="text-white font-semibold">Change Image</p>
+            {imagePreviews.length > 0 ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                        <img
+                          src={preview}
+                          alt={`Product preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index);
+                          }}
+                          className="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          aria-label="Remove image"
+                        >
+                          <Close size={14} />
+                        </button>
                       </div>
                     </div>
-                </>
-              ) : (
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("idFileInput").click()}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-red-500 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={20} />
+                  Add More Images
+                </button>
+              </div>
+            ) : (
+              <div
+                className="relative w-full h-56 sm:h-64 md:h-72 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all overflow-hidden group touch-manipulation"
+                onClick={() => document.getElementById("idFileInput").click()}
+              >
                 <div className="text-center p-8">
                   <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Upload size={40} className="text-4xl text-red-600 dark:text-red-400" />
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 font-semibold mb-2 text-lg">
-                    Upload Product Image
+                    Upload Product Images
                   </p>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                    Click to browse or drag and drop
+                    Click to browse or drag and drop (multiple images supported)
                   </p>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                     <CheckCircle size={24} className="text-green-500 dark:text-green-400" />
                     <span>JPG, PNG, GIF supported</span>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <input
               id="idFileInput"
               type="file"
               accept="image/*"
+              multiple
               onChange={handleFileChange}
               className="hidden"
-              required
+              required={imagePreviews.length === 0}
             />
 
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
               <InfoCircle size={24} className="text-blue-500 dark:text-blue-400" />
-              Recommended: High-quality images with 1:1 aspect ratio
+              Upload multiple images to showcase your product. First image will be the main display image.
             </p>
           </div>
 
@@ -452,11 +502,10 @@ export default function AddProduct() {
       </div>
 
       {showPopup && (
-        <div className={`fixed top-5 right-5 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3 ${
-          popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error')
-            ? 'bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white'
-            : 'bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white'
-        }`}>
+        <div className={`fixed top-5 right-5 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-2 fade-in z-50 max-w-md flex items-center gap-3 ${popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error')
+          ? 'bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white'
+          : 'bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white'
+          }`}>
           {popupMessage.toLowerCase().includes('fail') || popupMessage.toLowerCase().includes('error') ? <InfoCircle size={28} className="text-2xl flex-shrink-0" /> : <CheckCircle size={28} className="text-2xl flex-shrink-0" />}
           <div className="flex-1 min-w-0">
             <p className="font-semibold break-words">{popupMessage}</p>

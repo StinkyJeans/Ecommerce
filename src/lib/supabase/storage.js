@@ -63,6 +63,19 @@ export async function getSignedUrl(bucket, path, expiresIn = 3600) {
   }
   return data.signedUrl;
 }
+export function getFirstImageUrl(idUrl) {
+  if (!idUrl || typeof idUrl !== 'string') return idUrl;
+  try {
+    const parsed = JSON.parse(idUrl);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed[0];
+    }
+  } catch {
+    // Not JSON, return as-is
+  }
+  return idUrl;
+}
+
 export function getImageUrl(url, bucket = null) {
   if (!url) return null;
   if (url.includes('edgestore.dev') || url.includes('files.edgestore.dev')) {

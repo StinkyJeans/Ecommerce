@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from "react";
 import ProductImage from "@/app/components/ProductImage";
+import { getFirstImageUrl } from "@/lib/supabase/storage";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -235,7 +236,7 @@ function CheckoutContent() {
                   <div key={item.id} className="flex items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                       <ProductImage
-                        src={item.id_url || item.idUrl}
+                        src={getFirstImageUrl(item.id_url || item.idUrl)}
                         alt={item.product_name || item.productName}
                         className="object-cover"
                         sizes="80px"

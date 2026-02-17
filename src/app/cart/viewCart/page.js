@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import ProductImage from "@/app/components/ProductImage";
+import { getFirstImageUrl } from "@/lib/supabase/storage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
@@ -313,7 +314,7 @@ export default function ViewCart() {
                         <div className="col-span-6 flex items-center gap-4">
                           <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                             <ProductImage
-                              src={item.id_url || item.idUrl}
+                              src={getFirstImageUrl(item.id_url || item.idUrl)}
                               alt={item.product_name || item.productName}
                               className="object-cover"
                               sizes="80px"

@@ -6,7 +6,7 @@ import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { productFunctions } from "@/lib/supabase/api";
-import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp, ChatBubble, Star } from "griddy-icons";
+import { Close, Plus, Minus, ShoppingBasket, Timer, Tag, Store, Truck, ShieldCheck, Package, ChevronDown, ChevronUp, ChatBubble, Star, ChevronLeft, ChevronRight } from "griddy-icons";
 import StartChatButton from "./chat/StartChatButton";
 import { useChatModal } from "@/app/context/ChatModalContext";
 
@@ -29,6 +29,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
   const [editRating, setEditRating] = useState(0);
   const [editText, setEditText] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { openChat } = useChatModal();
   const productId = product?.product_id || product?.productId;
 
@@ -186,6 +187,33 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
   const shortDesc = desc.length > 160 ? desc.slice(0, 160) + "…" : desc;
   const hasLongDesc = desc.length > 160;
 
+  // Parse product images - support both single URL and JSON array
+  const parseProductImages = (idUrl) => {
+    if (!idUrl) return [];
+    try {
+      // Try to parse as JSON array
+      const parsed = JSON.parse(idUrl);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // Not JSON, treat as single URL string
+    }
+    // Single URL or invalid JSON
+    return [idUrl].filter(Boolean);
+  };
+
+  const productImages = parseProductImages(product.idUrl || product.id_url);
+  const hasMultipleImages = productImages.length > 1;
+
+  const nextImage = useCallback(() => {
+    setCurrentImageIndex((prev) => (prev + 1) % productImages.length);
+  }, [productImages.length]);
+
+  const prevImage = useCallback(() => {
+    setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+  }, [productImages.length]);
+
   return (
     <div
       className="fixed inset-0 flex justify-center items-center bg-black/70 backdrop-blur-md z-50 p-3 sm:p-4 animate-in fade-in duration-200"
@@ -195,24 +223,94 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
         className="bg-white dark:bg-[#2C2C2C] rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl max-h-[94vh] overflow-hidden flex flex-col sm:flex-row animate-in zoom-in-95 duration-200 border border-[#E0E0E0] dark:border-[#404040]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ——— Image (left on desktop) ——— */}
+        {/* ——— Image Carousel (left on desktop) ——— */}
         <div className="relative flex-shrink-0 w-full sm:w-[48%] lg:w-[45%] aspect-square sm:aspect-auto sm:min-h-[420px] bg-white dark:bg-white/5">
-          <ProductImage
-            src={product.idUrl || product.id_url}
-            alt={name}
-            className="object-cover w-full h-full"
-            sizes="(max-width: 640px) 100vw, 420px"
-            priority
-          />
+          {productImages.length > 0 ? (
+            <>
+              <div className="relative w-full h-full overflow-hidden">
+                {productImages.map((imageUrl, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-300 ${
+                      index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                  >
+                    <ProductImage
+                      src={imageUrl}
+                      alt={`${name} - Image ${index + 1}`}
+                      className="object-cover w-full h-full"
+                      sizes="(max-width: 640px) 100vw, 420px"
+                      priority={index === 0}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Carousel Navigation */}
+              {hasMultipleImages && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevImage();
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-[#404040]/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-white dark:hover:bg-[#404040] transition-colors border border-[#E0E0E0] dark:border-[#404040] z-20"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft size={20} className="text-current" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextImage();
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 dark:bg-[#404040]/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-white dark:hover:bg-[#404040] transition-colors border border-[#E0E0E0] dark:border-[#404040] z-20"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight size={20} className="text-current" />
+                  </button>
+                  
+                  {/* Image Indicators */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+                    {productImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentImageIndex(index);
+                        }}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          index === currentImageIndex
+                            ? 'bg-white w-6 dark:bg-[#e5e5e5]'
+                            : 'bg-white/50 dark:bg-[#e5e5e5]/50 hover:bg-white/75 dark:hover:bg-[#e5e5e5]/75'
+                        }`}
+                        aria-label={`Go to image ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Image Counter */}
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/50 backdrop-blur-sm text-white z-20">
+                    {currentImageIndex + 1} / {productImages.length}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+              <Package size={48} className="text-gray-400 dark:text-gray-600" />
+            </div>
+          )}
+
           {/* Overlays */}
           {category && (
-            <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-[#404040] text-[#2C2C2C] dark:text-[#e5e5e5] shadow-lg backdrop-blur-sm border border-[#E0E0E0] dark:border-[#404040]">
+            <span className={`absolute ${hasMultipleImages ? 'top-16' : 'top-4'} left-4 px-3 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-[#404040] text-[#2C2C2C] dark:text-[#e5e5e5] shadow-lg backdrop-blur-sm border border-[#E0E0E0] dark:border-[#404040] z-20`}>
               {category}
             </span>
           )}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white dark:bg-[#404040] shadow-lg flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#505050] transition-colors border border-[#E0E0E0] dark:border-[#404040]"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white dark:bg-[#404040] shadow-lg flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#505050] transition-colors border border-[#E0E0E0] dark:border-[#404040] z-20"
             aria-label="Close"
           >
             <Close size={20} className="text-current" />

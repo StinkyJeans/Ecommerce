@@ -4,6 +4,7 @@ import { memo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import ProductImage from "./ProductImage";
 import { formatPrice } from "@/lib/formatPrice";
+import { getFirstImageUrl } from "@/lib/supabase/storage";
 import { Eye, ShoppingBasket } from "griddy-icons";
 
 const ProductModal = dynamic(() => import("./ProductModal"), {
@@ -26,7 +27,7 @@ const ProductCard = memo(({ product, onView, onAddToCart, isAddingToCart = false
           <div className="absolute inset-0 animate-pulse bg-[#E0E0E0] dark:bg-[#404040]" />
         )}
         <ProductImage
-          src={product.idUrl || product.id_url}
+          src={getFirstImageUrl(product.idUrl || product.id_url)}
           alt={product.productName || product.product_name}
           className="object-cover group-hover:scale-110 transition-transform duration-500"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"

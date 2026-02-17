@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ProductImage from "@/app/components/ProductImage";
+import { getFirstImageUrl } from "@/lib/supabase/storage";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
@@ -199,7 +200,7 @@ export default function ViewProduct() {
                 >
                   <div className="relative h-48 overflow-hidden bg-gray-100 dark:bg-gray-700 group">
                     <ProductImage
-                      src={product.id_url}
+                      src={getFirstImageUrl(product.id_url)}
                       alt={product.product_name}
                       className="object-cover w-full h-full group-hover:scale-105 transition-transform"
                       sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
@@ -240,7 +241,7 @@ export default function ViewProduct() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="relative">
                 <div className="relative h-56">
-                  <ProductImage src={selectedProduct.id_url} alt={selectedProduct.product_name} className="object-cover w-full h-full rounded-t-2xl" sizes="512px" priority />
+                  <ProductImage src={getFirstImageUrl(selectedProduct.id_url)} alt={selectedProduct.product_name} className="object-cover w-full h-full rounded-t-2xl" sizes="512px" priority />
                 </div>
                 <button onClick={closeModal} className="absolute top-3 right-3 w-10 h-10 bg-white/95 dark:bg-gray-800/95 rounded-full flex items-center justify-center shadow" aria-label="Close">
                   <Close size={20} className="text-gray-700 dark:text-gray-300" />
