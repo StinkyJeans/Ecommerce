@@ -52,7 +52,6 @@ function SearchContent() {
     fetchProducts();
   }, []);
 
-  // Update URL with debouncing when localQuery changes
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -63,7 +62,7 @@ function SearchContent() {
       if (trimmedQuery !== q) {
         router.push(trimmedQuery ? `/search?q=${encodeURIComponent(trimmedQuery)}` : "/search");
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -91,7 +90,7 @@ function SearchContent() {
 
   const handleSearchChange = (value) => {
     setLocalQuery(value);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1);
   };
 
   const handleView = useCallback((product) => {
@@ -257,8 +256,7 @@ function SearchContent() {
                   
                   if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
                     window.dispatchEvent(new Event("cartUpdated"));
-                    
-                    // Automatically create conversation with seller and product
+
                     const sellerUsername = prod.sellerUsername || prod.seller_username;
                     const productId = prod.product_id || prod.productId;
                     if (sellerUsername && productId) {

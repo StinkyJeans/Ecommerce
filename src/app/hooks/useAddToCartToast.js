@@ -42,8 +42,7 @@ export function useAddToCartToast(username, onClosePopup, onSuccess) {
           setCartMessage("success");
           queryClient.invalidateQueries({ queryKey: cartQueryKey(username) });
           window.dispatchEvent(new Event("cartUpdated"));
-          
-          // Automatically create conversation with seller and product
+
           const sellerUsername = product.sellerUsername || product.seller_username;
           const productId = product.product_id || product.productId;
           if (sellerUsername && productId) {
@@ -52,14 +51,12 @@ export function useAddToCartToast(username, onClosePopup, onSuccess) {
                 seller_username: sellerUsername,
                 product_id: productId,
               });
-              // Dispatch event to refresh chat conversations
               window.dispatchEvent(new Event("chatConversationsUpdated"));
             } catch (err) {
-              // Silently fail - conversation creation is optional
               console.error("Failed to create conversation:", err);
             }
           }
-          
+
           successCallback?.();
           onSuccess?.(product);
           setTimeout(() => {
@@ -76,8 +73,7 @@ export function useAddToCartToast(username, onClosePopup, onSuccess) {
           setCartMessage("success");
           queryClient.invalidateQueries({ queryKey: cartQueryKey(username) });
           window.dispatchEvent(new Event("cartUpdated"));
-          
-          // Automatically create conversation with seller and product
+
           const sellerUsername = product.sellerUsername || product.seller_username;
           const productId = product.product_id || product.productId;
           if (sellerUsername && productId) {
@@ -86,14 +82,12 @@ export function useAddToCartToast(username, onClosePopup, onSuccess) {
                 seller_username: sellerUsername,
                 product_id: productId,
               });
-              // Dispatch event to refresh chat conversations
               window.dispatchEvent(new Event("chatConversationsUpdated"));
             } catch (err) {
-              // Silently fail - conversation creation is optional
               console.error("Failed to create conversation:", err);
             }
           }
-          
+
           successCallback?.();
           onSuccess?.(product);
           setTimeout(() => {

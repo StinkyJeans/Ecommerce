@@ -66,7 +66,6 @@ export default function ViewProduct() {
       setProducts(data.products || []);
     } catch (e) {
       const msg = e?.message || "Failed to load products";
-      // Retry once if 403 is due to signing key not ready yet (race with /api/signing-key)
       if (!isRetry && e?.status === 403 && (msg.toLowerCase().includes("signing") || msg.toLowerCase().includes("signature"))) {
         await new Promise((r) => setTimeout(r, 800));
         return fetchProducts(true);

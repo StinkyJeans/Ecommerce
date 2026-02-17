@@ -47,7 +47,7 @@ export default function UserPortalSidebar() {
   };
 
   const isActive = (item) => {
-    if (item.isModal) return false; // Modal items are never "active" in the sidebar sense
+    if (item.isModal) return false;
     if (item.path === "/account/settings") return pathname === "/account/settings";
     if (item.path === "/account" && item.tab) {
       if (pathname !== "/account") return false;

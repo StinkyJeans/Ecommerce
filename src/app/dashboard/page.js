@@ -127,8 +127,7 @@ export default function Dashboard() {
       if (data.cartItem || data.updated || (data.message && (data.message.includes('successfully') || data.message.includes('updated')))) {
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
-        
-        // Automatically create conversation with seller and product
+
         const sellerUsername = product.sellerUsername || product.seller_username;
         const productId = product.product_id || product.productId;
         if (sellerUsername && productId) {
@@ -139,11 +138,10 @@ export default function Dashboard() {
             });
             window.dispatchEvent(new Event("chatConversationsUpdated"));
           } catch (err) {
-            // Silently fail - conversation creation is optional
             console.error("Failed to create conversation:", err);
           }
         }
-        
+
         setTimeout(() => {
           setCartMessage("");
           closePopup();
@@ -155,11 +153,9 @@ export default function Dashboard() {
         setCartMessage("error");
         setTimeout(() => setCartMessage(""), 3000);
       } else {
-        // Default to success if we got here without error
         setCartMessage("success");
         window.dispatchEvent(new Event("cartUpdated"));
-        
-        // Automatically create conversation with seller and product
+
         const sellerUsername = product.sellerUsername || product.seller_username;
         const productId = product.product_id || product.productId;
         if (sellerUsername && productId) {
@@ -170,11 +166,10 @@ export default function Dashboard() {
             });
             window.dispatchEvent(new Event("chatConversationsUpdated"));
           } catch (err) {
-            // Silently fail - conversation creation is optional
             console.error("Failed to create conversation:", err);
           }
         }
-        
+
         setTimeout(() => {
           setCartMessage("");
           closePopup();
@@ -278,7 +273,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Trending Now Section */}
               <div className="mb-8 sm:mb-10 md:mb-12">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div>
@@ -377,7 +371,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* All Products Section */}
               {filteredProducts.length > 8 && (
                 <div>
                   <h2 className="text-3xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-6">Our Collection</h2>

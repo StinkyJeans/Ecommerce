@@ -18,16 +18,13 @@ async function getTransporter() {
   }
   transporterPromise = (async () => {
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
-    // Check for Gmail OAuth2 configuration (preferred method)
-    const hasOAuth2Config = process.env.GMAIL_CLIENT_ID && 
-                            process.env.GMAIL_CLIENT_SECRET && 
+
+    const hasOAuth2Config = process.env.GMAIL_CLIENT_ID &&
+                            process.env.GMAIL_CLIENT_SECRET &&
                             process.env.GMAIL_REFRESH_TOKEN;
-    
-    // Check for SMTP configuration (fallback)
+
     const hasSmtpConfig = process.env.SMTP_USER && process.env.SMTP_PASS;
-    
-    // Use Ethereal in development if no email config is provided
+
     if (isDevelopment && !hasOAuth2Config && !hasSmtpConfig) {
       console.log('📧 Nodemailer: Using Ethereal test account (development mode)');
       try {
@@ -51,7 +48,6 @@ async function getTransporter() {
       }
     }
 
-    // Use OAuth2 if configured (preferred for Gmail)
     if (hasOAuth2Config) {
       try {
         console.log('📧 Nodemailer: Using Gmail OAuth2 authentication');
@@ -78,7 +74,6 @@ async function getTransporter() {
         return transporter;
       } catch (error) {
         console.error('❌ Failed to initialize Gmail OAuth2:', error);
-        // Fall through to SMTP if OAuth2 fails
         if (!hasSmtpConfig) {
           throw error;
         }
@@ -86,11 +81,9 @@ async function getTransporter() {
       }
     }
 
-    // Fallback to SMTP configuration
     if (hasSmtpConfig) {
       const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
       const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-      // Port 587 uses STARTTLS (secure: false), Port 465 uses SSL/TLS (secure: true)
       const smtpSecure = smtpPort === 465 || process.env.SMTP_SECURE === 'true';
       const smtpUser = process.env.SMTP_USER;
       const smtpPass = process.env.SMTP_PASS;
@@ -102,9 +95,7 @@ async function getTransporter() {
       
       let transporterConfig;
 
-      // Gmail-specific configuration
       if (smtpHost.includes('gmail.com')) {
-        // Use Gmail service (simpler and more reliable)
         transporterConfig = {
           service: 'gmail',
           auth: {
@@ -114,7 +105,6 @@ async function getTransporter() {
         };
         console.log('📧 Using Gmail service configuration (Note: App passwords deprecated after March 2025)');
       } else {
-        // Generic SMTP configuration
         transporterConfig = {
           host: smtpHost,
           port: smtpPort,
@@ -124,7 +114,7 @@ async function getTransporter() {
             pass: smtpPass
           },
           tls: {
-            rejectUnauthorized: false // Allow self-signed certificates
+            rejectUnauthorized: false
           }
         };
         console.log('📧 Using generic SMTP configuration');
@@ -147,7 +137,6 @@ async function getTransporter() {
       return transporter;
     }
 
-    // No configuration found
     throw new Error(
       'Email configuration missing. Set Gmail OAuth2 credentials (GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN) ' +
       'or SMTP credentials (SMTP_USER, SMTP_PASS) in .env.local (or use Ethereal in development)'

@@ -9,11 +9,10 @@ const rateLimitCache = new LRUCache({
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Production limits (strict)
 const PROD_RATE_LIMITS = {
   login: {
-    maxRequests: 10, // Changed from 5 to 10 attempts
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 10,
+    windowMs: 15 * 60 * 1000,
   },
   register: {
     maxRequests: 3,
@@ -37,19 +36,18 @@ const PROD_RATE_LIMITS = {
   },
 };
 
-// Development limits (relaxed for testing)
 const DEV_RATE_LIMITS = {
   login: {
-    maxRequests: 30, // Changed from 20 to 30 attempts
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 30,
+    windowMs: 15 * 60 * 1000,
   },
   register: {
     maxRequests: 10,
     windowMs: 60 * 60 * 1000,
   },
   resetPassword: {
-    maxRequests: 20, // Increased for development testing
-    windowMs: 15 * 60 * 1000, // 15 minutes instead of 1 hour
+    maxRequests: 20,
+    windowMs: 15 * 60 * 1000,
   },
   addToCart: {
     maxRequests: 200,

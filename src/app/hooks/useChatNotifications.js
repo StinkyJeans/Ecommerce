@@ -4,14 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useChatRealtime } from "./useChatRealtime";
 import { chatFunctions } from "@/lib/supabase/api";
 
-/**
- * Listens for new chat messages and shows in-app + optional browser notifications.
- * Fetches conversation IDs from API and subscribes to Realtime; when a message
- * arrives from someone else, sets notification state and shows browser notification if permitted.
- * @param {string | null} currentUsername - Logged-in username (user or seller)
- * @param {boolean} enabled - Whether to run the subscription (e.g. when authenticated)
- * @returns {{ notification: object | null, dismissNotification: function }}
- */
 export function useChatNotifications(currentUsername, enabled = true) {
   const [conversationIds, setConversationIds] = useState([]);
   const [notification, setNotification] = useState(null);
@@ -60,8 +52,6 @@ export function useChatNotifications(currentUsername, enabled = true) {
       return;
     }
 
-    // Delay fetch to avoid blocking initial page load
-    // Only fetch after page is interactive
     let cancelled = false;
     const timeoutId = setTimeout(() => {
       (async () => {
@@ -79,7 +69,7 @@ export function useChatNotifications(currentUsername, enabled = true) {
           }
         }
       })();
-    }, 500); // Wait 500ms after component mount
+    }, 500);
 
     return () => {
       cancelled = true;

@@ -19,7 +19,6 @@ export function ChatModalProvider({ children }) {
 
   const closeChat = useCallback(() => {
     setIsOpen(false);
-    // Clear initial values after a short delay to allow animations
     setTimeout(() => {
       setInitialSeller(null);
       setInitialProduct(null);

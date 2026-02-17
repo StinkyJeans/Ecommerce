@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTokensFromCode } from '@/lib/email/gmail-oauth2';
 
-/**
- * POST /api/auth/gmail/callback
- * Exchanges authorization code for tokens
- * Body: { code: "authorization_code_from_google" }
- */
 export async function POST(req) {
   try {
     const { code } = await req.json();

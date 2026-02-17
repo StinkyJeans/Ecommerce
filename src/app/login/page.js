@@ -70,7 +70,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (loading) return; // Prevent multiple simultaneous requests
+    if (loading) return;
     setLoading(true);
     try {
       const data = await authFunctions.login({ email, password });
@@ -93,11 +93,9 @@ export default function LoginPage() {
         setPopupMessage(err.details || "Your seller account has been rejected. Please contact support.");
         setPopupType("error");
       } else if (status === 429) {
-        // Rate limit exceeded
         setPopupMessage(err.message || err.error || "Too many login attempts. Please wait a few minutes before trying again.");
         setPopupType("error");
       } else {
-        // Combine invalid password message with remaining attempts
         let message = err.message || error.message || "Invalid Email or Password";
         if (err.remainingAttempts !== undefined && err.remainingAttempts !== null && err.remainingAttempts > 0) {
           message += `, You have ${err.remainingAttempts} ${err.remainingAttempts === 1 ? 'attempt' : 'attempts'} left before waiting a few minutes to log in again.`;
@@ -108,7 +106,6 @@ export default function LoginPage() {
           setPasswordChangedMessage(`You have changed your password ${formatRelativeTime(err.passwordChangedAt)}`);
       }
       setShowPopup(true);
-      // Rate limit messages stay for 5 seconds, others for 4 seconds
       setTimeout(() => setShowPopup(false), status === 429 ? 5000 : status === 403 ? 5000 : 4000);
     } finally {
       setLoading(false);

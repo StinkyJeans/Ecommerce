@@ -49,19 +49,11 @@ export default function ChatModal() {
     fetchConversations();
   }, [isOpen, authLoading, username, role, fetchConversations, closeChat]);
 
-  // Listen for cart updates to refresh conversations
   useEffect(() => {
     if (!isOpen || !username) return;
-    
-    const handleCartUpdate = () => {
-      // Refresh conversations when cart is updated (product added)
-      fetchConversations();
-    };
-    
-    const handleChatUpdate = () => {
-      // Refresh conversations when chat conversations are updated
-      fetchConversations();
-    };
+
+    const handleCartUpdate = () => fetchConversations();
+    const handleChatUpdate = () => fetchConversations();
 
     window.addEventListener("cartUpdated", handleCartUpdate);
     window.addEventListener("chatConversationsUpdated", handleChatUpdate);
@@ -94,9 +86,7 @@ export default function ChatModal() {
             setSelectedConversation(updated);
             setMobileShowWindow(true);
           }
-        } catch {
-          // ignore
-        }
+        } catch {}
       })();
     }
   }, [isOpen, username, role, initialSeller, initialProduct, initialConversation, conversations, fetchConversations]);
@@ -137,7 +127,6 @@ export default function ChatModal() {
           if (prev.some((m) => m.id === newMsg.id)) return prev;
           return [...prev, newMsg];
         });
-        // Refresh left list (conversation list); right panel already got the new message above
         fetchConversations();
       },
       [fetchConversations]
@@ -145,7 +134,6 @@ export default function ChatModal() {
     isOpen && !!selectedConversation?.id
   );
 
-  // Refetch conversation list when tab becomes visible; right panel (messages) does not reload
   useEffect(() => {
     if (!isOpen || !username) return;
     const onVisible = () => {
@@ -196,28 +184,23 @@ export default function ChatModal() {
         )
       );
       setUnreadTotal((prev) => Math.max(0, prev - 1));
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, [currentRole]);
 
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] animate-in fade-in"
         onClick={closeChat}
         aria-hidden="true"
       />
 
-      {/* Modal */}
       <div
         className="fixed bottom-6 right-6 w-[90vw] max-w-[900px] h-[85vh] max-h-[700px] bg-white dark:bg-[#2C2C2C] rounded-2xl shadow-2xl z-[101] flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <header className="flex items-center justify-between gap-2 px-4 py-3 bg-white dark:bg-[#2C2C2C] border-b border-[#E0E0E0] dark:border-[#404040] flex-shrink-0">
           <div className="flex items-center gap-2">
             <ChatIcon size={20} className="text-[#2F79F4]" />
@@ -244,9 +227,7 @@ export default function ChatModal() {
           </div>
         </header>
 
-        {/* Content */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
-          {/* Conversation List */}
           <aside
             className={`w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col bg-white dark:bg-[#2C2C2C] border-r border-[#E0E0E0] dark:border-[#404040] ${
               mobileShowWindow ? "hidden md:flex" : "flex"
@@ -264,7 +245,6 @@ export default function ChatModal() {
             />
           </aside>
 
-          {/* Chat Window */}
           <main
             className={`flex-1 flex flex-col min-w-0 bg-[#f5f5f5] dark:bg-[#1a1a1a] ${
               mobileShowWindow ? "flex" : "hidden md:flex"

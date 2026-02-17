@@ -10,8 +10,6 @@ export default function VisitTracker() {
   const { role } = useAuth();
 
   useEffect(() => {
-    // Only track visits for authenticated, non-admin users.
-    // When role is null, the user is not logged in yet.
     if (!role || pathname.startsWith('/admin') || role === 'admin') {
       return;
     }
@@ -34,8 +32,7 @@ export default function VisitTracker() {
       }
     };
 
-    // Delay tracking to avoid blocking page load
-    const timeoutId = setTimeout(trackVisit, 2000); // 2 second delay
+    const timeoutId = setTimeout(trackVisit, 2000);
 
     return () => clearTimeout(timeoutId);
   }, [pathname, role]);

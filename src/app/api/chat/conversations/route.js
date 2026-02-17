@@ -94,7 +94,6 @@ export async function POST(req) {
       );
     }
 
-    // Resolve seller to exact username from DB (fixes case mismatch so seller sees the conversation)
     const { data: sellerRow } = await supabase
       .from("users")
       .select("username")

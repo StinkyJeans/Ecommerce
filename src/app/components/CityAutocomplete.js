@@ -22,12 +22,10 @@ export default function CityAutocomplete({
   const suggestionsRef = useRef(null);
   const debounceTimerRef = useRef(null);
 
-  // Update input value when value prop changes (for editing existing addresses)
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -95,12 +93,10 @@ export default function CityAutocomplete({
     setInputValue(newValue);
     onChange?.(newValue);
 
-    // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
-    // Debounce API calls (300ms)
     debounceTimerRef.current = setTimeout(() => {
       fetchSuggestions(newValue);
     }, 300);
@@ -112,12 +108,10 @@ export default function CityAutocomplete({
     setSuggestions([]);
     onChange?.(suggestion.description);
 
-    // Fetch place details for reverse geocoding
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      // Use lat/lon for reverse geocoding (more reliable than place_id lookup)
       const params = new URLSearchParams();
       if (suggestion.lat && suggestion.lon) {
         params.set("lat", suggestion.lat);
@@ -133,7 +127,6 @@ export default function CityAutocomplete({
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Call callback with location data
         onCitySelect?.({
           city: data.city || suggestion.mainText,
           province: data.province || "",
@@ -151,7 +144,6 @@ export default function CityAutocomplete({
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
-      // Still call callback with what we have
       onCitySelect?.({
         city: suggestion.mainText,
         province: "",

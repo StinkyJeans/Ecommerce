@@ -3,12 +3,6 @@
 import { useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/**
- * Subscribe to new messages for the given conversation IDs.
- * @param {string[]} conversationIds - List of conversation UUIDs to listen to
- * @param {function(object): void} onMessage - Callback when a new message is inserted (payload.new)
- * @param {boolean} enabled - Whether subscription is active
- */
 export function useChatRealtime(conversationIds, onMessage, enabled = true) {
   const callbackRef = useRef(onMessage);
   callbackRef.current = onMessage;
@@ -40,18 +34,13 @@ export function useChatRealtime(conversationIds, onMessage, enabled = true) {
       schema: "public",
       table: "messages",
     };
-    // Filter by conversation when subscribing to one so the server only sends relevant events
     if (ids.length === 1) {
       subConfig.filter = `conversation_id=eq.${ids[0]}`;
     }
 
     channel
       .on("postgres_changes", subConfig, handler)
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          // no-op
-        }
-      });
+      .subscribe(() => {});
 
     return () => {
       supabase.removeChannel(channel);

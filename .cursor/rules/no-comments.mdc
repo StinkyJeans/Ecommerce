@@ -9,3 +9,4 @@ globs: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.css"]
 - This applies to all JavaScript, TypeScript, JSX, and CSS in this project.
 - Documentation files (e.g. `.md`) are excluded; they may use markdown and prose as needed.
 - When editing or generating code, write self-explanatory names and structure instead of commenting.
+- Do not add comments in the future; the only exception is documentation in `.md` files.

@@ -9,13 +9,12 @@ export default function TermsOfServicePage() {
 
   const siteName = "TotallyNormalStore";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const contactEmail = "jome490@gmail.com"; // Update with your contact email
-  const lastUpdated = "February 16, 2025"; // Update this date when you modify the terms
+  const contactEmail = "jome490@gmail.com";
+  const lastUpdated = "February 16, 2025";
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#1a1a1a]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        {/* Header */}
         <div className="mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2C2C2C] dark:text-[#e5e5e5] mb-4">
             Terms of Service
@@ -25,7 +24,6 @@ export default function TermsOfServicePage() {
           </p>
         </div>
 
-        {/* Content */}
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-[#2C2C2C] dark:text-[#e5e5e5] mb-4">

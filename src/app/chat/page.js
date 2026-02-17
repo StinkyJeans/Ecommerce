@@ -11,7 +11,6 @@ import ThemeToggle from "@/app/components/ThemeToggle";
 import { ChevronLeft, Chat as ChatIcon } from "griddy-icons";
 import Link from "next/link";
 
-// Force dynamic rendering to prevent prerendering errors with useSearchParams
 export const dynamic = 'force-dynamic';
 
 function ChatPageContent() {
@@ -77,9 +76,7 @@ function ChatPageContent() {
             setSelectedConversation(updated);
             setMobileShowWindow(true);
           }
-        } catch {
-          // ignore
-        }
+        } catch {}
       })();
     }
   }, [username, role, sellerParam, productParam, conversationParam, conversations]);
@@ -156,9 +153,7 @@ function ChatPageContent() {
         )
       );
       setUnreadTotal((prev) => Math.max(0, prev - 1));
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, [currentRole]);
 
   if (authLoading || (!username && !role)) {

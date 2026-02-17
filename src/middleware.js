@@ -5,8 +5,6 @@ export function middleware(request) {
 
   const isProduction = process.env.NODE_ENV === 'production';
 
-  // Tightened CSP: removed 'unsafe-eval', kept 'unsafe-inline' for styles (required by Next.js)
-  // For scripts, 'unsafe-inline' is kept for Next.js hydration but XSS risk is mitigated by React's escaping
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'", 

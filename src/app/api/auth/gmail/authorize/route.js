@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthUrl } from '@/lib/email/gmail-oauth2';
 
-/**
- * GET /api/auth/gmail/authorize
- * Returns the OAuth2 authorization URL for Gmail setup
- * Visit this URL to authorize and get the refresh token
- */
 export async function GET() {
   try {
-    // Check if OAuth2 credentials are configured
     const hasClientId = !!process.env.GMAIL_CLIENT_ID;
     const hasClientSecret = !!process.env.GMAIL_CLIENT_SECRET;
     
