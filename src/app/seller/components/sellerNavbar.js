@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { authFunctions, chatFunctions, sellerOrderFunctions } from "@/lib/supabase/api";
-import { formatRelativeTime } from "@/lib/formatRelativeTime";
+import { authFunctions, chatFunctions } from "@/lib/supabase/api";
 import {
   Menu,
   Close,
   ChartLine,
   PlusCircle,
   Folders,
-  ShoppingBasket,
   Store,
   Grid,
   ChevronRight,
@@ -19,12 +17,10 @@ import {
   Settings,
   Users,
   Chat,
-  ConciergeBell as Bell,
   AnnotationQuestion,
 } from "griddy-icons";
 import { useAuth } from "@/app/context/AuthContext";
 import { useChatModal } from "@/app/context/ChatModalContext";
-import { useSellerOrderRealtime } from "@/app/hooks/useSellerOrderRealtime";
 
 const STORE_NAME = "Totally Normal Store";
 
@@ -43,12 +39,6 @@ export default function Navbar() {
   const settings = () => router.push("/seller/settings");
   const messages = () => openChat();
   const [unreadTotal, setUnreadTotal] = useState(0);
-  const [orderNotificationCount, setOrderNotificationCount] = useState(0);
-  const [orderNotificationList, setOrderNotificationList] = useState([]);
-  const [showOrderDropdown, setShowOrderDropdown] = useState(false);
-  const [loadingOrderNotifications, setLoadingOrderNotifications] = useState(false);
-  const orderDropdownRefMobile = useRef(null);
-  const orderDropdownRefDesktop = useRef(null);
 
   useEffect(() => {
     if (!username) {
@@ -61,65 +51,6 @@ export default function Navbar() {
     }).catch(() => { if (!cancelled) setUnreadTotal(0); });
     return () => { cancelled = true; };
   }, [username]);
-
-  const fetchOrderNotifications = () => {
-    if (!username) return;
-    setLoadingOrderNotifications(true);
-    sellerOrderFunctions.getSellerOrderNotifications()
-      .then((data) => {
-        setOrderNotificationCount(data?.count ?? 0);
-        setOrderNotificationList(data?.orders ?? []);
-      })
-      .catch(() => {
-        setOrderNotificationCount(0);
-        setOrderNotificationList([]);
-      })
-      .finally(() => setLoadingOrderNotifications(false));
-  };
-
-  useEffect(() => {
-    if (!username) {
-      setOrderNotificationCount(0);
-      setOrderNotificationList([]);
-      return;
-    }
-    fetchOrderNotifications();
-    const interval = setInterval(fetchOrderNotifications, 60000);
-    return () => clearInterval(interval);
-  }, [username]);
-
-  useEffect(() => {
-    if (showOrderDropdown) fetchOrderNotifications();
-  }, [showOrderDropdown]);
-
-  useSellerOrderRealtime(
-    username,
-    (newOrder) => {
-      setOrderNotificationCount((prev) => prev + 1);
-      setOrderNotificationList((prev) => [
-        {
-          id: newOrder.id,
-          product_name: newOrder.product_name,
-          quantity: newOrder.quantity,
-          total_amount: newOrder.total_amount,
-          created_at: newOrder.created_at,
-          order_group_id: newOrder.order_group_id,
-        },
-        ...prev,
-      ].slice(0, 20));
-    },
-    !!username
-  );
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      const inMobile = orderDropdownRefMobile.current?.contains(e.target);
-      const inDesktop = orderDropdownRefDesktop.current?.contains(e.target);
-      if (!inMobile && !inDesktop) setShowOrderDropdown(false);
-    };
-    if (showOrderDropdown) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showOrderDropdown]);
 
   const handleLogout = async () => {
     await authFunctions.logout();
@@ -172,43 +103,6 @@ export default function Navbar() {
               <p className="text-xs text-gray-500 -mt-1">Seller Portal</p>
             </div>
           </div>
-          <div className="relative flex items-center gap-1" ref={orderDropdownRefMobile}>
-            <button
-              type="button"
-              onClick={() => setShowOrderDropdown(!showOrderDropdown)}
-              className="relative p-2.5 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
-              aria-label="Order notifications"
-            >
-              <Bell size={22} className="text-gray-700" />
-              {orderNotificationCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center">
-                  {orderNotificationCount > 99 ? "99+" : orderNotificationCount}
-                </span>
-              )}
-            </button>
-            {showOrderDropdown && (
-              <div className="absolute top-full right-0 mt-1 w-80 max-h-72 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-2">
-                <div className="px-3 pb-2 border-b border-gray-200 flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">New orders</span>
-                  <button type="button" onClick={() => { setShowOrderDropdown(false); orders(); }} className="text-sm text-orange-600 hover:underline">View all</button>
-                </div>
-                {loadingOrderNotifications ? (
-                  <div className="p-4 flex justify-center"><div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
-                ) : orderNotificationList.length === 0 ? (
-                  <p className="p-4 text-sm text-gray-500">No new orders</p>
-                ) : (
-                  <ul className="py-1">
-                    {orderNotificationList.map((o) => (
-                      <li key={o.id} className="px-3 py-2 hover:bg-gray-50">
-                        <p className="text-sm font-medium text-gray-900 truncate">{o.product_name}</p>
-                        <p className="text-xs text-gray-500">₱{Number(o.total_amount).toLocaleString()} · {o.created_at ? formatRelativeTime(o.created_at) : ""}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
           <button onClick={() => setOpen(!open)} className="p-2.5 hover:bg-gray-100 rounded-xl transition-all active:scale-95">
             {open ? <Close size={22} className="text-gray-700 text-xl" /> : <Menu size={22} className="text-gray-700 text-xl" />}
           </button>
@@ -231,45 +125,6 @@ export default function Navbar() {
         </div>
 
         <div className="flex-1 overflow-y-auto py-4">
-          <div className="mb-4 relative" ref={orderDropdownRefDesktop}>
-            <button
-              type="button"
-              onClick={() => setShowOrderDropdown(!showOrderDropdown)}
-              className="w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-r-xl hover:bg-gray-100 transition-all group"
-              aria-label="Order notifications"
-            >
-              <Bell size={20} className="text-gray-500 group-hover:text-orange-600" />
-              <span className="flex-1 text-left font-medium text-gray-700">Notifications</span>
-              {orderNotificationCount > 0 && (
-                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-orange-500 text-white text-xs font-bold inline-flex items-center justify-center">
-                  {orderNotificationCount > 99 ? "99+" : orderNotificationCount}
-                </span>
-              )}
-            </button>
-            {showOrderDropdown && (
-              <div className="absolute left-2 right-2 top-full mt-1 max-h-72 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-2">
-                <div className="px-3 pb-2 border-b border-gray-200 flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">New orders</span>
-                  <button type="button" onClick={() => { setShowOrderDropdown(false); orders(); }} className="text-sm text-orange-600 hover:underline">View all</button>
-                </div>
-                {loadingOrderNotifications ? (
-                  <div className="p-4 flex justify-center"><div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
-                ) : orderNotificationList.length === 0 ? (
-                  <p className="p-4 text-sm text-gray-500">No new orders</p>
-                ) : (
-                  <ul className="py-1">
-                    {orderNotificationList.map((o) => (
-                      <li key={o.id} className="px-3 py-2 hover:bg-gray-50">
-                        <p className="text-sm font-medium text-gray-900 truncate">{o.product_name}</p>
-                        <p className="text-xs text-gray-500">₱{Number(o.total_amount).toLocaleString()} · {o.created_at ? formatRelativeTime(o.created_at) : ""}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
           <div className="mb-4">
             <p className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Portal</p>
             {sellerPortalItems.map((item) => renderNavItem(item, pathname === item.path))}
