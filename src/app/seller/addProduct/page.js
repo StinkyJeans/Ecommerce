@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/sellerNavbar";
 import { uploadProductImage } from "@/lib/supabase/storage";
 import { productFunctions } from "@/lib/supabase/api";
+import { createClient } from "@/lib/supabase/client";
 import { getCategoryOptionsForForm } from "@/lib/categories";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
@@ -120,39 +121,46 @@ export default function AddProduct() {
     let idUrl = "";
 
     try {
-      // Upload all images
+      // Upload all images directly to Supabase Storage (bypasses API route size limits)
       const uploadedUrls = [];
-      for (const image of images) {
-        const formData = new FormData();
-        formData.append('file', image);
-        formData.append('sellerUsername', username);
-
-        const uploadResponse = await fetch('/api/upload-product-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        // Check if response is JSON before parsing
-        const contentType = uploadResponse.headers.get('content-type');
-        let uploadData;
+      const supabase = createClient();
+      
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
         
-        if (contentType && contentType.includes('application/json')) {
-          uploadData = await uploadResponse.json();
-        } else {
-          // If not JSON, read as text to see what the error is
-          const textResponse = await uploadResponse.text();
-          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}. ${textResponse.substring(0, 200)}`);
+        // Validate file size (10MB max per image)
+        const maxSize = 10 * 1024 * 1024;
+        if (image.size > maxSize) {
+          throw new Error(`Image ${i + 1} exceeds 10MB limit. Please compress or use a smaller image.`);
         }
-
-        if (!uploadResponse.ok || !uploadData.success) {
-          throw new Error(uploadData.error || uploadData.message || 'Failed to upload image');
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(image.type)) {
+          throw new Error(`Image ${i + 1} has invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.`);
         }
-
-        if (!uploadData.url) {
-          throw new Error('Upload succeeded but no URL returned');
+        
+        // Upload directly to Supabase Storage
+        const timestamp = Date.now();
+        const fileName = `${username}/${timestamp}-${image.name}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, image, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+        
+        if (uploadError) {
+          throw new Error(`Failed to upload image ${i + 1}: ${uploadError.message}`);
         }
-
-        uploadedUrls.push(uploadData.url);
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(uploadData.path);
+        
+        uploadedUrls.push(urlData.publicUrl);
       }
 
       // Store as JSON array if multiple images, single string if one image
