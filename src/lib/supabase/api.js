@@ -102,10 +102,10 @@ export const productFunctions = {
       body: { productName, description, price, category, idUrl, username, stockQuantity, isAvailable },
     });
   },
-  async updateProduct({ productId, productName, description, price, category, idUrl, username }) {
+  async updateProduct({ productId, productName, description, price, category, idUrl, username, stockQuantity }) {
     return callApi('/api/sellers/updateProduct', {
       method: 'PUT',
-      body: { productId, productName, description, price, category, idUrl, username },
+      body: { productId, productName, description, price, category, idUrl, username, stockQuantity },
     });
   },
   async deleteProduct(productId, username) {

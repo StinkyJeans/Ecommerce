@@ -133,9 +133,22 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
       .finally(() => setEditSaving(false));
   }, [productId, username, editRating, editText, ratingFilter]);
 
+  // Get stock quantity from product - always enforce stock limits
+  // 0 or null means out of stock, positive numbers mean limited stock
+  const stockQuantity = product?.stock_quantity != null && product.stock_quantity !== "" 
+    ? Number(product.stock_quantity) 
+    : 0;
+  const isInStock = stockQuantity > 0;
+  const maxQuantity = stockQuantity;
+
   const increaseQuantity = useCallback(() => {
-    setQuantity((prev) => prev + 1);
-  }, []);
+    setQuantity((prev) => {
+      if (!isInStock || prev >= stockQuantity) {
+        return prev; // Don't increase beyond stock limit or if out of stock
+      }
+      return prev + 1;
+    });
+  }, [isInStock, stockQuantity]);
 
   const decreaseQuantity = useCallback(() => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -278,7 +291,8 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                 <div className="inline-flex items-center rounded-xl border-2 border-[#E0E0E0] dark:border-[#404040] overflow-hidden bg-white dark:bg-white/5">
                   <button
                     onClick={decreaseQuantity}
-                    className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors"
+                    disabled={quantity <= 1}
+                    className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Decrease"
                   >
                     <Minus size={16} className="text-current" />
@@ -286,19 +300,30 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                   <span className="w-14 text-center font-semibold text-[#2C2C2C] dark:text-[#e5e5e5] text-lg">{quantity}</span>
                   <button
                     onClick={increaseQuantity}
-                    className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors"
+                    disabled={!isInStock || quantity >= stockQuantity}
+                    className="w-11 h-11 flex items-center justify-center text-[#2C2C2C] dark:text-[#e5e5e5] hover:bg-[#E0E0E0] dark:hover:bg-[#404040] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Increase"
                   >
                     <Plus size={16} className="text-current" />
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-[#666666] dark:text-[#a3a3a3]">In stock</span>
-                  <span className="text-[#E0E0E0] dark:text-[#404040]">·</span>
-                  <span className="text-[#4CAF50] font-medium flex items-center gap-1.5">
-                    <Truck size={14} className="text-current" />
-                    Ready to ship
-                  </span>
+                  {isInStock ? (
+                    <>
+                      <span className="text-[#4CAF50] font-medium">
+                        {stockQuantity} in stock
+                      </span>
+                      <span className="text-[#E0E0E0] dark:text-[#404040]">·</span>
+                      <span className="text-[#4CAF50] font-medium flex items-center gap-1.5">
+                        <Truck size={14} className="text-current" />
+                        Ready to ship
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[#F44336] font-medium">
+                      Out of stock
+                    </span>
+                  )}
                 </div>
               </div>
             </section>
@@ -320,7 +345,7 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
             {/* CTA */}
             <button
               onClick={handleAddToCart}
-              disabled={isAddingToCart || !username}
+              disabled={isAddingToCart || !username || !isInStock}
               className="w-full py-4 rounded-xl font-semibold text-base sm:text-lg bg-[#FFBF00] hover:bg-[#e6ac00] text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
             >
               {isAddingToCart ? (
@@ -330,6 +355,8 @@ const ProductModal = memo(({ product, onClose, onAddToCart, isAddingToCart = fal
                 </>
               ) : !username ? (
                 "Sign in to add to cart"
+              ) : !isInStock ? (
+                "Out of stock"
               ) : (
                 <>
                   <ShoppingBasket size={24} className="text-current" />

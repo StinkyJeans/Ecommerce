@@ -60,10 +60,25 @@ export async function addItem(supabase, payload) {
   const currentCartQuantity = existing && !fetchError ? Number(existing.quantity) || 0 : 0;
   const totalRequested = currentCartQuantity + quantity;
   const rawStock = product.stock_quantity;
-  const availableStock = rawStock != null && rawStock !== "" ? Number(rawStock) : null;
+  
+  // Parse stock quantity: always enforce stock limits based on seller's setting
+  // 0 or null means out of stock, positive numbers mean limited stock
+  const availableStock = rawStock != null && rawStock !== "" 
+    ? Number(rawStock) 
+    : 0;
+  
+  // Check if stock is available (must be greater than 0)
+  if (availableStock <= 0) {
+    return {
+      success: false,
+      code: "INSUFFICIENT_STOCK",
+      available_stock: 0,
+      requested: totalRequested,
+    };
+  }
 
-  // Only enforce stock when the product has a positive stock_quantity set (null/0 = unlimited)
-  if (availableStock != null && availableStock > 0 && availableStock < totalRequested) {
+  // Enforce stock limit: ensure requested amount doesn't exceed available stock
+  if (totalRequested > availableStock) {
     return {
       success: false,
       code: "INSUFFICIENT_STOCK",
