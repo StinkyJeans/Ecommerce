@@ -59,9 +59,11 @@ export async function addItem(supabase, payload) {
 
   const currentCartQuantity = existing && !fetchError ? Number(existing.quantity) || 0 : 0;
   const totalRequested = currentCartQuantity + quantity;
-  const availableStock = Number(product.stock_quantity) || 0;
+  const rawStock = product.stock_quantity;
+  const availableStock = rawStock != null && rawStock !== "" ? Number(rawStock) : null;
 
-  if (availableStock < totalRequested) {
+  // Only enforce stock when the product has a positive stock_quantity set (null/0 = unlimited)
+  if (availableStock != null && availableStock > 0 && availableStock < totalRequested) {
     return {
       success: false,
       code: "INSUFFICIENT_STOCK",

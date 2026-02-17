@@ -27,6 +27,7 @@ import {
   Monitor,
   Mobile,
   SmartWatch,
+  Package,
 } from "griddy-icons";
 
 export default function AddProduct() {
@@ -36,6 +37,7 @@ export default function AddProduct() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
+  const [stockQuantity, setStockQuantity] = useState("");
   const [loading, setLoading] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -106,7 +108,7 @@ export default function AddProduct() {
         category,
         idUrl,
         username,
-        stockQuantity: 1,
+        stockQuantity: stockQuantity ? parseInt(stockQuantity, 10) : 0,
         isAvailable: true,
       });
 
@@ -130,6 +132,7 @@ export default function AddProduct() {
         setDescription("");
         setPrice("");
         setCategory("");
+        setStockQuantity("");
         setImage(null);
         setIdPreview(null);
 
@@ -360,6 +363,25 @@ export default function AddProduct() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Package size={18} className="mr-2 text-gray-400 dark:text-gray-500" />
+                  Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  placeholder="0 (unlimited)"
+                  value={stockQuantity}
+                  onChange={(e) => setStockQuantity(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  min="0"
+                  step="1"
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Leave empty or set to 0 for unlimited stock
+                </p>
               </div>
 
               <button
