@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createSupabaseAdminClient } from "@/lib/supabase";
 import { requireRole } from "@/lib/auth";
 export async function POST(req) {
   try {
@@ -43,50 +42,28 @@ export async function POST(req) {
     const timestamp = Date.now();
     const fileName = `${sellerUsername}/${timestamp}-${file.name}`;
     
-    // Try using authenticated client first (respects RLS policies)
-    // This should work since we've verified the user is a seller
-    let uploadData, uploadError;
-    
-    if (supabase) {
-      const result = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-      uploadData = result.data;
-      uploadError = result.error;
-    }
-    
-    // If authenticated client fails, try admin client as fallback
-    if (uploadError && (uploadError.message?.includes('row-level security') || uploadError.message?.includes('RLS'))) {
-      try {
-        const adminClient = createSupabaseAdminClient();
-        const result = await adminClient.storage
-          .from('product-images')
-          .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
-        uploadData = result.data;
-        uploadError = result.error;
-      } catch (adminError) {
-        uploadError = adminError;
-      }
-    }
+    // Use authenticated seller's client - we've already verified they're a seller
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
     
     if (uploadError) {
       console.error('Upload error:', uploadError);
       let errorMessage = `Failed to upload file: ${uploadError.message}`;
       if (uploadError.message?.includes('row-level security') || uploadError.message?.includes('RLS')) {
-        errorMessage = 'Storage permission error. Please ensure you are logged in as an approved seller and that SUPABASE_SERVICE_ROLE_KEY is configured correctly.';
+        errorMessage = 'Storage permission error. Please ensure you are logged in as an approved seller. If the issue persists, check that the RLS policies are correctly configured.';
       }
       return NextResponse.json(
         { error: errorMessage, details: uploadError.message },
         { status: 500 }
       );
     }
-    const { data: urlData } = adminClient.storage
+    
+    // Get public URL using the authenticated client
+    const { data: urlData } = supabase.storage
       .from('product-images')
       .getPublicUrl(uploadData.path);
     return NextResponse.json({
