@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import SearchBar from "../components/searchbar";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
@@ -303,24 +304,46 @@ export default function Dashboard() {
               </div>
 
               <div className="mb-8 sm:mb-10 md:mb-12 hidden md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                {getShopCategories().map((cat) => (
-                  <div
-                    key={cat.value}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => router.push(cat.path)}
-                    onKeyDown={(e) => e.key === "Enter" && router.push(cat.path)}
-                    className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg h-48 sm:h-56 md:h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]"
-                  >
-                    <div className="absolute inset-0 bg-[#5C6F5A]" />
-                    <div className="relative h-full flex flex-col justify-end p-4 sm:p-5 md:p-6">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">{cat.label}</h3>
-                      <p className="text-sm sm:text-base text-white/90">
-                        {cat.value === "Pc" ? "Power and portability" : cat.value === "Mobile" ? "Phones and tablets" : "Time in style"}
-                      </p>
+                {getShopCategories().map((cat) => {
+                  // Map category values to image paths
+                  const categoryImages = {
+                    Pc: "/PC1.jpg",
+                    Mobile: "/GamingMobile.jpg",
+                    Watch: "/Watches.jpg",
+                  };
+                  const imagePath = categoryImages[cat.value] || "/PC1.jpg";
+                  
+                  return (
+                    <div
+                      key={cat.value}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(cat.path)}
+                      onKeyDown={(e) => e.key === "Enter" && router.push(cat.path)}
+                      className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg h-48 sm:h-56 md:h-64 group cursor-pointer border border-[#E0E0E0] dark:border-[#404040]"
+                    >
+                      {/* Background Image */}
+                      <div className="absolute inset-0">
+                        <Image
+                          src={imagePath}
+                          alt={cat.label}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                        {/* Dark overlay for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+                      </div>
+                      {/* Content */}
+                      <div className="relative h-full flex flex-col justify-end p-4 sm:p-5 md:p-6 z-10">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">{cat.label}</h3>
+                        <p className="text-sm sm:text-base text-white/90 drop-shadow-md">
+                          {cat.value === "Pc" ? "Power and portability" : cat.value === "Mobile" ? "Phones and tablets" : "Time in style"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="mb-8 sm:mb-10 md:mb-12">
