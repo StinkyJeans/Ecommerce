@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { sellerOrderFunctions } from "@/lib/supabase/api";
-import { getImageUrl } from "@/lib/supabase/storage";
+import { getImageUrl, getFirstImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 import Header from "@/app/components/header";
 import Navbar from "../components/sellerNavbar";
 import Pagination from "@/app/components/Pagination";
@@ -258,12 +258,13 @@ export default function SellerOrders() {
                             <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0 relative">
                               {order.id_url ? (
                                 <img
-                                  src={order.id_url || '/placeholder-image.jpg'}
+                                  src={getFirstImageUrl(order.id_url) || PLACEHOLDER_IMAGE_DATA_URI}
                                   alt={order.product_name}
                                   className="absolute inset-0 w-full h-full object-cover"
                                   style={{ minHeight: '100%', minWidth: '100%' }}
                                   onError={(e) => {
-                                    e.target.src = '/placeholder-image.jpg';
+                                    e.target.onerror = null;
+                                    e.target.src = PLACEHOLDER_IMAGE_DATA_URI;
                                   }}
                                 />
                               ) : (

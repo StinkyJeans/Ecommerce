@@ -6,7 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import AdminNavbar from "../components/adminNavbar";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
-import { getImageUrl } from "@/lib/supabase/storage";
+import { getImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 import {
   Users,
   Store,
@@ -332,7 +332,8 @@ export default function AdminDashboard() {
                               alt="ID Preview"
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               onError={(e) => {
-                                e.target.src = '/placeholder-image.jpg';
+                                e.target.onerror = null;
+                                e.target.src = PLACEHOLDER_IMAGE_DATA_URI;
                               }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -458,7 +459,8 @@ export default function AdminDashboard() {
                     alt="ID Document"
                     className="w-full h-auto max-h-[50vh] object-contain"
                     onError={(e) => {
-                      e.target.src = '/placeholder-image.jpg';
+                      e.target.onerror = null;
+                      e.target.src = PLACEHOLDER_IMAGE_DATA_URI;
                     }}
                   />
                 </div>

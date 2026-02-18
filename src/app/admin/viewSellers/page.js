@@ -8,7 +8,7 @@ import Pagination from "@/app/components/Pagination";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { adminFunctions } from "@/lib/supabase/api";
-import { getImageUrl } from "@/lib/supabase/storage";
+import { getImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 import {
   Store,
   At,
@@ -450,7 +450,7 @@ export default function AdminViewSellers() {
                       alt="ID Document"
                       className={`w-full h-auto max-h-[40vh] object-contain transition-opacity duration-200 ${documentImageLoading ? 'opacity-0 absolute' : 'opacity-100'}`}
                       onLoad={() => setDocumentImageLoading(false)}
-                      onError={(e) => { e.target.src = '/placeholder-image.jpg'; setDocumentImageLoading(false); }}
+                      onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_IMAGE_DATA_URI; setDocumentImageLoading(false); }}
                     />
                   </div>
                 ) : (

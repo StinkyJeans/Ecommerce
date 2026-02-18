@@ -6,6 +6,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { sellerOrderFunctions } from "@/lib/supabase/api";
+import { getFirstImageUrl } from "@/lib/supabase/storage";
 import Navbar from "../components/sellerNavbar";
 import {
   PlusCircle,
@@ -338,7 +339,15 @@ export default function SellerDashboard() {
                         <li key={p.product_id} className="flex gap-4">
                           <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                             {p.id_url ? (
-                              <img src={p.id_url} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={getFirstImageUrl(p.id_url)}
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23e5e5e5' width='1' height='1'/%3E%3C/svg%3E";
+                                }}
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Package size={24} className="text-gray-400" />

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { getImageUrl } from "@/lib/supabase/storage";
+import { getImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 
 export default function ProductImage({ 
   src, 
@@ -23,13 +23,13 @@ export default function ProductImage({
       const url = getImageUrl(src, bucket);
       setImageSrc(url);
     } else {
-      setImageSrc('/placeholder-image.jpg');
+      setImageSrc(PLACEHOLDER_IMAGE_DATA_URI);
       setIsLoading(false);
     }
   }, [src, bucket]);
 
   const isEdgeStoreUrl = src && (src.includes('edgestore.dev') || src.includes('files.edgestore.dev'));
-  const finalSrc = isEdgeStoreUrl ? '/placeholder-image.jpg' : (hasError ? "/placeholder-image.jpg" : imageSrc);
+  const finalSrc = isEdgeStoreUrl ? PLACEHOLDER_IMAGE_DATA_URI : (hasError ? PLACEHOLDER_IMAGE_DATA_URI : imageSrc);
 
   const handleLoad = (e) => {
     setIsLoading(false);
@@ -65,4 +65,4 @@ export default function ProductImage({
       )}
     </div>
   );
-}
+}

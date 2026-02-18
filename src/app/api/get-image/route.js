@@ -14,7 +14,7 @@ export async function GET(req) {
       );
     }
     if (imageUrl.includes('edgestore.dev') || imageUrl.includes('files.edgestore.dev')) {
-      return NextResponse.redirect('/placeholder-image.jpg');
+      return NextResponse.redirect('/placeholder-image.svg');
     }
     const isSupabaseStorage = imageUrl.includes('supabase.co') || imageUrl.includes('supabase.in');
     if (!isSupabaseStorage) {

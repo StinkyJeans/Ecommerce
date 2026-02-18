@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { cartFunctions } from "@/lib/supabase/api";
+import { getFirstImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 import { ArrowLeft, Trash } from "griddy-icons";
 import Navbar from "../components/sellerNavbar";
 export default function ViewCart() {
@@ -68,12 +69,13 @@ export default function ViewCart() {
               >
                 <div className="relative h-48 w-full rounded-lg overflow-hidden mb-4">
                   <img
-                    src={item.idUrl || '/placeholder-image.jpg'}
+                    src={getFirstImageUrl(item.idUrl) || PLACEHOLDER_IMAGE_DATA_URI}
                     alt={item.productName}
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ minHeight: '100%', minWidth: '100%' }}
                     onError={(e) => {
-                      e.target.src = '/placeholder-image.jpg';
+                      e.target.onerror = null;
+                      e.target.src = PLACEHOLDER_IMAGE_DATA_URI;
                     }}
                   />
                 </div>

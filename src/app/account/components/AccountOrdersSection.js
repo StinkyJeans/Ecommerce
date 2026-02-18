@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/formatPrice";
 import { orderFunctions } from "@/lib/supabase/api";
+import { getFirstImageUrl, PLACEHOLDER_IMAGE_DATA_URI } from "@/lib/supabase/storage";
 import Pagination from "@/app/components/Pagination";
 import { Package, Timer, Close } from "griddy-icons";
 
@@ -93,10 +94,13 @@ export default function AccountOrdersSection({ username, setMessage }) {
                   <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                     {order.id_url ? (
                       <img
-                        src={order.id_url || "/placeholder-image.jpg"}
+                        src={getFirstImageUrl(order.id_url) || PLACEHOLDER_IMAGE_DATA_URI}
                         alt={order.product_name}
                         className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = "/placeholder-image.jpg"; }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = PLACEHOLDER_IMAGE_DATA_URI;
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

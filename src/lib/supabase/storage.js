@@ -76,10 +76,13 @@ export function getFirstImageUrl(idUrl) {
   return idUrl;
 }
 
+// Data URI for a 1x1 gray pixel - use as fallback to avoid 404 when image fails
+export const PLACEHOLDER_IMAGE_DATA_URI = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3Crect fill='%23e5e5e5' width='1' height='1'/%3E%3C/svg%3E";
+
 export function getImageUrl(url, bucket = null) {
   if (!url) return null;
   if (url.includes('edgestore.dev') || url.includes('files.edgestore.dev')) {
-    return '/placeholder-image.jpg';
+    return PLACEHOLDER_IMAGE_DATA_URI;
   }
   if (!url.includes('supabase.co') && !url.includes('supabase.in')) {
     return url;
