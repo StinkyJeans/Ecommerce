@@ -32,7 +32,7 @@ export async function POST(req) {
         '   GMAIL_CLIENT_SECRET=your_client_secret',
         '   EMAIL_FROM=your_gmail_address@gmail.com',
         '4. Restart your development server',
-        '5. Test email sending with /api/test-email'
+        '5. Test email sending (see email setup docs)'
       ],
       note: 'The refresh_token is long-lived and can be reused. Keep it secure!'
     });

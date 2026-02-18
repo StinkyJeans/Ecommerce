@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../components/sellerNavbar";
-import { uploadProductImage } from "@/lib/supabase/storage";
 import { productFunctions } from "@/lib/supabase/api";
 import { createClient } from "@/lib/supabase/client";
 import { getCategoryOptionsForForm } from "@/lib/categories";
@@ -12,7 +11,6 @@ import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import {
   Plus,
   Image,
-  RefreshCw,
   Upload,
   CheckCircle,
   InfoCircle,
@@ -25,9 +23,6 @@ import {
   LightbulbOn,
   Star,
   Close,
-  Monitor,
-  Mobile,
-  SmartWatch,
   Package,
 } from "griddy-icons";
 
