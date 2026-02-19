@@ -7,6 +7,7 @@ import { useLoadingFavicon } from "@/app/hooks/useLoadingFavicon";
 import { formatPrice } from "@/lib/formatPrice";
 import { sellerOrderFunctions } from "@/lib/supabase/api";
 import { getFirstImageUrl } from "@/lib/supabase/storage";
+import { useSellerOrderRealtime } from "@/app/hooks/useSellerOrderRealtime";
 import Navbar from "../components/sellerNavbar";
 import {
   PlusCircle,
@@ -95,6 +96,10 @@ export default function SellerDashboard() {
     const interval = setInterval(fetchOrderNotifications, 60000);
     return () => clearInterval(interval);
   }, [username]);
+
+  useSellerOrderRealtime(username, () => {
+    fetchOrderNotifications();
+  }, !!(username && (role === "seller" || role === "admin")));
 
   useEffect(() => {
     const handleClickOutside = (e) => {
