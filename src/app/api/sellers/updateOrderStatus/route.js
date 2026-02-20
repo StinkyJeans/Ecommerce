@@ -96,16 +96,26 @@ export async function PATCH(req) {
     
     // If order is cancelled, restore stock
     if (newStatus === 'cancelled' && order.status !== 'cancelled') {
-      const { error: stockError } = await supabase
+      // Fetch current stock first, then update
+      const { data: product, error: productFetchError } = await supabase
         .from('products')
-        .update({
-          stock_quantity: supabase.raw(`stock_quantity + ${order.quantity}`),
-          is_available: true
-        })
-        .eq('product_id', order.product_id);
+        .select('stock_quantity')
+        .eq('product_id', order.product_id)
+        .single();
       
-      if (stockError) {
-        console.error('Failed to restore stock:', stockError);
+      if (!productFetchError && product) {
+        const newStockQuantity = (parseInt(product.stock_quantity) || 0) + parseInt(order.quantity);
+        const { error: stockError } = await supabase
+          .from('products')
+          .update({
+            stock_quantity: newStockQuantity,
+            is_available: newStockQuantity > 0
+          })
+          .eq('product_id', order.product_id);
+        
+        if (stockError) {
+          console.error('Failed to restore stock:', stockError);
+        }
       }
       
       // Set cancellation timestamp

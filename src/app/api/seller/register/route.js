@@ -117,17 +117,21 @@ export async function POST(req) {
     }
 
     try {
-      console.log('=== SELLER WELCOME EMAIL DEBUG ===');
-      console.log('Attempting to send welcome email to:', sanitizedEmail);
-      console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('=== SELLER WELCOME EMAIL DEBUG ===');
+        console.log('Attempting to send welcome email to:', sanitizedEmail);
+        console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      }
 
       const emailResult = await sendSellerWelcomeEmail({
         email: sanitizedEmail,
         userName: sanitizedDisplayName
       });
 
-      console.log('Welcome email sent successfully!');
-      console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Welcome email sent successfully!');
+        console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      }
 
       if (!emailResult || !emailResult.id) {
         console.error('Email send returned no ID - email may not have been sent');

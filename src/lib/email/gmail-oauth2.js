@@ -47,7 +47,9 @@ export async function getAccessToken() {
     accessToken = credentials.access_token;
     tokenExpiry = credentials.expiry_date || (Date.now() + 3600000);
     
-    console.log('✅ Gmail OAuth2 access token refreshed');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Gmail OAuth2 access token refreshed');
+    }
     
     return accessToken;
   } catch (error) {

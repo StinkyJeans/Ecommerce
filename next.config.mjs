@@ -21,6 +21,13 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  compiler: {
+    // Remove console.log, console.debug, console.info in production
+    // Keep console.error and console.warn for critical issues
+    removeConsole: process.env.NODE_ENV === 'production'
+      ? { exclude: ['error', 'warn'] }
+      : false,
+  },
   experimental: {
     optimizeCss: true,
   },

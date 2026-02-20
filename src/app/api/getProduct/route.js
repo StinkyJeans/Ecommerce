@@ -35,7 +35,9 @@ export async function GET(request) {
       }
     } catch (err) {
       // seller_status column might not exist, continue without filtering
-      console.log('Could not filter by seller_status:', err.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Could not filter by seller_status:', err.message);
+      }
     }
     
     // Filter products in memory

@@ -75,17 +75,21 @@ export async function POST(req) {
       }, { status: 404 });
     }
     try {
-      console.log('=== SELLER APPROVAL EMAIL DEBUG ===');
-      console.log('Attempting to send approval email to:', updatedSeller.email);
-      console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('=== SELLER APPROVAL EMAIL DEBUG ===');
+        console.log('Attempting to send approval email to:', updatedSeller.email);
+        console.log('RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
+      }
       const userName = updatedSeller.display_name || updatedSeller.username || 'there';
       const emailResult = await sendSellerApprovalEmail({
         email: updatedSeller.email,
         userName,
         approved: action === 'approve'
       });
-      console.log('Approval email sent successfully!');
-      console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Approval email sent successfully!');
+        console.log('Email result:', JSON.stringify(emailResult, null, 2));
+      }
       if (!emailResult || !emailResult.id) {
         console.error('Email send returned no ID - email may not have been sent');
       }

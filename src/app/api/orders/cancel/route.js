@@ -21,7 +21,7 @@ export async function POST(req) {
     const username = sanitizeString(body.username || userData.username, 50);
     
     if (!orderId) {
-      return createValidationErrorResponse("Order ID is required");
+      return createValidationErrorResponse("Order ID is required to cancel an order");
     }
     
     const ownershipCheck = await verifyOwnership(username);
@@ -42,7 +42,7 @@ export async function POST(req) {
     if (fetchError || !order) {
       return NextResponse.json({
         success: false,
-        message: "Order not found"
+        message: "Order not found. Please check the order ID and try again."
       }, { status: 404 });
     }
     
@@ -50,7 +50,7 @@ export async function POST(req) {
     if (order.status !== 'pending') {
       return NextResponse.json({
         success: false,
-        message: `Cannot cancel order with status: ${order.status}. Only pending orders can be cancelled.`
+        message: `Cannot cancel this order. Only pending orders can be cancelled. This order is currently ${order.status}.`
       }, { status: 400 });
     }
     
@@ -68,29 +68,45 @@ export async function POST(req) {
       .single();
     
     if (updateError) {
-      return handleError(updateError, 'cancelOrder');
+      return NextResponse.json({
+        success: false,
+        message: "Failed to cancel order. Please try again."
+      }, { status: 500 });
     }
     
-    // Restore stock
-    const { error: stockError } = await supabase
+    // Restore stock - fetch current stock first, then update
+    const { data: product, error: productFetchError } = await supabase
       .from('products')
-      .update({
-        stock_quantity: supabase.raw(`stock_quantity + ${order.quantity}`),
-        is_available: true
-      })
-      .eq('product_id', order.product_id);
+      .select('stock_quantity')
+      .eq('product_id', order.product_id)
+      .single();
     
-    if (stockError) {
-      console.error('Failed to restore stock:', stockError);
-      // Don't fail the cancellation, but log the error
+    if (!productFetchError && product) {
+      const newStockQuantity = (parseInt(product.stock_quantity) || 0) + parseInt(order.quantity);
+      const { error: stockError } = await supabase
+        .from('products')
+        .update({
+          stock_quantity: newStockQuantity,
+          is_available: newStockQuantity > 0
+        })
+        .eq('product_id', order.product_id);
+      
+      if (stockError) {
+        console.error('Failed to restore stock:', stockError);
+        // Don't fail the cancellation, but log the error
+      }
     }
     
     return NextResponse.json({ 
       success: true,
-      message: "Order cancelled successfully",
+      message: "Order cancelled successfully. The product stock has been restored.",
       order: cancelledOrder
     }, { status: 200 });
   } catch (err) {
-    return handleError(err, 'cancelOrder');
+    console.error('Error cancelling order:', err);
+    return NextResponse.json({
+      success: false,
+      message: "An error occurred while cancelling the order. Please try again later."
+    }, { status: 500 });
   }
 }

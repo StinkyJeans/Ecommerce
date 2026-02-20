@@ -42,22 +42,25 @@ export async function POST(req) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const redirectTo = `${siteUrl}/auth/reset-password`;
     try {
-      console.log('=== PASSWORD RESET EMAIL DEBUG ===');
-      console.log('Environment:', process.env.NODE_ENV);
-      console.log('SMTP_USER present:', !!process.env.SMTP_USER);
-      console.log('SMTP_PASS present:', !!process.env.SMTP_PASS);
       const isDevelopment = process.env.NODE_ENV === 'development';
       const hasSmtpConfig = !!(process.env.SMTP_USER && process.env.SMTP_PASS);
       const willUseEthereal = isDevelopment && !hasSmtpConfig;
-      if (willUseEthereal) {
-        console.log('⚠️  Using Ethereal (development mode) - emails are NOT actually sent!');
-        console.log('📧 Check console logs for Ethereal preview URL after sending');
-      } else if (hasSmtpConfig) {
-        console.log('✅ Using SMTP configuration for email delivery');
-      } else {
-        console.warn('⚠️  No SMTP configuration found - will use Ethereal in development or fail in production');
+      
+      if (isDevelopment) {
+        console.log('=== PASSWORD RESET EMAIL DEBUG ===');
+        console.log('Environment:', process.env.NODE_ENV);
+        console.log('SMTP_USER present:', !!process.env.SMTP_USER);
+        console.log('SMTP_PASS present:', !!process.env.SMTP_PASS);
+        if (willUseEthereal) {
+          console.log('⚠️  Using Ethereal (development mode) - emails are NOT actually sent!');
+          console.log('📧 Check console logs for Ethereal preview URL after sending');
+        } else if (hasSmtpConfig) {
+          console.log('✅ Using SMTP configuration for email delivery');
+        } else {
+          console.warn('⚠️  No SMTP configuration found - will use Ethereal in development or fail in production');
+        }
+        console.log('Attempting to send custom email via Nodemailer...');
       }
-      console.log('Attempting to send custom email via Nodemailer...');
       const adminClient = createSupabaseAdminClient();
       const { data: resetData, error: resetTokenError } = await adminClient.auth.admin.generateLink({
         type: 'recovery',
@@ -75,21 +78,25 @@ export async function POST(req) {
                       (resetData.properties?.hashed_token ? 
                         `${siteUrl}/auth/reset-password?token=${resetData.properties.hashed_token}` : 
                         redirectTo);
-      console.log('✅ Reset URL generated:', resetUrl);
-      console.log('📧 Sending email to:', sanitizedEmail);
-      console.log('👤 User name:', userName);
+      if (isDevelopment) {
+        console.log('✅ Reset URL generated:', resetUrl);
+        console.log('📧 Sending email to:', sanitizedEmail);
+        console.log('👤 User name:', userName);
+      }
       const emailResult = await sendPasswordResetEmail({
         email: sanitizedEmail,
         userName,
         resetUrl,
         expiryTime: "1 hour"
       });
-      console.log('✅ Email sent successfully via Nodemailer');
-      console.log('📧 Email result:', JSON.stringify(emailResult, null, 2));
+      if (isDevelopment) {
+        console.log('✅ Email sent successfully via Nodemailer');
+        console.log('📧 Email result:', JSON.stringify(emailResult, null, 2));
+      }
       if (!emailResult || (!emailResult.id && !emailResult.messageId)) {
         throw new Error('Email send returned no ID - email may not have been sent');
       }
-      if (willUseEthereal && emailResult.previewUrl) {
+      if (willUseEthereal && emailResult.previewUrl && isDevelopment) {
         console.log('📧 EThereal Preview URL:', emailResult.previewUrl);
         console.log('⚠️  IMPORTANT: Email is NOT actually sent in development mode!');
         console.log('⚠️  Click the preview URL above to view the email');
@@ -117,7 +124,9 @@ export async function POST(req) {
         console.error('❌ Supabase email also failed:', resetError);
         return createErrorResponse("Failed to send reset email. Please try again later.", 500, resetError);
       }
-      console.log('✅ Supabase email sent successfully (fallback)');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Supabase email sent successfully (fallback)');
+      }
       return NextResponse.json({ 
         success: true,
         message: "If an account with that email exists, a password reset email has been sent to your email address." 
@@ -126,4 +135,4 @@ export async function POST(req) {
   } catch (error) {
     return handleError(error, 'resetPassword');
   }
-}
+}
