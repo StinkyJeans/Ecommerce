@@ -149,7 +149,7 @@ function AccountPageContent() {
 
   const fetchAddresses = async () => {
     try {
-      const data = await shippingFunctions.getAddresses(username);
+      const data = await shippingFunctions.getAddresses();
       if (data.success) {
         setAddresses(data.addresses || []);
       } else {
@@ -211,7 +211,7 @@ function AccountPageContent() {
 
     setDeletingAddressId(id);
     try {
-      const data = await shippingFunctions.deleteAddress(id, username);
+      const data = await shippingFunctions.deleteAddress(id);
 
       if (data.success) {
         setMessage({ text: "Address deleted successfully", type: "success" });

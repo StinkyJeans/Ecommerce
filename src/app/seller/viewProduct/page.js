@@ -63,7 +63,7 @@ export default function ViewProduct() {
   const fetchProducts = async (isRetry) => {
     try {
       setErrorMessage("");
-      const data = await productFunctions.getSellerProducts(username);
+      const data = await productFunctions.getSellerProducts();
       setProducts(data.products || []);
     } catch (e) {
       const msg = e?.message || "Failed to load products";
@@ -83,7 +83,7 @@ export default function ViewProduct() {
     setErrorMessage("");
     setSuccessMessage("");
     try {
-      const data = await productFunctions.deleteProduct(productId, username);
+      const data = await productFunctions.deleteProduct(productId);
       if (data.success) {
         setProducts((prev) => prev.filter((p) => pid(p) !== productId));
         setSuccessMessage("Product deleted successfully!");

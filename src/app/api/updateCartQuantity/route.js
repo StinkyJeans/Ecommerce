@@ -16,7 +16,7 @@ export async function PATCH(req) {
     const { searchParams } = new URL(req.url);
     const id = sanitizeString(searchParams.get("id"), 100);
     const action = sanitizeString(searchParams.get("action"), 20);
-    const username = sanitizeString(searchParams.get("username"), 50);
+    const username = sanitizeString(searchParams.get("username"), 50) || userData.username;
     if (!id || !action || !username) {
       return createValidationErrorResponse("Missing required parameters");
     }

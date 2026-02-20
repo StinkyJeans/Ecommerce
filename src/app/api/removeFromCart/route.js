@@ -15,7 +15,7 @@ export async function DELETE(req) {
     if (!verify.valid) return verify.response;
     const { searchParams } = new URL(req.url);
     const id = sanitizeString(searchParams.get("id"), 100);
-    const username = sanitizeString(searchParams.get("username"), 50);
+    const username = sanitizeString(searchParams.get("username"), 50) || userData.username;
     if (!id || !username) {
       return createValidationErrorResponse("Missing id or username");
     }

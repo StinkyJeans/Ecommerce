@@ -108,13 +108,13 @@ export const productFunctions = {
       body: { productId, productName, description, price, category, idUrl, username, stockQuantity },
     });
   },
-  async deleteProduct(productId, username) {
-    return callApi(`/api/sellers/deleteProduct?id=${encodeURIComponent(productId)}&username=${encodeURIComponent(username)}`, {
+  async deleteProduct(productId) {
+    return callApi(`/api/sellers/deleteProduct?id=${encodeURIComponent(productId)}`, {
       method: 'DELETE',
     });
   },
-  async getSellerProducts(username) {
-    return callApi(`/api/sellers/getProducts?username=${encodeURIComponent(username)}`);
+  async getSellerProducts() {
+    return callApi('/api/sellers/getProducts');
   },
   async getProductReviews(productId, options = {}) {
     const params = new URLSearchParams();
@@ -138,19 +138,19 @@ export const cartFunctions = {
       body: { username, productId, productName, description, price, idUrl, quantity },
     });
   },
-  async getCart(username) {
-    return callApi(`/api/getCart?username=${encodeURIComponent(username)}`);
+  async getCart() {
+    return callApi('/api/getCart');
   },
-  async getCartCount(username) {
-    return callApi(`/api/getCartCount?username=${encodeURIComponent(username)}`);
+  async getCartCount() {
+    return callApi('/api/getCartCount');
   },
-  async updateCartQuantity(itemId, action, username) {
-    return callApi(`/api/updateCartQuantity?id=${encodeURIComponent(itemId)}&action=${action}&username=${encodeURIComponent(username)}`, {
+  async updateCartQuantity(itemId, action) {
+    return callApi(`/api/updateCartQuantity?id=${encodeURIComponent(itemId)}&action=${action}`, {
       method: 'PATCH',
     });
   },
-  async removeFromCart(itemId, username) {
-    return callApi(`/api/removeFromCart?id=${encodeURIComponent(itemId)}&username=${encodeURIComponent(username)}`, {
+  async removeFromCart(itemId) {
+    return callApi(`/api/removeFromCart?id=${encodeURIComponent(itemId)}`, {
       method: 'DELETE',
     });
   },
@@ -159,8 +159,8 @@ export const cartFunctions = {
   },
 };
 export const orderFunctions = {
-  async getOrders(username) {
-    return callApi(`/api/getOrders?username=${encodeURIComponent(username)}`);
+  async getOrders() {
+    return callApi('/api/getOrders');
   },
   async checkout({ username, items, shipping_address_id, payment_method, delivery_option }) {
     return callApi('/api/checkout', {
@@ -177,8 +177,8 @@ export const orderFunctions = {
 };
 
 export const sellerOrderFunctions = {
-  async getSellerOrders(sellerUsername, status = 'all') {
-    return callApi(`/api/sellers/getOrders?seller_username=${encodeURIComponent(sellerUsername)}&status=${encodeURIComponent(status)}`);
+  async getSellerOrders(status = 'all') {
+    return callApi(`/api/sellers/getOrders?status=${encodeURIComponent(status)}`);
   },
   async updateOrderStatus({ order_id, status, tracking_number }) {
     return callApi('/api/sellers/updateOrderStatus', {
@@ -197,8 +197,8 @@ export const sellerOrderFunctions = {
   },
 };
 export const shippingFunctions = {
-  async getAddresses(username) {
-    return callApi(`/api/shipping-addresses?username=${encodeURIComponent(username)}`);
+  async getAddresses() {
+    return callApi('/api/shipping-addresses');
   },
   async addAddress({ username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType }) {
     return callApi('/api/shipping-addresses', {
@@ -212,8 +212,8 @@ export const shippingFunctions = {
       body: { id, username, fullName, phoneNumber, addressLine1, addressLine2, city, province, postalCode, country, isDefault, addressType },
     });
   },
-  async deleteAddress(id, username) {
-    return callApi(`/api/shipping-addresses?id=${encodeURIComponent(id)}&username=${encodeURIComponent(username)}`, {
+  async deleteAddress(id) {
+    return callApi(`/api/shipping-addresses?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
   },
@@ -281,4 +281,4 @@ export const chatFunctions = {
       method: 'PUT',
     });
   },
-};
+};

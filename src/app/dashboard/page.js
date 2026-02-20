@@ -48,7 +48,7 @@ export default function Dashboard() {
       }
       if (document.hidden) return;
       try {
-        const data = await cartFunctions.getCartCount(username);
+        const data = await cartFunctions.getCartCount();
         setCartCount(Number(data?.count) ?? 0);
       } catch {
         setCartCount(0);

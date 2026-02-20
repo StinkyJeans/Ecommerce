@@ -6,7 +6,7 @@ import { cartFunctions } from "@/lib/supabase/api";
 export const cartQueryKey = (username) => ["cart", username];
 
 async function fetchCart(username) {
-  const data = await cartFunctions.getCart(username);
+  const data = await cartFunctions.getCart();
   return data?.cart ?? [];
 }
 

@@ -31,7 +31,7 @@ export default function ViewCart() {
     }
     const fetchCart = async () => {
       try {
-        const data = await cartFunctions.getCart(username);
+        const data = await cartFunctions.getCart();
         setCartItems(data.cart || []);
       } catch (err) {
       } finally {

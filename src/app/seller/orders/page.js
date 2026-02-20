@@ -78,7 +78,7 @@ export default function SellerOrders() {
     if (!username) return;
     setLoading(true);
     try {
-      const data = await sellerOrderFunctions.getSellerOrders(username, statusFilter);
+      const data = await sellerOrderFunctions.getSellerOrders(statusFilter);
       if (data.success) {
         setOrders(data.orders || []);
         try {

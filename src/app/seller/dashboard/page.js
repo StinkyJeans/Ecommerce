@@ -66,7 +66,7 @@ export default function SellerDashboard() {
   useEffect(() => {
     if (!username || (role !== "seller" && role !== "admin")) return;
     let cancelled = false;
-    sellerOrderFunctions.getSellerOrders(username, "all")
+    sellerOrderFunctions.getSellerOrders("all")
       .then((r) => {
         if (!cancelled) setOrders(r.orders || []);
       })

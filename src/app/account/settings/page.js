@@ -46,7 +46,7 @@ function AccountSettingsContent() {
       try {
         const [profileRes, addrRes] = await Promise.all([
           userFunctions.getProfile().catch(() => ({ fullName: "", email: "", phone: "", passwordChangedAt: null })),
-          shippingFunctions.getAddresses(username).catch(() => ({ success: false, addresses: [] })),
+          shippingFunctions.getAddresses().catch(() => ({ success: false, addresses: [] })),
         ]);
         if (mounted) {
           setProfile({

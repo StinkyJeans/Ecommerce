@@ -15,7 +15,7 @@ export async function GET(request) {
     if (!verify.valid) return verify.response;
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
-    const username = sanitizeString(searchParams.get('username'), 50);
+    const username = sanitizeString(searchParams.get('username'), 50) || userData.username;
     if (!username) {
       return createValidationErrorResponse("Username is required");
     }

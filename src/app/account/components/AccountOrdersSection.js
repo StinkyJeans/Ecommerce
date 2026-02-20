@@ -19,7 +19,7 @@ export default function AccountOrdersSection({ username, setMessage }) {
   const fetchOrders = async () => {
     if (!username) return;
     try {
-      const data = await orderFunctions.getOrders(username);
+      const data = await orderFunctions.getOrders();
       setOrders(data.orders || []);
     } catch {
       setOrders([]);

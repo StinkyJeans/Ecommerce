@@ -59,7 +59,7 @@ function CheckoutContent() {
       }
 
       const itemIds = JSON.parse(decodeURIComponent(itemsParam));
-      const data = await cartFunctions.getCart(username);
+      const data = await cartFunctions.getCart();
 
       const selectedItems = (data.cart || []).filter(item => itemIds.includes(item.id));
       setCartItems(selectedItems);
@@ -73,7 +73,7 @@ function CheckoutContent() {
 
   const fetchAddresses = async () => {
     try {
-      const data = await shippingFunctions.getAddresses(username);
+      const data = await shippingFunctions.getAddresses();
       if (data.success) {
         setAddresses(data.addresses || []);
       }

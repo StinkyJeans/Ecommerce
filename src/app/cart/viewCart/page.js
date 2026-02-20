@@ -77,7 +77,7 @@ export default function ViewCart() {
     const originalCart = [...cartItems];
 
     try {
-      const data = await cartFunctions.updateCartQuantity(itemId, action, username);
+      const data = await cartFunctions.updateCartQuantity(itemId, action);
 
       if (data.success) {
         // Update cache with server response to ensure consistency
@@ -139,7 +139,7 @@ export default function ViewCart() {
     setErrorMessage("");
 
     try {
-      const data = await cartFunctions.removeFromCart(itemId, username);
+      const data = await cartFunctions.removeFromCart(itemId);
 
       if (data.success) {
         invalidateCart();

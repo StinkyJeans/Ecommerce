@@ -74,7 +74,7 @@ function EditProductContent() {
 
       try {
         setFetching(true);
-        const data = await productFunctions.getSellerProducts(username);
+        const data = await productFunctions.getSellerProducts();
 
         if (data.products) {
           const product = data.products.find(p => 
