@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import Navbar from "../components/sellerNavbar";
-import { Upload, Lock, LocationPin, Image } from "griddy-icons";
+import { Upload, Lock, LocationPin, Image, Eye, EyeOff } from "griddy-icons";
 
 const initialForm = {
   storeName: "Totally Normal Store",
@@ -31,6 +31,8 @@ export default function SellerSettingsPage() {
   const [savedForm, setSavedForm] = useState(initialForm);
   const [toast, setToast] = useState({ text: "", type: "" });
   const [saving, setSaving] = useState(false);
+  const [showRoutingNumber, setShowRoutingNumber] = useState(false);
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -214,23 +216,43 @@ export default function SellerSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Routing Number</label>
-                <input
-                  type="password"
-                  value={form.routingNumber}
-                  onChange={(e) => update("routingNumber", e.target.value)}
-                  placeholder="*********"
-                  className={inputBase}
-                />
+                <div className="relative">
+                  <input
+                    type={showRoutingNumber ? "text" : "password"}
+                    value={form.routingNumber}
+                    onChange={(e) => update("routingNumber", e.target.value)}
+                    placeholder="*********"
+                    className={`${inputBase} pr-10`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRoutingNumber((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
+                    aria-label={showRoutingNumber ? "Hide routing number" : "Show routing number"}
+                  >
+                    {showRoutingNumber ? <EyeOff size={16} className="text-sm" /> : <Eye size={16} className="text-sm" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#2C2C2C] dark:text-[#e5e5e5] mb-2">Account Number</label>
-                <input
-                  type="password"
-                  value={form.accountNumber}
-                  onChange={(e) => update("accountNumber", e.target.value)}
-                  placeholder="***********1234"
-                  className={inputBase}
-                />
+                <div className="relative">
+                  <input
+                    type={showAccountNumber ? "text" : "password"}
+                    value={form.accountNumber}
+                    onChange={(e) => update("accountNumber", e.target.value)}
+                    placeholder="***********1234"
+                    className={`${inputBase} pr-10`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAccountNumber((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#2C2C2C] dark:text-[#a3a3a3] dark:hover:text-[#e5e5e5]"
+                    aria-label={showAccountNumber ? "Hide account number" : "Show account number"}
+                  >
+                    {showAccountNumber ? <EyeOff size={16} className="text-sm" /> : <Eye size={16} className="text-sm" />}
+                  </button>
+                </div>
               </div>
             </div>
           </section>

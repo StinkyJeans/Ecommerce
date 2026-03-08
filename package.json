@@ -11,6 +11,7 @@
     "reset:db": "node scripts/reset-database.js",
     "create:admin": "node scripts/create-admin.js",
     "create:admin:simple": "node scripts/create-admin-simple.js",
+    "seed:sellers": "node scripts/seed-sellers.js",
     "clear:data": "node scripts/clear-database.js",
     "clear:all": "node scripts/clear-all-data.js"
   },
